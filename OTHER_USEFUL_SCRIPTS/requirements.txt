@@ -1,0 +1,7 @@
+torch==2.10.0+cu128
+torchaudio==2.10.0+cu128
+transformers==4.57.6
+diffusers==0.37.1
+accelerate==1.13.0
+soundfile==0.13.1
+huggingface-hub==0.36.2

@@ -1,5 +1,3 @@
-# Prompt Template — Music Caption Synthesis
-
 ## Your Task
 Synthesize the four-chunk music caption JSON below into a single Suno-ready caption paragraph.
 
