@@ -1,0 +1,27 @@
+{
+  "globals": {
+    "model_id": "nvidia/music-flamingo-2601-hf",
+    "precision": "bf16",
+    "max_new_tokens": 512,
+    "prompt_mode": "minimal",
+    "output_dir": "./captions/fadl_shaker_512/"
+  },
+  "tracks": [
+    {
+      "path": "fadl_shaker/03.Allah We'allam.mp3",
+      "tags": { "artist": "Fadl Shaker", "track_number": 3, "title": "Allah We'allam", "baseline_time_sec": 20.1, "tuning_run": "512_tokens" }
+    },
+    {
+      "path": "fadl_shaker/07.M'assar Feya.mp3",
+      "tags": { "artist": "Fadl Shaker", "track_number": 7, "title": "M'assar Feya", "baseline_time_sec": 19.7, "tuning_run": "512_tokens" }
+    },
+    {
+      "path": "fadl_shaker/12.Dehket El Donya.mp3",
+      "tags": { "artist": "Fadl Shaker", "track_number": 12, "title": "Dehket El Donya", "baseline_time_sec": 19.4, "tuning_run": "512_tokens" }
+    },
+    {
+      "path": "fadl_shaker/16.Baya' El Oulob.mp3",
+      "tags": { "artist": "Fadl Shaker", "track_number": 16, "title": "Baya' El Oulob", "baseline_time_sec": 15.7, "tuning_run": "512_tokens" }
+    }
+  ]
+}

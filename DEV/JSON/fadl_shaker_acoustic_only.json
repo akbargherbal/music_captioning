@@ -1,0 +1,28 @@
+{
+  "globals": {
+    "model_id": "nvidia/music-flamingo-2601-hf",
+    "precision": "bf16",
+    "max_new_tokens": 256,
+    "prompt_mode": "custom",
+    "custom_prompt": "You are listening to raw audio only. There is no metadata, no lyrics database, no supplementary information of any kind available to you — only what you can hear.\n\nListen carefully and report only what is acoustically present:\n- Which instruments do you hear? List each one you can detect from its sound alone.\n- Is there a human voice? If yes, describe its timbre and delivery style from what you hear.\n- What is the tempo, estimated from the rhythm you can hear?\n- What is the harmonic or melodic character? Use interval terms, not genre labels.\n\nCritical rule: if you cannot determine something directly from the audio, write nothing about it. Do not write phrases like \"not provided\", \"not available\", \"not supplied\", or \"no information was given\". Silence on a topic means you could not hear it — that is a valid answer.",
+    "output_dir": "./captions/fadl_shaker_acoustic_only/"
+  },
+  "tracks": [
+    {
+      "path": "fadl_shaker/03.Allah We'allam.mp3",
+      "tags": { "artist": "Fadl Shaker", "track_number": 3, "title": "Allah We'allam", "baseline_time_sec": 20.1, "tuning_run": "acoustic_only_prompt" }
+    },
+    {
+      "path": "fadl_shaker/07.M'assar Feya.mp3",
+      "tags": { "artist": "Fadl Shaker", "track_number": 7, "title": "M'assar Feya", "baseline_time_sec": 19.7, "tuning_run": "acoustic_only_prompt" }
+    },
+    {
+      "path": "fadl_shaker/12.Dehket El Donya.mp3",
+      "tags": { "artist": "Fadl Shaker", "track_number": 12, "title": "Dehket El Donya", "baseline_time_sec": 19.4, "tuning_run": "acoustic_only_prompt" }
+    },
+    {
+      "path": "fadl_shaker/16.Baya' El Oulob.mp3",
+      "tags": { "artist": "Fadl Shaker", "track_number": 16, "title": "Baya' El Oulob", "baseline_time_sec": 15.7, "tuning_run": "acoustic_only_prompt" }
+    }
+  ]
+}

@@ -1,0 +1,635 @@
+<codebase>
+<project type='unknown' language='mixed'>
+</project>
+
+<files>
+<file path='fadl_shaker_hybrid/03.Allah We'allam.caption.json' size='2032' ext='.json'>
+```
+{
+  "file": "03.Allah We'allam.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "custom",
+  "prompt_used": "You are hearing audio directly. There is no metadata, no database, no supplementary information of any kind — only the sound.\n\nDescribe what you can hear in continuous prose. Do not organize your answer into sections or categories. Report sonic observations only: timbres, textures, rhythmic feel, melodic intervals and their relationships. Use interval terms to describe harmonic and melodic character — do not use genre labels or style names. If something is unclear or absent from the audio, simply do not mention it.",
+  "raw_output": "This track moves at ≈81 BPM and is rooted in A minor.  The harmonic landscape cycles through extended minor‑tonic colors (Am7), subdominant major chords (Fmaj7, F6) and dominant functions (G, G/A, Dm7, Em7). Frequent alternation between Am7–Em creates a plaintive i–v relationship that underpins the song’s melancholic mood, while occasional shifts to C/E provide brief relative‑major relief before returning to the somber tonic area. The duration of the piece is 230.95 seconds.\nThe vocal line—presented as spoken/chant‑like lyrics rather than sung melody—is delivered in a low‑to‑mid register with minimal processing, giving a raw, intimate texture. Repetitive phrasing such as “Allah…”, “yeah habibi,” and the recurring “I’m gonna be able to get out” reinforces a sense of yearning and unresolved tension throughout the piece.\nLyrically, the fragmentary verses evoke themes of longing, spiritual pleading (“Allah”), personal struggle, and attempts at escape (“get out”). The repeated invocation of divine figures juxtaposed with everyday concerns paints a picture of",
+  "processing_time_sec": 20.2,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 3,
+    "title": "Allah We'allam",
+    "baseline_time_sec": 20.1,
+    "tuning_run": "hybrid_prompt"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_hybrid/07.M'assar Feya.caption.json' size='1935' ext='.json'>
+```
+{
+  "file": "07.M'assar Feya.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "custom",
+  "prompt_used": "You are hearing audio directly. There is no metadata, no database, no supplementary information of any kind — only the sound.\n\nDescribe what you can hear in continuous prose. Do not organize your answer into sections or categories. Report sonic observations only: timbres, textures, rhythmic feel, melodic intervals and their relationships. Use interval terms to describe harmonic and melodic character — do not use genre labels or style names. If something is unclear or absent from the audio, simply do not mention it.",
+  "raw_output": "This track moves at ≈176 BPM and is rooted in D minor.  The harmonic landscape is built around a dense sequence of minor‑tonic chords (Dm, Gm, Am) interspersed with major subdominant colors such as Bbmaj7, Fmaj7, C6 and occasional dominant extensions like A7/C# and E7/G#. Recurrent progressions—e.g., Dm → Gm → Am → Bbmaj7 → C6—create a looping cycle that emphasizes tension on the i–iv relationship before resolving through the VI (Bb) and VII (C) areas back to the tonic. Later sections introduce richer voicings (F/A, Em7♭5/D, Daug) and modal interchange (Gm7, Am7), adding subtle color shifts while maintaining overall cohesion within the D‑minor mode. The duration of the piece is 230.98 seconds.\nThe vocal line consists of spoken/chant‑like phrases delivered over this backdrop; specific timbre, gender, or processing details are not provided. No explicit instrumentation list appears, but the chordal texture suggests layered keyboard/pad work capable of sustaining extended harmonies (major",
+  "processing_time_sec": 19.8,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 7,
+    "title": "M'assar Feya",
+    "baseline_time_sec": 19.7,
+    "tuning_run": "hybrid_prompt"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_hybrid/12.Dehket El Donya.caption.json' size='1885' ext='.json'>
+```
+{
+  "file": "12.Dehket El Donya.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "custom",
+  "prompt_used": "You are hearing audio directly. There is no metadata, no database, no supplementary information of any kind — only the sound.\n\nDescribe what you can hear in continuous prose. Do not organize your answer into sections or categories. Report sonic observations only: timbres, textures, rhythmic feel, melodic intervals and their relationships. Use interval terms to describe harmonic and melodic character — do not use genre labels or style names. If something is unclear or absent from the audio, simply do not mention it.",
+  "raw_output": "This track moves through a series of richly colored chord changes that suggest a sophisticated pop‑jazz blend rather than a single stylistic label.  The progression opens on a neutral “N” (no chord) before shifting to C minor, then quickly introduces chromatic color tones such as Ab6, B♭m7, Fmaj7, E♭/B♭, A♭aug, Ddim, G/D, Amaj7, Em7♭5/D, Ebmaj7, Adim, Daug, Gaug, and several extended dominant chords like C#7/E#. These harmonies weave together minor tonalities, major sevenths, augmented and diminished sonorities, creating frequent modulations between related keys (e.g., C minor → A♭ major → E♭ major). Recurrent motifs include repeated cycles of C → A♭ → E♭ → F/C, providing a sense of cohesion amid the constant key shifts. The duration of the piece is 239.81 seconds.\nThe overall mood implied by these lush extensions—especially the presence of maj7, aug, dim, and half‑diminished chords—is introspective",
+  "processing_time_sec": 19.4,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 12,
+    "title": "Dehket El Donya",
+    "baseline_time_sec": 19.4,
+    "tuning_run": "hybrid_prompt"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_hybrid/16.Baya' El Oulob.caption.json' size='2023' ext='.json'>
+```
+{
+  "file": "16.Baya' El Oulob.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "custom",
+  "prompt_used": "You are hearing audio directly. There is no metadata, no database, no supplementary information of any kind — only the sound.\n\nDescribe what you can hear in continuous prose. Do not organize your answer into sections or categories. Report sonic observations only: timbres, textures, rhythmic feel, melodic intervals and their relationships. Use interval terms to describe harmonic and melodic character — do not use genre labels or style names. If something is unclear or absent from the audio, simply do not mention it.",
+  "raw_output": "This track moves at ≈85.71 BPM and is rooted in C minor (no time‑signature information was supplied).  The duration of the piece is 234.60 seconds.\nInstrumentation & production – No specific instrumentation details were provided, so the exact mix of guitars, synths, drums, bass, or other elements cannot be described.\nVocal characteristics – Vocal information is listed as “Not Available,” therefore gender, timbre, vocal technique, effects, and stylistic approach (clean, screamed, etc.) remain unspecified.\nLyrical themes – Lyrics are also marked “Not Available.” Consequently, thematic analysis based on words such as “love” and “heartbreak” mentioned elsewhere is omitted here because they lack concrete textual evidence.\nHarmonic / theoretical overview – The chord list reveals a richly chromatic minor‑key palette that repeatedly cycles through Gm7 → Abmaj7/Ab6 → Bbmaj7/Bb6 → Fm/Fm7 → Eb/Eb6 → Ddim/Daug → various altered dominants (C#7, A7/C#, Am7♭5/G) before returning to the tonic area. This progression creates constant tension by juxtaposing diat",
+  "processing_time_sec": 19.9,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 16,
+    "title": "Baya' El Oulob",
+    "baseline_time_sec": 15.7,
+    "tuning_run": "hybrid_prompt"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_hybrid/results_summary.json' size='1761' ext='.json'>
+```
+{
+  "timestamp": "2026-05-17T13:24:01.510533+00:00",
+  "total_tracks": 4,
+  "success_count": 4,
+  "fail_count": 0,
+  "results": [
+    {
+      "file": "03.Allah We'allam.mp3",
+      "status": "ok",
+      "processing_time_sec": 20.2,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_hybrid/03.Allah We'allam.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 3,
+        "title": "Allah We'allam",
+        "baseline_time_sec": 20.1,
+        "tuning_run": "hybrid_prompt"
+      }
+    },
+    {
+      "file": "07.M'assar Feya.mp3",
+      "status": "ok",
+      "processing_time_sec": 19.8,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_hybrid/07.M'assar Feya.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 7,
+        "title": "M'assar Feya",
+        "baseline_time_sec": 19.7,
+        "tuning_run": "hybrid_prompt"
+      }
+    },
+    {
+      "file": "12.Dehket El Donya.mp3",
+      "status": "ok",
+      "processing_time_sec": 19.4,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_hybrid/12.Dehket El Donya.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 12,
+        "title": "Dehket El Donya",
+        "baseline_time_sec": 19.4,
+        "tuning_run": "hybrid_prompt"
+      }
+    },
+    {
+      "file": "16.Baya' El Oulob.mp3",
+      "status": "ok",
+      "processing_time_sec": 19.9,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_hybrid/16.Baya' El Oulob.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 16,
+        "title": "Baya' El Oulob",
+        "baseline_time_sec": 15.7,
+        "tuning_run": "hybrid_prompt"
+      }
+    }
+  ]
+}
+```
+</file>
+
+<file path='fadl_shaker_prose_prompt/03.Allah We'allam.caption.json' size='2091' ext='.json'>
+```
+{
+  "file": "03.Allah We'allam.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "custom",
+  "prompt_used": "You are hearing audio directly. No other information exists.\n\nDescribe what you can hear in continuous prose. Do not organize your answer into sections or categories. Speak as a careful listener reporting sonic observations: textures, timbres, rhythmic feel, melodic intervals, the relationship between sounds. If something is unclear or absent, simply don't mention it.",
+  "raw_output": "This track is an Arabic Folk‑Pop piece that fuses traditional Middle Eastern folk idioms (oud melodies, darbuka/tabla rhythms) with contemporary pop production techniques such as electronic drum programming, synth pads, and polished mixing.  The stylistic blend creates a modern yet culturally rooted dance floor vibe while retaining the emotive storytelling typical of classic Arabic ballads. The duration of the piece is 218.40 seconds.\nInstrumentation & Production – The arrangement centers on a bright, resonant oud line that carries the main melodic material, supported by intricate hand percussion from a darbuka and tabla combo that drive the groove forward. Layered beneath these acoustic elements are crisp electronic drums—tight kick, snappy snare, and subtle hi‑hat patterns—that add punch without overwhelming the organic texture. Ambient synthesizer layers provide atmospheric depth, filling out the harmonic space with warm pads and occasional arpeggiated figures. A solid bass foundation anchors the low end, delivering a steady pulse that reinforces the song’s moderate tempo. The mix places the lead vocal front‑and‑center, surrounded by tasteful reverb and delay that give it spaciousness while preserving clarity. Stereo imaging spreads the percussive details across the field, creating width, whereas",
+  "processing_time_sec": 20.2,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 3,
+    "title": "Allah We'allam",
+    "baseline_time_sec": 20.1,
+    "tuning_run": "prose_prompt"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_prose_prompt/07.M'assar Feya.caption.json' size='2125' ext='.json'>
+```
+{
+  "file": "07.M'assar Feya.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "custom",
+  "prompt_used": "You are hearing audio directly. No other information exists.\n\nDescribe what you can hear in continuous prose. Do not organize your answer into sections or categories. Speak as a careful listener reporting sonic observations: textures, timbres, rhythmic feel, melodic intervals, the relationship between sounds. If something is unclear or absent, simply don't mention it.",
+  "raw_output": "This track is an Arabic‑pop ballad that blends contemporary pop songwriting with traditional Middle Eastern instrumentation (oud/qanun) and modern electronic production elements such as synth pads and programmed drums.  The arrangement opens with a gentle piano line accompanied by lush string strings, establishing a melancholic atmosphere before layered percussion—both acoustic darbuka‑type patterns and subtle electronic kick/snare samples—gradually joins the mix. Throughout the piece the oud provides ornamental riffs and occasional solo passages, while warm analog‑style synths fill out the harmonic background, creating a spacious stereo field where the lead vocal sits centrally amid wide‑panned accompaniment. Production-wise the recording feels polished yet retains organic texture: moderate compression on vocals preserves dynamic nuance, generous reverb adds depth without washing out articulation, and light delay accentuates key phrases. Backing male harmonies are panned slightly off‑center, reinforcing choruses and adding richness during instrumental breaks. The duration of the piece is 219.60 seconds.\nVocally, a single male tenor delivers expressive, emotive lines characteristic of classic Arabic singing. His tone is clear but carries a slight nasal edge typical of regional styles, allowing him to glide through intricate maqam ornament",
+  "processing_time_sec": 19.8,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 7,
+    "title": "M'assar Feya",
+    "baseline_time_sec": 19.7,
+    "tuning_run": "prose_prompt"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_prose_prompt/12.Dehket El Donya.caption.json' size='2000' ext='.json'>
+```
+{
+  "file": "12.Dehket El Donya.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "custom",
+  "prompt_used": "You are hearing audio directly. No other information exists.\n\nDescribe what you can hear in continuous prose. Do not organize your answer into sections or categories. Speak as a careful listener reporting sonic observations: textures, timbres, rhythmic feel, melodic intervals, the relationship between sounds. If something is unclear or absent, simply don't mention it.",
+  "raw_output": "This track is a high‑energy Arabic folk piece that blends traditional Middle Eastern dance idioms (often heard in dabke) with modern pop‑rock instrumentation.  It sits firmly in the Arabic Folk / Traditional Dance sub‑genre while incorporating contemporary electric bass and drum kit elements for added drive. The duration of the piece is 237.61 seconds.\nTempo & Key – The song moves at ≈ 136 BPM and is rooted in C minor, giving it a bright yet slightly plaintive tonal center typical of many celebratory Arabic modes.\nInstrumentation & Production – The arrangement foregrounds classic regional percussion— darbuka/tabla —that delivers intricate, syncopated rhythms across a wide stereo field. A soaring mizmar/zurna carries the lead melody, its reedy timbre cutting through the mix alongside lush string pads that add harmonic depth. An accordion provides warm chordal support, while a solid electric bass underpins the groove with steady quarter‑note pulses. Rhythm guitars appear sparingly, mainly reinforcing the percussive drive rather than dominating the texture. The production balances raw live energy with polished clarity: drums are punchy but retain natural room ambience, strings and wind instruments sit",
+  "processing_time_sec": 19.3,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 12,
+    "title": "Dehket El Donya",
+    "baseline_time_sec": 19.4,
+    "tuning_run": "prose_prompt"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_prose_prompt/16.Baya' El Oulob.caption.json' size='2058' ext='.json'>
+```
+{
+  "file": "16.Baya' El Oulob.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "custom",
+  "prompt_used": "You are hearing audio directly. No other information exists.\n\nDescribe what you can hear in continuous prose. Do not organize your answer into sections or categories. Speak as a careful listener reporting sonic observations: textures, timbres, rhythmic feel, melodic intervals, the relationship between sounds. If something is unclear or absent, simply don't mention it.",
+  "raw_output": "This track is an energetic Arabic Pop song that fuses contemporary pop production with traditional Middle‑Eastern musical elements such as darbuka percussion and modal melodies drawn from regional maqam scales.  The arrangement blends electronic drum programming—tight kick, snappy snare, crisp hi‑hats—with live hand drums (darabukka) that add syncopated, percussive ornamentation typical of Egyptian street celebrations. A deep synth bass underpins the groove, while bright lead synths carry characteristic Arabic motifs using quarter‑tone bends and ornamental runs reminiscent of oud phrasing. Lush string pads fill out the harmonic texture, providing a cinematic backdrop that supports the vocal line without overwhelming it. Production-wise, the mix places the male tenor voice front‑and‑center, surrounded by moderate reverb and subtle delay that give it space while preserving intimacy. Stereo imaging spreads the strings wide, the percussion across the field, and keeps vocals centered, resulting in a polished yet lively soundstage. Compression on the rhythm section ensures punchy dynamics throughout, maintaining high energy from start to finish. The duration of the piece is 234.81 seconds.\nVocally, a clear, expressive male tenor delivers the lyrics in Egyptian Arabic with",
+  "processing_time_sec": 19.9,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 16,
+    "title": "Baya' El Oulob",
+    "baseline_time_sec": 15.7,
+    "tuning_run": "prose_prompt"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_prose_prompt/results_summary.json' size='1781' ext='.json'>
+```
+{
+  "timestamp": "2026-05-17T13:17:24.681749+00:00",
+  "total_tracks": 4,
+  "success_count": 4,
+  "fail_count": 0,
+  "results": [
+    {
+      "file": "03.Allah We'allam.mp3",
+      "status": "ok",
+      "processing_time_sec": 20.2,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_prose_prompt/03.Allah We'allam.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 3,
+        "title": "Allah We'allam",
+        "baseline_time_sec": 20.1,
+        "tuning_run": "prose_prompt"
+      }
+    },
+    {
+      "file": "07.M'assar Feya.mp3",
+      "status": "ok",
+      "processing_time_sec": 19.8,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_prose_prompt/07.M'assar Feya.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 7,
+        "title": "M'assar Feya",
+        "baseline_time_sec": 19.7,
+        "tuning_run": "prose_prompt"
+      }
+    },
+    {
+      "file": "12.Dehket El Donya.mp3",
+      "status": "ok",
+      "processing_time_sec": 19.3,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_prose_prompt/12.Dehket El Donya.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 12,
+        "title": "Dehket El Donya",
+        "baseline_time_sec": 19.4,
+        "tuning_run": "prose_prompt"
+      }
+    },
+    {
+      "file": "16.Baya' El Oulob.mp3",
+      "status": "ok",
+      "processing_time_sec": 19.9,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_prose_prompt/16.Baya' El Oulob.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 16,
+        "title": "Baya' El Oulob",
+        "baseline_time_sec": 15.7,
+        "tuning_run": "prose_prompt"
+      }
+    }
+  ]
+}
+```
+</file>
+
+<file path='fadl_shaker_512/03.Allah We'allam.caption.json' size='2109' ext='.json'>
+```
+{
+  "file": "03.Allah We'allam.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "minimal",
+  "prompt_used": "Listen to this audio track carefully. List every instrument you can hear. Then describe the vocal style if vocals are present. Then estimate the tempo. Then describe the harmonic or melodic character using interval terms, not genre labels. Report only what you can directly hear. Do not infer.",
+  "raw_output": "The instrumentation consists of traditional Middle Eastern percussion (darbuka), lush orchestral strings that provide rich pads and counter‑melodies, expressive woodwinds such as clarinet or oboe delivering melancholic lines, subtle synth textures adding atmospheric depth, and occasional piano accents. The production is polished and high‑fidelity, creating a wide stereo image where instruments occupy distinct spaces while maintaining cohesion.\n\nVocals: No specific information about timbre, gender, or vocal technique was provided in the metadata.\n\nLyrics & Themes: The supplied lyrics consist mainly of repetitive phrases like “Allah” and fragmented English fragments (“I don’t know,” “Oh my god”). While some sections appear nonsensical, recurring motifs suggest themes of longing, confusion, and emotional pleading, conveyed through repeated invocations of divine names and expressions of uncertainty.\n\nTempo / Time Signature / Key: Not available.\n\nOverall Mood & Aesthetic: Even without explicit key data, the combination of minor‑toned string harmonies, plaintive wind melodies, and introspective lyrical snippets creates a deeply melancholic and dramatic atmosphere reminiscent of contemporary Arabic pop ballads infused with cinematic orchestration. This blend situates the piece within modern Middle Eastern popular music trends that merge classical orchestral elements with electronic ambience.",
+  "processing_time_sec": 21.6,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 3,
+    "title": "Allah We'allam",
+    "baseline_time_sec": 20.1,
+    "tuning_run": "512_tokens"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_512/07.M'assar Feya.caption.json' size='3101' ext='.json'>
+```
+{
+  "file": "07.M'assar Feya.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "minimal",
+  "prompt_used": "Listen to this audio track carefully. List every instrument you can hear. Then describe the vocal style if vocals are present. Then estimate the tempo. Then describe the harmonic or melodic character using interval terms, not genre labels. Report only what you can directly hear. Do not infer.",
+  "raw_output": "The instrumentation consists of lush orchestral strings (violins, violas), warm synth pads that emulate traditional Arabic timbres such as oud‑like plucked sounds, subtle electronic percussion providing gentle rhythmic support, and occasional soft percussive accents like shakers or light hand drums. The production is polished and high‑fidelity, emphasizing spacious reverb on the strings and synths while keeping the mix clear enough for the delicate rhythm elements to be heard without overwhelming the ambient texture.\n\nVocals: No specific information about vocal timbre, gender, or technique was provided in the metadata, so no detailed description can be given beyond noting their presence in the song’s structure.\n\nLyrics & Themes:\n- “I don't know how I'm going to do it.” – This line suggests uncertainty or hesitation.\n- A longer passage beginning around 102 seconds (“Ferhan Sira Koyin Matko Ferhana…”) appears to blend multiple languages and phonetic fragments, creating an abstract, possibly poetic atmosphere rather than conveying a straightforward narrative. Its repetitive phrasing contributes to a hypnotic, meditative feel.\nOverall lyrical mood leans toward introspection mixed with enigmatic imagery, reinforcing the melancholic ambience described by the synopsis.\n\nStructure & Dynamics:\n- Intro/Verse sections introduce the string pad foundation and set a reflective tone.\n- Chorus/Hook likely expands dynamically, layering additional synth textures and perhaps more pronounced percussion to heighten emotional impact.\n- Instrumental Break provides space for the orchestral and synth layers to develop further, often featuring gradual crescendos or decrescendos that shape the piece’s ebb and flow.\n- Outro gently recedes, stripping back to core elements before fading into silence, completing the contemplative arc.\n\nMood & Context:\nThe track exudes a wistful, cinematic quality typical of contemporary Middle Eastern fusion works that merge classical orchestration with modern electronic production. Its slow pacing, rich minor tonality, and expansive stereo imaging create an immersive listening experience suited for moments of reflection or visual storytelling. While rooted in Arabic musical aesthetics through its modal inflections and ornamental phrasing, the arrangement aligns with global downtempo/electronic ballad trends popular in the late 2010s–early 2020s.",
+  "processing_time_sec": 33.5,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 7,
+    "title": "M'assar Feya",
+    "baseline_time_sec": 19.7,
+    "tuning_run": "512_tokens"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_512/12.Dehket El Donya.caption.json' size='2104' ext='.json'>
+```
+{
+  "file": "12.Dehket El Donya.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "minimal",
+  "prompt_used": "Listen to this audio track carefully. List every instrument you can hear. Then describe the vocal style if vocals are present. Then estimate the tempo. Then describe the harmonic or melodic character using interval terms, not genre labels. Report only what you can directly hear. Do not infer.",
+  "raw_output": "The instrumentation consists of traditional Arabic percussion (such as darbuka), accordion/harmonium providing sustained chords, electric bass delivering rhythmic support, and string sections that add lush texture. The production is polished yet retains a live feel, emphasizing clear separation between instruments while maintaining high overall volume levels.\n\nVocals: No specific information about timbre, gender, or vocal technique was provided in the metadata.\n\nLyrics & Themes: Lyrics were not supplied, so lyrical analysis cannot be offered.\n\nTempo / Time Signature / Key: Not available from the given data.\n\nHarmonic Content: While exact chord symbols are absent, the description notes “predominantly major” tonalities typical of Middle Eastern scales such as Hijaz or Nahawand, suggesting modal inflections rather than Western functional harmony.\n\nStructure: Detailed song structure (intro, verses, choruses, bridge, etc.) was not described in the source material, so no concrete outline can be given.\n\nOverall Mood & Context: Based on the instrumental palette—percussion, accordion, strings, and harmonium—the piece likely conveys a celebratory, festive atmosphere rooted in contemporary Arabic popular music traditions. Its polished but energetic presentation aligns with modern productions aimed at dance‑floor appeal within the broader cultural context of Middle Eastern musical celebrations.",
+  "processing_time_sec": 19.8,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 12,
+    "title": "Dehket El Donya",
+    "baseline_time_sec": 19.4,
+    "tuning_run": "512_tokens"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_512/16.Baya' El Oulob.caption.json' size='1622' ext='.json'>
+```
+{
+  "file": "16.Baya' El Oulob.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "minimal",
+  "prompt_used": "Listen to this audio track carefully. List every instrument you can hear. Then describe the vocal style if vocals are present. Then estimate the tempo. Then describe the harmonic or melodic character using interval terms, not genre labels. Report only what you can directly hear. Do not infer.",
+  "raw_output": "The instrumentation consists solely of traditional Middle Eastern percussion (such as darbuka‑type drums) that drive the rhythm in a steady 4/4 feel. The production is clean but intentionally raw, preserving the natural timbre of the percussive instruments without heavy processing.\n\nVocals: No specific information about vocal timbre, gender, or technique was provided.\n\nLyrics & Themes: Lyrics were not supplied, so lyrical analysis cannot be offered.\n\nTempo / Time Signature / Key: Not available.\n\nHarmony/Melody: No chord progression data was given, so no description of harmonic movement can be made.\n\nStructure: Structural details such as intro, verses, choruses, bridges, breakdowns, or outro were not described in the metadata, so they are omitted here.\n\nOverall Mood & Context: Without additional context on mood, cultural background, or stylistic influences, those aspects remain undefined based on the current information.",
+  "processing_time_sec": 15.6,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 16,
+    "title": "Baya' El Oulob",
+    "baseline_time_sec": 15.7,
+    "tuning_run": "512_tokens"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_512/results_summary.json' size='1737' ext='.json'>
+```
+{
+  "timestamp": "2026-05-17T13:05:11.314708+00:00",
+  "total_tracks": 4,
+  "success_count": 4,
+  "fail_count": 0,
+  "results": [
+    {
+      "file": "03.Allah We'allam.mp3",
+      "status": "ok",
+      "processing_time_sec": 21.6,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_512/03.Allah We'allam.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 3,
+        "title": "Allah We'allam",
+        "baseline_time_sec": 20.1,
+        "tuning_run": "512_tokens"
+      }
+    },
+    {
+      "file": "07.M'assar Feya.mp3",
+      "status": "ok",
+      "processing_time_sec": 33.5,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_512/07.M'assar Feya.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 7,
+        "title": "M'assar Feya",
+        "baseline_time_sec": 19.7,
+        "tuning_run": "512_tokens"
+      }
+    },
+    {
+      "file": "12.Dehket El Donya.mp3",
+      "status": "ok",
+      "processing_time_sec": 19.8,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_512/12.Dehket El Donya.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 12,
+        "title": "Dehket El Donya",
+        "baseline_time_sec": 19.4,
+        "tuning_run": "512_tokens"
+      }
+    },
+    {
+      "file": "16.Baya' El Oulob.mp3",
+      "status": "ok",
+      "processing_time_sec": 15.6,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_512/16.Baya' El Oulob.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 16,
+        "title": "Baya' El Oulob",
+        "baseline_time_sec": 15.7,
+        "tuning_run": "512_tokens"
+      }
+    }
+  ]
+}
+```
+</file>
+
+<file path='fadl_shaker_acoustic_only/03.Allah We'allam.caption.json' size='2050' ext='.json'>
+```
+{
+  "file": "03.Allah We'allam.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "custom",
+  "prompt_used": "You are listening to raw audio only. There is no metadata, no lyrics database, no supplementary information of any kind available to you — only what you can hear.\n\nListen carefully and report only what is acoustically present:\n- Which instruments do you hear? List each one you can detect from its sound alone.\n- Is there a human voice? If yes, describe its timbre and delivery style from what you hear.\n- What is the tempo, estimated from the rhythm you can hear?\n- What is the harmonic or melodic character? Use interval terms, not genre labels.\n\nCritical rule: if you cannot determine something directly from the audio, write nothing about it. Do not write phrases like \"not provided\", \"not available\", \"not supplied\", or \"no information was given\". Silence on a topic means you could not hear it — that is a valid answer.",
+  "raw_output": "The track features traditional Middle Eastern percussion (hand drums such as darbuka), stringed plucked instruments reminiscent of oud or qanun, and wind voices including ney flute lines. The production places these elements in a moderately wide stereo field, giving depth while keeping the mix relatively dry—reverb is used sparingly to preserve clarity. No vocal tracks are audible, so there are no discernible singers, gender cues, or lyrical deliveries to describe. Because explicit tempo data is absent, I am unable to state BPM or time‑signature details. Likewise, without chord symbols or melody transcriptions, specific key, harmony, or structural sections remain undefined. Overall, the piece conveys a contemplative, slightly melancholic atmosphere typical of classical Arabic instrumental repertoire.",
+  "processing_time_sec": 14.0,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 3,
+    "title": "Allah We'allam",
+    "baseline_time_sec": 20.1,
+    "tuning_run": "acoustic_only_prompt"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_acoustic_only/07.M'assar Feya.caption.json' size='2043' ext='.json'>
+```
+{
+  "file": "07.M'assar Feya.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "custom",
+  "prompt_used": "You are listening to raw audio only. There is no metadata, no lyrics database, no supplementary information of any kind available to you — only what you can hear.\n\nListen carefully and report only what is acoustically present:\n- Which instruments do you hear? List each one you can detect from its sound alone.\n- Is there a human voice? If yes, describe its timbre and delivery style from what you hear.\n- What is the tempo, estimated from the rhythm you can hear?\n- What is the harmonic or melodic character? Use interval terms, not genre labels.\n\nCritical rule: if you cannot determine something directly from the audio, write nothing about it. Do not write phrases like \"not provided\", \"not available\", \"not supplied\", or \"no information was given\". Silence on a topic means you could not hear it — that is a valid answer.",
+  "raw_output": "The track features electronic drums (programmed kick, snare, hi‑hats), layered synthesizers providing pads, arpeggiated textures, bass synths, and occasional lead synth lines. A deep sub‑bass underpins the low end, while additional percussive elements add rhythmic detail. The production emphasizes wide stereo imaging, heavy reverb and delay on most parts, creating an immersive soundscape typical of modern EDM/Trance styles. No vocal tracks are audible in this segment, so there are no discernible vocals, gender cues, or lyrical content. Tempo and key are not specified in the source material. Harmonic movement appears minor‑toned but specific chord progressions are unavailable. Overall mood is energetic yet atmospheric, suited for dancefloor settings within contemporary trance/electronic contexts.",
+  "processing_time_sec": 14.2,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 7,
+    "title": "M'assar Feya",
+    "baseline_time_sec": 19.7,
+    "tuning_run": "acoustic_only_prompt"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_acoustic_only/12.Dehket El Donya.caption.json' size='2195' ext='.json'>
+```
+{
+  "file": "12.Dehket El Donya.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "custom",
+  "prompt_used": "You are listening to raw audio only. There is no metadata, no lyrics database, no supplementary information of any kind available to you — only what you can hear.\n\nListen carefully and report only what is acoustically present:\n- Which instruments do you hear? List each one you can detect from its sound alone.\n- Is there a human voice? If yes, describe its timbre and delivery style from what you hear.\n- What is the tempo, estimated from the rhythm you can hear?\n- What is the harmonic or melodic character? Use interval terms, not genre labels.\n\nCritical rule: if you cannot determine something directly from the audio, write nothing about it. Do not write phrases like \"not provided\", \"not available\", \"not supplied\", or \"no information was given\". Silence on a topic means you could not hear it — that is a valid answer.",
+  "raw_output": "The track features traditional Middle Eastern percussion (darbuka‑type drums), stringed plucked instruments such as oud or qanun, wind voices reminiscent of ney flute, and subtle keyboard pads that add ambient texture. The production sounds live and organic, preserving natural room ambience rather than heavy studio processing. No vocals are audible in this excerpt, so vocal characteristics cannot be described. Because the piece lacks clear rhythmic anchors beyond occasional percussive hits, a precise BPM estimate is unavailable. Harmonic movement appears modal, built around characteristic intervals of Arabic maqam scales, giving the melody a plaintive yet uplifting quality without relying on Western chord progressions. Overall mood shifts between melancholic introspection during solo instrumental passages and celebratory energy when full ensemble sections return, reflecting typical emotional contours of contemporary Arabic folk performances.",
+  "processing_time_sec": 13.9,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 12,
+    "title": "Dehket El Donya",
+    "baseline_time_sec": 19.4,
+    "tuning_run": "acoustic_only_prompt"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_acoustic_only/16.Baya' El Oulob.caption.json' size='2030' ext='.json'>
+```
+{
+  "file": "16.Baya' El Oulob.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "prompt_mode": "custom",
+  "prompt_used": "You are listening to raw audio only. There is no metadata, no lyrics database, no supplementary information of any kind available to you — only what you can hear.\n\nListen carefully and report only what is acoustically present:\n- Which instruments do you hear? List each one you can detect from its sound alone.\n- Is there a human voice? If yes, describe its timbre and delivery style from what you hear.\n- What is the tempo, estimated from the rhythm you can hear?\n- What is the harmonic or melodic character? Use interval terms, not genre labels.\n\nCritical rule: if you cannot determine something directly from the audio, write nothing about it. Do not write phrases like \"not provided\", \"not available\", \"not supplied\", or \"no information was given\". Silence on a topic means you could not hear it — that is a valid answer.",
+  "raw_output": "The track features electronic drums (kick, snare, hi‑hats), synth bass, lead synthesizers playing Middle Eastern scales, atmospheric pads, string synths, brass synths, piano/keyboard layers, electric guitar riffs, acoustic drum elements such as shakers and tambourines, plus traditional Arabic percussion including tabla/darbuka. The production blends these sounds into a polished pop arrangement while retaining distinct regional tonalities through the modal melodies played by the synths and guitars. No vocal performance is audible in this excerpt, so there are no discernible singers, gendered voices, or lyrical deliveries to describe. Consequently, I am unable to provide details on vocal timbre, range, effects, or thematic content based solely on the instrumental material heard here.",
+  "processing_time_sec": 13.8,
+  "tags": {
+    "artist": "Fadl Shaker",
+    "track_number": 16,
+    "title": "Baya' El Oulob",
+    "baseline_time_sec": 15.7,
+    "tuning_run": "acoustic_only_prompt"
+  },
+  "status": "ok",
+  "error": null
+}
+```
+</file>
+
+<file path='fadl_shaker_acoustic_only/results_summary.json' size='1817' ext='.json'>
+```
+{
+  "timestamp": "2026-05-17T13:06:28.843174+00:00",
+  "total_tracks": 4,
+  "success_count": 4,
+  "fail_count": 0,
+  "results": [
+    {
+      "file": "03.Allah We'allam.mp3",
+      "status": "ok",
+      "processing_time_sec": 14.0,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_acoustic_only/03.Allah We'allam.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 3,
+        "title": "Allah We'allam",
+        "baseline_time_sec": 20.1,
+        "tuning_run": "acoustic_only_prompt"
+      }
+    },
+    {
+      "file": "07.M'assar Feya.mp3",
+      "status": "ok",
+      "processing_time_sec": 14.2,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_acoustic_only/07.M'assar Feya.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 7,
+        "title": "M'assar Feya",
+        "baseline_time_sec": 19.7,
+        "tuning_run": "acoustic_only_prompt"
+      }
+    },
+    {
+      "file": "12.Dehket El Donya.mp3",
+      "status": "ok",
+      "processing_time_sec": 13.9,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_acoustic_only/12.Dehket El Donya.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 12,
+        "title": "Dehket El Donya",
+        "baseline_time_sec": 19.4,
+        "tuning_run": "acoustic_only_prompt"
+      }
+    },
+    {
+      "file": "16.Baya' El Oulob.mp3",
+      "status": "ok",
+      "processing_time_sec": 13.8,
+      "error": null,
+      "output_file": "./captions/fadl_shaker_acoustic_only/16.Baya' El Oulob.caption.json",
+      "tags": {
+        "artist": "Fadl Shaker",
+        "track_number": 16,
+        "title": "Baya' El Oulob",
+        "baseline_time_sec": 15.7,
+        "tuning_run": "acoustic_only_prompt"
+      }
+    }
+  ]
+}
+```
+</file>
+
+</files>
+</codebase>
