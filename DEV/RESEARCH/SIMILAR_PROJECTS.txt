@@ -1,0 +1,14 @@
+https://github.com/yan97ao/argus/tree/master
+https://github.com/DSfromScratch/bitwig-ai-agent
+https://github.com/musnows/juya_ai_daliy
+https://github.com/tavy315/ComfyUI-Music-Flamingo-Analyzer
+https://github.com/Yuan-lab-LLM/Yuan3.0-Ultra
+https://github.com/GabinVr/music-CLAP
+https://github.com/sdbds/qinglong-captions
+
+
+-----------
+https://github.com/CPJKU/beat_this
+https://github.com/adamstark/BTrack
+
+btrack.detect_beats
