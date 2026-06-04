@@ -1,0 +1,44 @@
+{
+  "file": "06.Awel Hob.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "responses": [
+    {
+      "prompt_index": 0,
+      "prompt": "This is an Arabic song.\n\nBriefly describe:\n- The most likely genre or genres.\n- The regional musical style (Khaliji, Egyptian, Levantine, Iraqi, Maghrebi, Yemeni, Sudanese, Mixed, or other).\n- Whether the song sounds traditional, modern, or a fusion.\n- The approximate era or decade of the musical style.\n- Up to five descriptive tags.\n\nKeep the answer concise and organized with bullet points.",
+      "raw_output": "- Genre: Traditional Arabic pop ballad.\n- Regional style: Egyptian/Levantine folk‑pop blend.\n- Musical character: Modern production meets classic melodic ornamentation.\n- Approximate era / stylistic influence: 1970s–80s romantic Arab popular music.\n- Mood & aesthetic: Warm, nostalgic romance conveyed through expressive vocal lines over lush orchestration.\n- Instrumental texture: Prominent accordion melody supported by string sections that provide sweeping harmonic pads, while subtle percussion adds gentle rhythmic drive without overpowering the vocals.\n- Vocal characteristics: Male lead voice delivering emotive phrasing in Arabic, employing typical ornamental turns and slight vibrato characteristic of mid‑20th‑century Arabic singing styles.\n- Lyrical themes: Not provided, but given the described mood and instrumentation, the lyrics would likely focus on love, longing, and heartfelt devotion—common motifs in this period’s Arabic ballads.\n- Overall feel: A polished yet intimate rendition that evokes the sentimental atmosphere of classic Egyptian/Levantine love songs from the golden age of Arabic radio and television.",
+      "processing_time_sec": 19.7,
+      "status": "ok",
+      "error": null
+    },
+    {
+      "prompt_index": 1,
+      "prompt": "This is an Arabic song.\n\nAnalyze the melody and tonal characteristics.\n\nDiscuss:\n- The most likely maqam.\n- One or two alternative maqamat if applicable.\n- Whether quarter tones are clearly present, absent, or uncertain.\n- The tonal center or resting note if identifiable.\n- The main melodic characteristics that support your conclusion.\n\nIf uncertain, say so explicitly instead of guessing.\nKeep the answer concise and organized with bullet points.",
+      "raw_output": "The track’s primary melodic material follows patterns typical of Maqam Bayati (also known as Bayat‑e Kurd). This mode features a characteristic half‑step between the tonic and the second degree, giving it its distinctive “Arabic” flavor. While other modes such as Hijaz or Nahawand could share some intervals, the overall contour and ornamentation strongly point toward Bayati.\n\nQuarter‑tone usage:  Yes, clear microtonal inflections appear throughout the vocal lines and instrumental phrases, especially in the upper register where slides from the major third to the augmented fourth create expressive tension. These subtle pitch bends reinforce the modal character rather than being overtly notated.\n\nTonal centre / key reference:  Although no formal Western key label is provided, the piece revolves around a single tonal anchor—most often perceived as C♯/D♭ when transcribed into Western notation. Many sections resolve on this pitch before moving through related notes of the Bayati scale (C♯–E–F♯–G♯).\n\nMelodic characteristics:\n- Ornamented runs using trills, rapid grace notes, and glissandi.\n- Frequent use of the raised fourth (F♯) against the tonic (C♯), creating the hallmark “raised fourth” interval of Bayati.\n- Repetitive motifs built on the tonic and dominant degrees, providing a sense of continuity across verses and choruses.\n- Call‑and‑response phrasing between lead voice and backing instruments, emphasizing rhythmic syncopation common in contemporary Arabic pop arrangements.\n\nOverall mood & aesthetic:  The combination of these elements yields a passionate yet slightly melancholic atmosphere, reflecting themes of love and longing that are central to many modern Arabic songs. By grounding itself firmly in the traditional Bayati framework while employing polished production techniques, the track bridges classic Middle Eastern musical heritage with current popular sensibilities.",
+      "processing_time_sec": 30.3,
+      "status": "ok",
+      "error": null
+    },
+    {
+      "prompt_index": 2,
+      "prompt": "This is an Arabic song.\n\nAnalyze the performance and arrangement.\n\nDescribe:\n- The main instruments heard.\n- Whether the arrangement is acoustic, electronic, or mixed.\n- The vocal style.\n- Whether the singer appears male, female, mixed, or unclear.\n- Whether there is a solo singer or multiple vocalists.\n- Any notable rhythmic characteristics.\n\nKeep the answer concise and organized with bullet points.",
+      "raw_output": "- Main instruments: Traditional Middle Eastern percussion (darbuka/tabla‑type drums), melodic stringed instrument reminiscent of oud/qanun, subtle synth pads that add atmospheric depth, occasional electric bass line supporting the groove.\n- Arrangement type: Acoustic‑electronic blend – organic percussive textures combined with light electronic ambience.\n- Vocal style: Male lead vocalist delivering clear, expressive timbre in classic Arabic singing tradition, employing extensive ornamentation such as trills, rapid runs, and microtonal inflections typical of maqam improvisation.\n- Gender & number of singers: Solo male voice only.\n- Multiple voices/soloist: Single performer throughout.\n- Rhythmic feel: Steady 4/4 pulse driven by syncopated darbuka patterns, giving the track its danceable momentum while allowing space for intricate vocal embellishments.\nOverall mood is romantic and celebratory, evoking traditional love songs performed at gatherings where listeners sway to the rhythm and appreciate ornate vocal expression.",
+      "processing_time_sec": 18.5,
+      "status": "ok",
+      "error": null
+    },
+    {
+      "prompt_index": 3,
+      "prompt": "This is an Arabic song.\n\nDescribe the listening experience.\n\nDiscuss:\n- The dominant mood or emotions.\n- The energy level (low, medium, or high).\n- The danceability (low, medium, or high).\n- The tempo (slow, medium, or fast).\n- Up to three similar Arabic artists.\n- Situations or contexts where listeners might enjoy this song.\n\nKeep the answer concise and organized with bullet points.",
+      "raw_output": "- This track delivers a vibrant, celebratory atmosphere that feels like a modern‑pop take on traditional Middle Eastern festivities.\n- It moves in 4/4 time, giving it a steady, driving pulse ideal for dancing.\n- Instrumentation & production: A polished pop mix centers on electronic drums paired with classic Arabic percussion such as tabla/darbuka, creating intricate rhythmic layers. Bright synth leads imitate regional instruments while lush pads fill out the harmonic space. An electric bass provides a solid low‑end foundation, keeping the groove grounded without overwhelming the melodic elements. Production emphasizes clear separation between parts, moderate stereo width, light compression, subtle reverb, and tasteful delay—typical of contemporary Arabic pop releases.\n- Vocals: Performed by a male tenor whose timbre is strong, expressive, and slightly nasal—a hallmark of many Arabic vocal styles. He sings melodically with extensive ornamentation (melisma) throughout verses and choruses. Vocal processing includes gentle auto‑tune/pitch correction, modest reverb, and occasional delay, preserving natural expressiveness while adding polish.\n- Lyrical themes: Although full lyrics aren’t provided, the repeated phrases “أول حبي” (“first love”) and “يا حبيبي أنا” (“my beloved I am”) point to romantic devotion and affectionate longing, reinforcing the joyful yet intimate tone of the piece.\n- Structure: The arrangement follows a conventional verse → pre‑chorus → chorus layout, punctuated by instrumental breaks that showcase the percussive interplay and synth motifs before returning to vocal sections. Dynamic intensity builds from the relatively restrained intro into fuller choruses, then recedes during bridges and breakdowns, maintaining listener interest through contrast.\n- Overall mood & context: Energetic, uplifting, and highly danceable, the song blends Western pop sensibilities with unmistakable Arabic musical identity, reflecting current trends in Arab popular music where global production techniques meet local cultural expression. Its bright major tonality and festive rhythm make it well suited for celebrations, clubs, weddings, and radio playlists across the region.",
+      "processing_time_sec": 32.4,
+      "status": "ok",
+      "error": null
+    }
+  ],
+  "total_processing_time_sec": 100.9,
+  "tags": {
+    "track_number": 6,
+    "title": "Awel Hob"
+  },
+  "status": "ok"
+}

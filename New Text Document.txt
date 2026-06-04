@@ -1,0 +1,1 @@
+while true; do   echo "[$(date '+%Y-%m-%d %H:%M:%S')] Syncing changes...";   gcloud storage rsync /content/captions gs://akbar-december-2024-backup/DISCOGRAPHY/captions --recursive;   sleep 30; done
