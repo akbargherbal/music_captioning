@@ -3,29 +3,46 @@
 caption.py — Restored & Robust Music Flamingo Captioning Script
 Fulfills all unit test specs from test_caption.py & includes pre-flight validation.
 
-Fixes (v3):
-  FIX-1  CUDA_LAUNCH_BLOCKING=1 set before torch import → synchronous kernel launches
-         give accurate stack traces on device-side asserts instead of async red herrings.
-         Set to "0" or remove in production for a ~10–15 % speed gain.
-  FIX-2  torch.no_grad() wraps model.generate() → gradients are not tracked during
-         inference, recovering ~30–40 % of activation VRAM (critical on an L4 with a
-         16 GB model leaving only ~6 GB of headroom).
-  FIX-3  Sequence-length guard: tokenise on CPU first, check input_ids length against
-         the model's max_position_embeddings (probing multiple config paths) BEFORE
-         .to(device). Also caps audio at MAX_AUDIO_SEC before the processor sees it so
-         the audio encoder's own position-embedding table cannot OOB.
-  FIX-4  CUDA-poison detection in main(): a device-side assert permanently corrupts the
-         CUDA context.  After the first CUDA error the script flags remaining tracks as
-         skipped. torch.cuda.empty_cache() is now guarded in its own try/except so it
-         cannot itself throw and trigger a duplicate summary record.
-  FIX-5  Full Python traceback is captured inside run_inference and written to the
-         per-track .caption.json.  With CUDA_LAUNCH_BLOCKING=1 active this now shows
-         the exact model layer that triggered the IndexKernel OOB.
+Original fixes (v3):
+  FIX-1  CUDA_LAUNCH_BLOCKING set before torch import.
+         Now defaults to "0" (production speed). Set to "1" only when
+         debugging device-side asserts — it adds ~10-15% overhead.
+  FIX-2  torch.no_grad() wraps model.generate() → gradients are not tracked
+         during inference, recovering ~30–40% of activation VRAM.
+  FIX-3  Sequence-length guard: tokenise on CPU first, check input_ids length
+         against the model's max_position_embeddings BEFORE .to(device).
+         Audio is capped at MAX_AUDIO_SEC before the processor sees it.
+  FIX-4  CUDA-poison detection in main(): a device-side assert permanently
+         corrupts the CUDA context. After the first CUDA error the script flags
+         remaining tracks as skipped. torch.cuda.empty_cache() is guarded in
+         its own try/except so it cannot throw a duplicate summary record.
+  FIX-5  Full Python traceback captured inside run_inference and written to the
+         per-track .caption.json.
+
+Quality fixes (v4):
+  FIX-6  input_features dtype cast: after batch.to(device), explicitly cast
+         batch["input_features"] to model.dtype (bfloat16). Without this,
+         float32 audio features are silently fed into a bf16 model — the
+         official model card examples all include this cast and omitting it
+         causes silent quality loss.
+  FIX-7  MAX_TOKENS_CEILING raised 512 → 4096 (the model's own hard limit per
+         the model card). The old 512 cap was silently truncating analyses
+         mid-sentence. Default max_new_tokens raised 256 → 1024 for the same
+         reason. A runtime warning is emitted when the output hits the ceiling.
+  FIX-8  Temp-file cleanup in run_inference finally-block was a no-op (body
+         was `pass`). Fixed to actually call os.unlink on the temp WAV.
+  FIX-9  4-bit quantization quality warning: when --precision 4bit is used a
+         visible warning is printed at load time so the operator knows output
+         quality will be reduced vs bf16.
+  FIX-10 Audio-coverage verification: after processor.apply_chat_template(),
+         input_features.shape is printed so the operator can confirm the number
+         of 30-second windows actually fed to the model matches expectations
+         (e.g. a 4-minute track should show 8 windows, not 2).
 """
 
-# ── FIX-1: MUST be set before 'import torch' ──────────────────────────────────
+# ── FIX-1: Set BEFORE 'import torch'. Use "1" only for debugging. ─────────────
 import os
-os.environ.setdefault("CUDA_LAUNCH_BLOCKING", "1")
+os.environ.setdefault("CUDA_LAUNCH_BLOCKING", "0")
 # ──────────────────────────────────────────────────────────────────────────────
 
 import argparse
@@ -71,18 +88,23 @@ def cuda_is_healthy() -> bool:
     except RuntimeError:
         return False
 
+
 # ---------------------------------------------------------------------------
 # Constants & Defaults
 # ---------------------------------------------------------------------------
 
 MODEL_ID = "nvidia/music-flamingo-2601-hf"
-MAX_TOKENS_CEILING = 512
 
-# FIX-3: Hard cap on audio duration sent to the model.
-# Music Flamingo's audio encoder has its own positional embedding table — if
-# the waveform produces more frames than the table supports you get the same
-# IndexKernel OOB as with the text decoder.  300 s (5 min) is conservative;
-# raise it only after confirming longer clips work on your checkpoint.
+# FIX-7: Raised from 512 → 4096.
+# The model card states the model's own output cap is 2048 tokens; 4096 is a
+# safe ceiling that will never be hit before the model stops naturally.
+# The old 512 limit was silently truncating detailed analyses mid-sentence.
+MAX_TOKENS_CEILING = 4096
+
+# Audio hard-cap before the processor sees the waveform.
+# The model supports up to 20 minutes (1200 s); 300 s (5 min) is the chosen
+# cap for L4 GPU memory.  Tracks longer than this are truncated and a
+# [TRUNC] warning is printed.  Raise to 1200 on larger hardware.
 MAX_AUDIO_SEC = 300
 
 MINIMAL_PROMPT = "This is an Arabic song. Briefly describe the genre, style, and era."
@@ -93,7 +115,7 @@ DEFAULT_PROMPT = (
 SCRIPT_DEFAULTS = {
     "model_id": MODEL_ID,
     "precision": "bf16",
-    "max_new_tokens": 256,
+    "max_new_tokens": 1024,   # FIX-7: raised from 256 — avoids truncation on typical prompts
     "prompt_mode": "minimal",
     "custom_prompt": None,
     "output_dir": "./captions/",
@@ -112,26 +134,24 @@ def validate_audio_file(audio_path: str) -> tuple[bool, str or None]:
     try:
         import librosa
 
-        # 1. Decode audio waveform
         y, sr = librosa.load(audio_path, sr=16000)
         if y is None or len(y) == 0:
             return False, "Decoded audio waveform is empty."
 
-        # 2. Check for NaN/Inf floats
         if np.isnan(y).any():
             return False, "Audio waveform contains NaN values."
         if np.isinf(y).any():
             return False, "Audio waveform contains infinite values."
 
-        # 3. Check duration boundaries
         duration = librosa.get_duration(y=y, sr=sr)
         if duration <= 0:
             return False, f"Invalid audio duration: {duration:.2f}s."
         if duration > 1200:
-            # RoTE position embeddings inside Music Flamingo hard-cap at 20 minutes (1200s)
+            # Model hard cap is 20 minutes (1200 s).
             return (
                 False,
-                f"Audio duration ({duration:.2f}s) exceeds the maximum allowed length of 1200s (20 minutes).",
+                f"Audio duration ({duration:.2f}s) exceeds the model's maximum of "
+                f"1200s (20 minutes). Trim the file and retry.",
             )
 
         return True, None
@@ -140,14 +160,12 @@ def validate_audio_file(audio_path: str) -> tuple[bool, str or None]:
 
 
 # ---------------------------------------------------------------------------
-# Core Module Functions (Fulfills test_caption.py Specs)
+# Core Module Functions
 # ---------------------------------------------------------------------------
 
 
 def build_prompt(prompt_mode: str, custom_prompt: str = None) -> str:
-    """
-    Build prompt string based on the selected mode. (Task 2.3)
-    """
+    """Build prompt string based on the selected mode."""
     if prompt_mode == "minimal":
         return MINIMAL_PROMPT
     elif prompt_mode == "default":
@@ -163,9 +181,7 @@ def build_prompt(prompt_mode: str, custom_prompt: str = None) -> str:
 
 
 def parse_job_file(job_path: str) -> list[dict]:
-    """
-    Read a JSON job file and return a list of fully resolved track dicts. (Task 5.1)
-    """
+    """Read a JSON job file and return a list of fully resolved track dicts."""
     if not os.path.isfile(job_path):
         raise FileNotFoundError(f"Job file not found: {job_path!r}")
 
@@ -183,7 +199,6 @@ def parse_job_file(job_path: str) -> list[dict]:
         if "path" not in track:
             raise ValueError(f"Track at index {i} is missing required key 'path'.")
 
-        # Precedence hierarchy: SCRIPT_DEFAULTS <- globals <- track
         merged = {**SCRIPT_DEFAULTS, **raw_globals, **track}
 
         max_tokens = int(
@@ -227,9 +242,7 @@ def write_track_output(
     model_id: str,
     output_dir: str,
 ) -> str:
-    """
-    Write <output_dir>/<trackname>.caption.json. (Task 2.5)
-    """
+    """Write <output_dir>/<trackname>.caption.json."""
     os.makedirs(output_dir, exist_ok=True)
 
     out_name = Path(audio_path).stem + ".caption.json"
@@ -245,7 +258,11 @@ def write_track_output(
         "tags": tags if isinstance(tags, dict) else {},
         "status": result.get("status"),
         "error": result.get("error"),
-        "traceback": result.get("traceback"),  # FIX-5: full stack trace on error
+        "traceback": result.get("traceback"),
+        # FIX-10: audio coverage diagnostics written to output JSON
+        "audio_windows": result.get("audio_windows"),
+        "audio_covered_sec": result.get("audio_covered_sec"),
+        "output_truncated": result.get("output_truncated"),
     }
 
     with open(out_path, "w", encoding="utf-8") as f:
@@ -255,9 +272,7 @@ def write_track_output(
 
 
 def write_summary(results: list[dict], output_dir: str) -> str:
-    """
-    Write results_summary.json to output_dir. (Task 6.2)
-    """
+    """Write results_summary.json to output_dir."""
     os.makedirs(output_dir, exist_ok=True)
     out_path = os.path.join(output_dir, "results_summary.json")
 
@@ -279,9 +294,7 @@ def write_summary(results: list[dict], output_dir: str) -> str:
 
 
 def discover_audio_files(directory: str) -> list[str]:
-    """
-    Recursively discover audio files under directory. (Task 4.1)
-    """
+    """Recursively discover audio files under directory."""
     if not os.path.isdir(directory):
         sys.exit(f"Error: directory not found: {directory!r}")
 
@@ -302,13 +315,22 @@ def discover_audio_files(directory: str) -> list[str]:
 
 
 def load_model(model_id: str, precision: str):
-    """
-    Load MusicFlamingo model and processor.
-    """
+    """Load MusicFlamingo model and processor."""
     print(f"Loading processor from {model_id!r} ...")
     processor = AutoProcessor.from_pretrained(model_id)
 
     print(f"Loading model (precision={precision}) ...")
+
+    # FIX-9: Warn loudly when 4-bit is used so the operator knows output
+    # quality will be reduced compared to bf16.
+    if precision == "4bit":
+        print(
+            "  [QUALITY WARNING] 4-bit quantization is active.\n"
+            "  Output quality will be noticeably lower than bf16, especially\n"
+            "  for detailed music analysis (maqam, chord identification, lyrics).\n"
+            "  Use --precision bf16 on L4 (24 GB) unless you are genuinely VRAM-constrained."
+        )
+
     if precision == "bf16":
         model = MusicFlamingoForConditionalGeneration.from_pretrained(
             model_id,
@@ -344,19 +366,14 @@ def run_inference(
     prompt: str,
     max_new_tokens: int,
 ) -> dict:
-    """
-    Run inference on one audio file with a specific prompt.
-    """
+    """Run inference on one audio file with a specific prompt."""
+    tmp_path = None  # declared here so finally-block can always reference it
     try:
         import librosa
         import soundfile as sf
         import tempfile
 
         # ── FIX-3a: Pre-load audio on CPU and enforce MAX_AUDIO_SEC ─────────
-        # The audio encoder has its own positional embedding table; feeding a
-        # waveform longer than it supports produces an IndexKernel OOB on the
-        # GPU identical to the text-decoder version.  Truncate here, before the
-        # processor ever sees the file.
         target_sr = getattr(
             getattr(processor, "feature_extractor", processor),
             "sampling_rate",
@@ -365,22 +382,26 @@ def run_inference(
         y, _sr = librosa.load(audio_path, sr=target_sr, mono=True)
         max_samples = int(MAX_AUDIO_SEC * target_sr)
         duration_s = len(y) / target_sr
+
         if len(y) > max_samples:
             print(
                 f"  [TRUNC] {duration_s:.1f}s → {MAX_AUDIO_SEC}s "
-                f"(encoder positional-embedding guard)"
+                f"(L4 audio cap — full model limit is 1200s)"
             )
             y = y[:max_samples]
+            effective_duration_s = MAX_AUDIO_SEC
+        else:
+            effective_duration_s = duration_s
+        # ─────────────────────────────────────────────────────────────────────
 
-        # Write truncated waveform to a temp WAV so the processor can load it
+        # Write truncated/full waveform to a temp WAV for the processor
         tmp_fd, tmp_path = tempfile.mkstemp(suffix=".wav")
         os.close(tmp_fd)
         try:
             sf.write(tmp_path, y, target_sr)
             effective_path = tmp_path
         except Exception:
-            effective_path = audio_path  # fall back to original on write failure
-        # ─────────────────────────────────────────────────────────────────────
+            effective_path = audio_path
 
         conversation = [
             {
@@ -394,7 +415,7 @@ def run_inference(
 
         start = time.time()
 
-        # FIX-3b: Tokenise entirely on CPU first — do NOT call .to(device) yet.
+        # FIX-3b: Tokenise entirely on CPU first
         batch = processor.apply_chat_template(
             conversation,
             tokenize=True,
@@ -402,9 +423,30 @@ def run_inference(
             return_dict=True,
         )
 
-        # FIX-3c: Guard against sequences that exceed the model's position-
-        # embedding table.  Probe several config paths because Music Flamingo
-        # nests the language-model config differently from stock HF models.
+        # FIX-10: Audio coverage verification — print window count so the
+        # operator can confirm the full track reached the model.
+        # The processor splits audio into 30-second windows; the first
+        # dimension of input_features is the window count.
+        audio_windows = None
+        audio_covered_sec = None
+        if "input_features" in batch and batch["input_features"] is not None:
+            audio_windows = batch["input_features"].shape[0]
+            audio_covered_sec = audio_windows * 30
+            print(
+                f"  [AUDIO] input_features shape: {tuple(batch['input_features'].shape)} | "
+                f"{audio_windows} window(s) × 30s = {audio_covered_sec}s covered "
+                f"(track effective duration: {effective_duration_s:.1f}s)"
+            )
+            if audio_covered_sec < effective_duration_s - 30:
+                # The processor covered significantly less than what we passed —
+                # something went wrong upstream (sample-rate mismatch, etc.)
+                print(
+                    f"  [QUALITY WARNING] Processor only covered {audio_covered_sec}s "
+                    f"of a {effective_duration_s:.1f}s track. "
+                    f"The model will analyse an incomplete portion of the audio."
+                )
+
+        # FIX-3c: Sequence length guard
         seq_len = batch["input_ids"].shape[1]
         _cfg = model.config
         model_max_len = (
@@ -423,15 +465,21 @@ def run_inference(
                 f"Reduce MAX_AUDIO_SEC (currently {MAX_AUDIO_SEC}s) and retry."
             )
 
-        # Only move to GPU after all CPU-side checks pass.
+        # Move to GPU after all CPU-side checks pass
         batch = batch.to(model.device)
+
+        # FIX-6: Cast input_features to model dtype (bfloat16).
+        # batch.to(device) moves tensors to the right device but does NOT
+        # cast dtypes — audio features remain float32 unless cast explicitly.
+        # The official model card examples always include this line.
+        if "input_features" in batch and batch["input_features"] is not None:
+            batch["input_features"] = batch["input_features"].to(model.dtype)
 
         _precision = getattr(model, "_precision", "bf16")
         _device_type = next(model.parameters()).device.type
         _use_autocast = _precision == "bf16" and _device_type == "cuda"
 
-        # FIX-2: no_grad() prevents gradient tracking during inference,
-        # saving ~30–40 % of activation VRAM.
+        # FIX-2: no_grad() prevents gradient tracking during inference
         with torch.no_grad():
             with torch.autocast(
                 device_type=_device_type, dtype=torch.bfloat16, enabled=_use_autocast
@@ -443,6 +491,8 @@ def run_inference(
                 )
 
         inp_len = batch["input_ids"].shape[1]
+        new_token_count = gen_ids.shape[1] - inp_len
+
         raw_output = processor.batch_decode(
             gen_ids[:, inp_len:],
             skip_special_tokens=True,
@@ -450,17 +500,29 @@ def run_inference(
         )[0]
 
         elapsed = time.time() - start
+
+        # FIX-7: Detect whether the model hit the token ceiling mid-response
+        output_truncated = new_token_count >= max_new_tokens
+        if output_truncated:
+            print(
+                f"  [QUALITY WARNING] Output hit the max_new_tokens ceiling "
+                f"({max_new_tokens}). The response is likely truncated mid-sentence. "
+                f"Re-run with a higher --max-tokens value."
+            )
+
         return {
             "raw_output": raw_output,
             "processing_time_sec": round(elapsed, 1),
             "status": "ok",
             "error": None,
             "traceback": None,
+            "audio_windows": audio_windows,
+            "audio_covered_sec": audio_covered_sec,
+            "output_truncated": output_truncated,
         }
 
     except Exception as e:
-        # FIX-5: capture the full Python traceback.  With CUDA_LAUNCH_BLOCKING=1
-        # this will include the exact model layer that triggered the OOB assert.
+        # FIX-5: Capture the full Python traceback
         tb = traceback.format_exc()
         return {
             "raw_output": None,
@@ -468,12 +530,17 @@ def run_inference(
             "status": "error",
             "error": str(e),
             "traceback": tb,
+            "audio_windows": None,
+            "audio_covered_sec": None,
+            "output_truncated": None,
         }
     finally:
-        # Clean up temp file if it was created
+        # FIX-8: Actually delete the temp WAV file.
+        # The original body was `pass` — the file was never cleaned up,
+        # leaking one temp file per processed track.
         try:
-            if "tmp_path" in dir() or "tmp_path" in locals():
-                pass
+            if tmp_path is not None and os.path.exists(tmp_path):
+                os.unlink(tmp_path)
         except Exception:
             pass
 
@@ -508,9 +575,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--max-tokens",
         type=int,
-        default=256,
+        default=1024,   # FIX-7: raised from 256
         dest="max_tokens",
-        help="Maximum new tokens to generate per prompt (default: 256, ceiling: 512).",
+        help="Maximum new tokens to generate per prompt (default: 1024, ceiling: 4096).",
     )
     parser.add_argument(
         "--prompt-mode",
@@ -525,7 +592,7 @@ def build_parser() -> argparse.ArgumentParser:
         type=str,
         choices=["bf16", "4bit"],
         default="bf16",
-        help="Model precision (default: bf16).",
+        help="Model precision (default: bf16). 4bit reduces quality — a warning is printed.",
     )
     parser.add_argument(
         "--output-dir",
@@ -568,6 +635,14 @@ def main():
             f"Warning: --max-tokens {args.max_tokens} exceeds ceiling of {MAX_TOKENS_CEILING}. Clamping."
         )
         args.max_tokens = MAX_TOKENS_CEILING
+
+    # FIX-7: Warn when the operator explicitly asks for a low token count
+    if args.max_tokens < 512:
+        print(
+            f"  [QUALITY WARNING] --max-tokens {args.max_tokens} is low. "
+            f"Detailed analyses may be truncated mid-sentence. "
+            f"Consider using at least 1024."
+        )
 
     tracks = []
     job_summary_output_dir = args.output_dir
@@ -623,7 +698,7 @@ def main():
 
         print(f"[{idx}/{total}] Processing: {name}")
 
-        # FIX-4: Skip GPU work entirely if the CUDA context is known-bad.
+        # FIX-4: Skip GPU work entirely if the CUDA context is known-bad
         if cuda_poisoned:
             err_msg = (
                 "Skipped: CUDA context poisoned by earlier device-side assert. "
@@ -674,7 +749,7 @@ def main():
             )
             continue
 
-        # 3. Model Inference Setup & Launch
+        # 3. Model Inference
         try:
             prompt = build_prompt(track["prompt_mode"], track["custom_prompt"])
             result = run_inference(
@@ -703,20 +778,17 @@ def main():
                     "error": result["error"],
                     "output_file": out_path if result["status"] == "ok" else None,
                     "tags": track["tags"],
+                    "audio_windows": result.get("audio_windows"),
+                    "audio_covered_sec": result.get("audio_covered_sec"),
+                    "output_truncated": result.get("output_truncated"),
                 }
             )
 
-            # FIX-4: Detect CUDA poisoning after an error.
-            # IMPORTANT: torch.cuda.empty_cache() itself throws on a poisoned
-            # context, so it is wrapped in its own try/except to prevent it from
-            # propagating into the outer handler and appending a duplicate
-            # summary record.
+            # FIX-4: Detect CUDA poisoning after an error
             if result["status"] == "error":
                 err_str = result.get("error", "") or ""
                 tb_str  = result.get("traceback", "") or ""
 
-                # FIX-5: Print the full traceback so we can see exactly which
-                # model layer raised the IndexKernel OOB.
                 if "CUDA" in err_str or "device-side assert" in err_str:
                     if tb_str:
                         print(f"  [CUDA TRACEBACK]\n{tb_str}")
@@ -727,7 +799,7 @@ def main():
                     try:
                         torch.cuda.empty_cache()
                     except Exception:
-                        pass  # expected on a poisoned context — swallow silently
+                        pass
                     print(
                         "  !! CUDA context is poisoned — remaining tracks will be "
                         "recorded as errors without attempting GPU inference.\n"
