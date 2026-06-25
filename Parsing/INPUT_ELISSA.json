@@ -1,0 +1,658 @@
+{
+  "globals": {
+    "model_id": "nvidia/music-flamingo-2601-hf",
+    "precision": "bf16",
+    "max_new_tokens": 512,
+    "output_dir": "./elissa_captions/"
+  },
+  "tracks": [
+    {
+      "path": "ELISSA/Elissa - 2000 Wakherta Maak/06.Wahyatt El Hob.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Wahyatt El Hob"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2000 Wakherta Maak/07.Ramchet Ayn.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Ramchet Ayn"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2000 Wakherta Maak/08.Sa'alna.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Sa'alna"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2000 Wakherta Maak/09.Saharni Habibi.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Saharni Habibi"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2000 Wakherta Maak/10.Chafouna Tneyn.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Chafouna Tneyn"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2000 Wakherta Maak/11.Minn Bloum.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Minn Bloum"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2002 Aayshalak/01. A ayshalak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "A ayshalak"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2002 Aayshalak/02. Ah Min Hawak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Ah Min Hawak"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2002 Aayshalak/03. Ajmal Ihssas.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Ajmal Ihssas"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2002 Aayshalak/04. Shaghilni.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Shaghilni"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2002 Aayshalak/05. Shiltak min Albi.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Shiltak min Albi"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2002 Aayshalak/06. Million Ahibbak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Million Ahibbak"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2002 Aayshalak/07. Baada.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Baada"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2002 Aayshalak/08. Kilmit Hob.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Kilmit Hob"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2002 Aayshalak/09. La Trouh.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "La Trouh"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2002 Aayshalak/10. Shou El hal.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Shou El hal"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/01.Ergaa Lil Shou'.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Ergaa Lil Shou'"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/02.Ahla Donya.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Ahla Donya"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/03.Kol Youm Beomre.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Kol Youm Beomre"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/04.Khaleny Aeesh.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Khaleny Aeesh"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/05. Been El Ein.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Been El Ein"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/06.Hobak Wagaa.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Hobak Wagaa"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/07.Ad Mabashtaklak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Ad Mabashtaklak"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/08. Kan Nifsy Aaraf.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Kan Nifsy Aaraf"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/09.Zikra.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Zikra"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/10.Erham Abi.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Erham Abi"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/11.Gowaya Leek.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Gowaya Leek"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/12.Arably.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Arably"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/13.Law Nergaa Sawa.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Law Nergaa Sawa"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2004 Ahla Donya/14.Music.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "track_number": 122,
+        "title": "Music"
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/01.Bastanak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "01.Bastanak",
+        "track_number": 1
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/02.Kermalak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "02.Kermalak",
+        "track_number": 2
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/03.Fatet Sineen.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "03.Fatet Sineen",
+        "track_number": 3
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/04.Zanbi Ana.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "04.Zanbi Ana",
+        "track_number": 4
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/05.Baaeh Ala Hissak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "05.Baaeh Ala Hissak",
+        "track_number": 5
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/06.Tlob Itmana.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "06.Tlob Itmana",
+        "track_number": 6
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/07.Taa.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "07.Taa",
+        "track_number": 7
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/08.Matkhafch Minni.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "08.Matkhafch Minni",
+        "track_number": 8
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/09.Hikayti Maak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "09.Hikayti Maak",
+        "track_number": 9
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/10.Law Basset Eddamak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "10.Law Basset Eddamak",
+        "track_number": 10
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/11.Law kan.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "11.Law kan",
+        "track_number": 11
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/12.Law Teaarafou.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "12.Law Teaarafou",
+        "track_number": 12
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2006 Bastannak/13.Kermalak [Remix].mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "13.Kermalak [Remix]",
+        "track_number": 13
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2008 Ayami Beek/01. Ayami Bik.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Ayami Bik",
+        "track_number": 1
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2008 Ayami Beek/02. Khod Balak Alaya.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Khod Balak Alaya",
+        "track_number": 2
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2008 Ayami Beek/03. Betmon.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Betmon",
+        "track_number": 3
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2008 Ayami Beek/04. Ya Alam.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Ya Alam",
+        "track_number": 4
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2008 Ayami Beek/05. Law Ma Tegi.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Law Ma Tegi",
+        "track_number": 5
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2008 Ayami Beek/06. Mish Ktir Alayk.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Mish Ktir Alayk",
+        "track_number": 6
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2008 Ayami Beek/07. Adik Erift.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Adik Erift",
+        "track_number": 7
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2008 Ayami Beek/08. Ala Hobbak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Ala Hobbak",
+        "track_number": 8
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2008 Ayami Beek/09. Ana Bastaghrib Aleh.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Ana Bastaghrib Aleh",
+        "track_number": 9
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2008 Ayami Beek/10. Sahar Einy.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Sahar Einy",
+        "track_number": 10
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2008 Ayami Beek/11. Awakhir El Shity.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Awakhir El Shity",
+        "track_number": 11
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/01.Tesada'a Bemeen.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Tesada'a Bemeen",
+        "track_number": 1
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/02.Aa Bali Habibi.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Aa Bali Habibi",
+        "track_number": 2
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/03.Min Gheir Mounasba.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Min Gheir Mounasba",
+        "track_number": 3
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/04.Amri La Rabbi.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Amri La Rabbi",
+        "track_number": 4
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/05.Fi Shi Nkasar.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Fi Shi Nkasar",
+        "track_number": 5
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/06.Maash Walakan.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Maash Walakan",
+        "track_number": 6
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/07.Sallimli Aleh.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Sallimli Aleh",
+        "track_number": 7
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/08.Law Feye.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Law Feye",
+        "track_number": 8
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/09.Eftakart.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Eftakart",
+        "track_number": 9
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/10.W Byestehi.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "W Byestehi",
+        "track_number": 10
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/11.Ma Ta'rafchi Lei.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Ma Ta'rafchi Lei",
+        "track_number": 11
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/12.Aisha Welsalam.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Aisha Welsalam",
+        "track_number": 12
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2009 Tesada'a Bemeen/13.Masdoma.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Masdoma",
+        "track_number": 13
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/01. Fi Ouyounak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Fi Ouyounak",
+        "track_number": 1
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/02. As3ad Wa7da.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "As3ad Wa7da",
+        "track_number": 2
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/03. Moutafa2La.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Moutafa2La",
+        "track_number": 3
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/04. Faker.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Faker",
+        "track_number": 4
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/05. Te3ebt Minnak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Te3ebt Minnak",
+        "track_number": 5
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/06. Law Aoullak.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Law Aoullak",
+        "track_number": 6
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/07. Kerehtak Ana.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Kerehtak Ana",
+        "track_number": 7
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/08. Rohtelo.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Rohtelo",
+        "track_number": 8
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/09. Eghmerni.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Eghmerni",
+        "track_number": 9
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/10. Haylif Wiylif.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Haylif Wiylif",
+        "track_number": 10
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/11. Alouli El Eid.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Alouli El Eid",
+        "track_number": 11
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/12. Albi Hasis Fik.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Albi Hasis Fik",
+        "track_number": 12
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/13. Sa3at.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Sa3at",
+        "track_number": 13
+      }
+    },
+    {
+      "path": "ELISSA/Elissa - 2012  As3ad Wa7da/14. Lola El Malama.mp3",
+      "tags": {
+        "artist": "Elissa",
+        "title": "Lola El Malama",
+        "track_number": 14
+      }
+    }
+  ]
+}

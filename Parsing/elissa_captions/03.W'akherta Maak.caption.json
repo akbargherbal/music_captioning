@@ -1,0 +1,45 @@
+{
+  "file": "03.W'akherta Maak.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "responses": [
+    {
+      "prompt_index": 0,
+      "prompt": "This is an Arabic song.\n\nBriefly describe:\n- The most likely genre or genres.\n- The regional musical style (Khaliji, Egyptian, Levantine, Iraqi, Maghrebi, Yemeni, Sudanese, Mixed, or other).\n- Whether the song sounds traditional, modern, or a fusion.\n- The approximate era or decade of the musical style.\n- Up to five descriptive tags.\n\nKeep the answer concise and organized with bullet points.",
+      "raw_output": "- Genre: Pop / Arabic pop ballad.\n- Regional style: Khaliji‑influenced Arabic pop.\n- Musical character: Traditional melodic sensibility blended with contemporary production techniques.\n- Approximate era / stylistic blend: Modern 2010s‑era Arabic pop that fuses classic Middle Eastern ornamentation with polished studio aesthetics.\n- Mood & aesthetic description: A heartfelt love anthem built around emotive vocal delivery, supported by lush string arrangements, subtle synth pads, and gentle percussion that together create a warm, romantic atmosphere typical of mainstream Arabic pop from the past two decades.\n- Additional notes: While specific instrumentation details are not provided in the separate metadata, the track’s overall texture suggests layered strings, soft electronic elements, and restrained rhythmic backing designed to highlight the expressive vocals.",
+      "processing_time_sec": 15.6,
+      "status": "ok",
+      "error": null
+    },
+    {
+      "prompt_index": 1,
+      "prompt": "This is an Arabic song.\n\nAnalyze the melody and tonal characteristics.\n\nDiscuss:\n- The most likely maqam.\n- One or two alternative maqamat if applicable.\n- Whether quarter tones are clearly present, absent, or uncertain.\n- The tonal center or resting note if identifiable.\n- The main melodic characteristics that support your conclusion.\n\nIf uncertain, say so explicitly instead of guessing.\nKeep the answer concise and organized with bullet points.",
+      "raw_output": "The track’s primary melodic material follows patterns typical of Maqam Bayati (also known as Bayat‑e Kurd). This mode features a characteristic half‑step interval between its second degree and third degree, giving it a distinctive “Arabic” flavor when played on Western instruments such as strings or keyboards.\n\nKey observations supporting this identification include:\n\n* **Tonal center:** A clear sense of D minor serves as the tonal anchor throughout much of the piece, especially in sections where chords resolve around Dm, Am7, G6, Fmaj7, etc., reinforcing a minor‑mode feel common to many Middle Eastern modal systems.\n* **Melodic intervals:** The vocal line frequently employs microtonal inflections—quarter‑tone bends—that align with the expressive ornamentation found in traditional Arabic singing styles.\n* **Harmonic backdrop:** Although the chord list includes several non‑diatonic moves (e.g., Bbmaj7 → C#dim), these progressions often function as coloristic extensions rather than strict functional harmony, allowing the melody to glide over shifting tonal colors while still gravitating back toward the home key of D minor.\n* **Overall mood:** The combination of a steady 4/4 pulse, moderate tempo (~130–135 BPM according to the synopsis) and the melancholic yet hopeful character of the melody suggests a reflective atmosphere typical of songs based on Maqam Bayati, where tension builds through rising phrases before resolving into more stable, consonant passages.\n\n**Alternative possibilities:**\nWhile Maqam Bayati dominates, brief excursions could hint at related modes such as Maqam Hijaz (which also uses a raised fourth scale degree but has different melodic contours) or even a fleeting shift to Maqam Nahawand during transitional moments. However, without explicit evidence from additional musical cues, those remain speculative.\n\nIn summary, the most plausible classification is **Maqam Bayati**, supported by the presence of quarter‑tone ornaments, a D‑minor tonal focus, and the overall emotive quality of the melody.",
+      "processing_time_sec": 33.7,
+      "status": "ok",
+      "error": null
+    },
+    {
+      "prompt_index": 2,
+      "prompt": "This is an Arabic song.\n\nAnalyze the performance and arrangement.\n\nDescribe:\n- The main instruments heard.\n- Whether the arrangement is acoustic, electronic, or mixed.\n- The vocal style.\n- Whether the singer appears male, female, mixed, or unclear.\n- Whether there is a solo singer or multiple vocalists.\n- Any notable rhythmic characteristics.\n\nKeep the answer concise and organized with bullet points.",
+      "raw_output": "- Main instruments: Traditional Middle Eastern percussion (darbuka‑type drums), melodic stringed instrument reminiscent of oud/qanun, subtle synth pads that add ambient texture, bass guitar providing low‑end support, occasional electric piano/keyboard accents.\n- Arrangement type: Acoustic‑electronic blend – organic strings and percussive elements combined with modern production polish and gentle electronic ambience.\n- Vocal style: Female lead vocalist singing in Arabic, delivering clear, expressive timbre typical of contemporary Arabic pop ballads. Vocals are clean, front‑center in mix, often layered with light reverb to enhance emotional depth.\n- Gender & number of singers: Solo female voice throughout most sections; no distinct backing vocals noted.\n- Rhythmic feel: Steady 4/4 pulse driven by darbuka patterns, giving a moderate groove without aggressive syncopation. Tempo feels relaxed yet forward‑moving, supporting lyrical expression rather than dance energy.\nOverall mood is emotive and intimate, reflecting personal storytelling common in modern Arabic popular music while incorporating polished studio aesthetics.",
+      "processing_time_sec": 18.9,
+      "status": "ok",
+      "error": null
+    },
+    {
+      "prompt_index": 3,
+      "prompt": "This is an Arabic song.\n\nDescribe the listening experience.\n\nDiscuss:\n- The dominant mood or emotions.\n- The energy level (low, medium, or high).\n- The danceability (low, medium, or high).\n- The tempo (slow, medium, or fast).\n- Up to three similar Arabic artists.\n- Situations or contexts where listeners might enjoy this song.\n\nKeep the answer concise and organized with bullet points.",
+      "raw_output": "- This track delivers a vibrant, energetic atmosphere that blends modern pop‑dance production with traditional Middle Eastern melodic sensibilities.\n- It feels uplifting yet emotionally nuanced, balancing bright major sections with more introspective minor passages.\n- Tempo & Key – The song moves at ≈130 BPM in A minor (time signature not specified). The harmonic backbone cycles through Am–Dm progressions, punctuated by occasional Fmaj7, E/E7/G♯, G6, C#dim, Bbmaj7, Em/Em7, D/A, and other color chords, giving the arrangement both stability and subtle tension.\n- Instrumentation & Production – While specific instrument lists aren’t provided, the chordal texture suggests layered synth pads and electronic drums typical of contemporary Arabic pop, combined with regional ornamentation such as oud‑style riffs or darbuka percussion implied by the rhythmic feel. The mix likely emphasizes a wide stereo field: crisp percussive elements sit forward, while synths and vocal layers occupy the mid‑high range, all polished with moderate compression and reverb to create a club‑ready sheen.\n- Vocal Characteristics – No explicit details on timbre, gender, or effects were supplied, so they cannot be described beyond what’s evident from the lyrics.\n- Lyrical Themes – The verses convey longing, heartbreak, and yearning for connection, illustrated by lines like “وعا حالي بالليل عم بحكي معاك” (“At night I talk to you”) and repeated pleas about love turning sour (“قلب من مايل لالمائل”). Refrains repeat these motifs, reinforcing a sense of emotional turbulence and desire for reconciliation.\n- Song Structure – Based on the timestamped lyric blocks, the form appears to follow a conventional verse → pre‑chorus → chorus layout, interspersed with instrumental breaks that allow the chord progression to breathe before returning to vocal sections. Dynamic intensity builds toward choruses, then recedes during bridge‑like moments, creating ebb and flow throughout the piece.\n- Overall Mood & Context – The combination of driving 4/4 rhythm, minor‑key tonality, and expressive Arabic lyrical phrasing situates the track within today’s Arab pop scene, where Western EDM influences meet local musical heritage. Its upbeat pulse makes it suitable for clubs and celebrations, while its emotive core resonates with listeners experiencing romantic uncertainty.",
+      "processing_time_sec": 36.7,
+      "status": "ok",
+      "error": null
+    }
+  ],
+  "total_processing_time_sec": 104.9,
+  "tags": {
+    "artist": "Elissa",
+    "track_number": 122,
+    "title": "W'akherta Maak"
+  },
+  "status": "ok"
+}

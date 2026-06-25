@@ -1,0 +1,45 @@
+{
+  "file": "01. Baddy Doub.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "responses": [
+    {
+      "prompt_index": 0,
+      "prompt": "This is an Arabic song.\n\nBriefly describe:\n- The most likely genre or genres.\n- The regional musical style (Khaliji, Egyptian, Levantine, Iraqi, Maghrebi, Yemeni, Sudanese, Mixed, or other).\n- Whether the song sounds traditional, modern, or a fusion.\n- The approximate era or decade of the musical style.\n- Up to five descriptive tags.\n\nKeep the answer concise and organized with bullet points.",
+      "raw_output": "- Genre: Traditional Arabic pop ballad.\n- Regional style: Khaliji‑influenced Arabic pop.\n- Musical character: A blend of classic Middle Eastern melodic ornamentation with contemporary pop production.\n- Production approach: Modern studio polish combined with authentic acoustic elements such as oud/qanun lines and subtle percussive textures that evoke Gulf folk rhythms.\n- Vocal profile: Male lead vocalist delivering emotive, expressive singing in Arabic, employing typical maqam inflections while staying within a clean vocal timbre.\n- Instrumental texture: Likely features layered stringed instruments (oud, qanun), light percussion (darbuka/riqq patterns), bass guitar grounding the harmony, and atmospheric synth pads adding depth.\n- Lyrical theme: Not provided, but given the description, the lyrics probably explore love, longing, or personal reflection common in Khaliji ballads.\n- Overall mood & aesthetic: Warm, heartfelt atmosphere suited for intimate listening or romantic settings, reflecting the cultural tradition of Gulf‑region popular songs from the early 2000s onward.",
+      "processing_time_sec": 18.3,
+      "status": "ok",
+      "error": null
+    },
+    {
+      "prompt_index": 1,
+      "prompt": "This is an Arabic song.\n\nAnalyze the melody and tonal characteristics.\n\nDiscuss:\n- The most likely maqam.\n- One or two alternative maqamat if applicable.\n- Whether quarter tones are clearly present, absent, or uncertain.\n- The tonal center or resting note if identifiable.\n- The main melodic characteristics that support your conclusion.\n\nIf uncertain, say so explicitly instead of guessing.\nKeep the answer concise and organized with bullet points.",
+      "raw_output": "*The provided metadata does not include explicit information about the key signature, tempo, time signature, chord progression, lyrics, vocal timbre, instrumentation, production details, or specific structural sections (intro, verse, chorus, etc.).*\n\nBased on the description in the synopsis alone:\n\n1) **Genre / Style**: An Arabic song – this indicates the piece draws from traditional Middle Eastern musical idioms rather than Western pop/rock conventions.\n\n2) **Melody & Tonality**:\n   - No concrete data were supplied about the underlying scale system used by the composer.\n   - Maqams such as Hijaz, Bayati, Nahawand, Rast, Saba, and others often feature characteristic intervals like augmented seconds (quarter‑tone steps), but without hearing the actual pitch material we cannot confirm their presence definitively.\n\n3) **Tonal Center**:\n   - Since no key information was given, there is insufficient evidence to state a definitive tonic note or key center.\n\n4) **Overall Mood & Aesthetic**:\n   - Without further context, only general observations can be made: Arabic songs typically convey emotional depth through expressive ornamentation, microtonal inflections, and lyrical themes rooted in love, longing, spirituality, or social commentary. However, these traits must remain speculative because they are not supported by the available data.\n\nIn summary, while I can outline possible analytical angles based on genre expectations, none of those conclusions can be confirmed due to missing musical specifics.",
+      "processing_time_sec": 22.0,
+      "status": "ok",
+      "error": null
+    },
+    {
+      "prompt_index": 2,
+      "prompt": "This is an Arabic song.\n\nAnalyze the performance and arrangement.\n\nDescribe:\n- The main instruments heard.\n- Whether the arrangement is acoustic, electronic, or mixed.\n- The vocal style.\n- Whether the singer appears male, female, mixed, or unclear.\n- Whether there is a solo singer or multiple vocalists.\n- Any notable rhythmic characteristics.\n\nKeep the answer concise and organized with bullet points.",
+      "raw_output": "- Main instruments: Traditional Middle Eastern percussion (darbuka/tabla), melodic string instrument reminiscent of oud/qanun, subtle synth pads that add atmospheric depth, bass guitar providing low‑end support, occasional electric piano/keyboard textures.\n- Arrangement type: Acoustic‑electronic blend – organic percussive elements combined with modern production polish.\n- Vocal style: Female lead vocalist singing in Arabic, clear timbre, expressive delivery typical of contemporary Arabic pop ballads, clean vocals without harsh distortion.\n- Gender & number of singers: Solo female voice only.\n- Rhythmic feel: Steady 4/4 groove driven by darbuka patterns, giving a danceable yet relaxed pulse around mid‑tempo range (~105–120 BPM as described).\n- Overall mood & context: Melancholic and romantic atmosphere, evoking longing through minor tonalities and lyrical phrasing common in Arabic love songs. Production emphasizes spacious reverb on strings and vocals while keeping drums tight and upfront, creating a polished studio aesthetic suited for radio play across the Arab world.",
+      "processing_time_sec": 17.4,
+      "status": "ok",
+      "error": null
+    },
+    {
+      "prompt_index": 3,
+      "prompt": "This is an Arabic song.\n\nDescribe the listening experience.\n\nDiscuss:\n- The dominant mood or emotions.\n- The energy level (low, medium, or high).\n- The danceability (low, medium, or high).\n- The tempo (slow, medium, or fast).\n- Up to three similar Arabic artists.\n- Situations or contexts where listeners might enjoy this song.\n\nKeep the answer concise and organized with bullet points.",
+      "raw_output": "- This track delivers a vibrant Middle Eastern pop‑dance vibe that feels celebratory and romantic while retaining a touch of melancholy in its melodic phrasing.\n- It moves at ≈100 BPM in 4/4 time and is rooted in E minor, giving it a slightly wistful tonal center despite the upbeat rhythm.\n- Instrumentation & production: A polished modern mix foregrounds crisp electronic drums paired with traditional darbuka percussion, creating syncopated grooves that drive the dance feel. Bright synth leads weave through lush string pads, while rhythmic acoustic guitar adds organic texture. An electric bass provides a solid low‑end foundation, anchoring the harmonic flow without overwhelming the mids. Reverb and delay on most elements give depth, and careful compression keeps dynamics tight yet lively across sections.\n- Vocal characteristics: The lead vocalist sings in a mezzo‑soprano range with a clear, expressive timbre typical of contemporary Arabic singers. Her delivery blends smooth legato lines with occasional ornamental flourishes, all processed with tasteful reverb, subtle delay, light auto‑tune/pitch correction, and consistent compression. Backing vocals supply rich harmonies—especially in choruses—that reinforce the emotional hook.\n- Lyrical themes: Although full lyrics aren’t provided, recurring phrases such as “Ya lali” (“Oh my love”) and references like “Layli layli nhar” point to classic Arabic motifs of longing, passionate devotion, and yearning romance. These repeated hooks amplify the song’s emotive core.\n- Song structure & dynamics: The arrangement follows a conventional verse → pre‑chorus → chorus layout, punctuated by instrumental breaks that showcase the synth‑string interplay and percussive accents. Verses stay relatively restrained, allowing the vocal melody to shine over a looping Em–C progression. Pre‑choruses build tension with added chords (e.g., D6, Bm7) before exploding into choruses anchored around Gmaj7, Cmaj7, and bright major lifts, delivering anthemic release. Breakdowns strip back to drums and darbuka, then gradually re‑introduce layers leading to a final, uplifting climax.\n- Harmonic insight: While centered in E minor, the chord palette frequently shifts to relative majors (Gmaj7, Cmaj7) and secondary dominants (D/F#, F#), providing contrast between minor‑toned verses and more hopeful, major‑flavored",
+      "processing_time_sec": 35.3,
+      "status": "ok",
+      "error": null
+    }
+  ],
+  "total_processing_time_sec": 93.0,
+  "tags": {
+    "artist": "Elissa",
+    "title": "Baddy Doub",
+    "track_number": 1
+  },
+  "status": "ok"
+}

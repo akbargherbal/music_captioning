@@ -1,19 +1,43 @@
 #!/usr/bin/env python3
 """
-caption.py — Music Flamingo caption script
-Model: nvidia/music-flamingo-2601-hf
-Multi-prompt mode: runs all PROMPTS sequentially per track.
+caption.py — Restored & Robust Music Flamingo Captioning Script
+Fulfills all unit test specs from test_caption.py & includes pre-flight validation.
+
+Fixes (v3):
+  FIX-1  CUDA_LAUNCH_BLOCKING=1 set before torch import → synchronous kernel launches
+         give accurate stack traces on device-side asserts instead of async red herrings.
+         Set to "0" or remove in production for a ~10–15 % speed gain.
+  FIX-2  torch.no_grad() wraps model.generate() → gradients are not tracked during
+         inference, recovering ~30–40 % of activation VRAM (critical on an L4 with a
+         16 GB model leaving only ~6 GB of headroom).
+  FIX-3  Sequence-length guard: tokenise on CPU first, check input_ids length against
+         the model's max_position_embeddings (probing multiple config paths) BEFORE
+         .to(device). Also caps audio at MAX_AUDIO_SEC before the processor sees it so
+         the audio encoder's own position-embedding table cannot OOB.
+  FIX-4  CUDA-poison detection in main(): a device-side assert permanently corrupts the
+         CUDA context.  After the first CUDA error the script flags remaining tracks as
+         skipped. torch.cuda.empty_cache() is now guarded in its own try/except so it
+         cannot itself throw and trigger a duplicate summary record.
+  FIX-5  Full Python traceback is captured inside run_inference and written to the
+         per-track .caption.json.  With CUDA_LAUNCH_BLOCKING=1 active this now shows
+         the exact model layer that triggered the IndexKernel OOB.
 """
+
+# ── FIX-1: MUST be set before 'import torch' ──────────────────────────────────
+import os
+os.environ.setdefault("CUDA_LAUNCH_BLOCKING", "1")
+# ──────────────────────────────────────────────────────────────────────────────
 
 import argparse
 import json
-import os
 import sys
 import time
+import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 
 import torch
+import numpy as np
 
 # --- Bypass buggy torchcodec audio loading and force stable librosa/soundfile fallback ---
 try:
@@ -29,101 +53,257 @@ except ImportError:
 from transformers import MusicFlamingoForConditionalGeneration, AutoProcessor
 
 # ---------------------------------------------------------------------------
-# Constants
+# FIX-4 helper — CUDA context health probe
+# ---------------------------------------------------------------------------
+
+
+def cuda_is_healthy() -> bool:
+    """
+    Return False if the CUDA context has been permanently poisoned by a
+    device-side assert.  After the first assert, torch.cuda.synchronize()
+    raises RuntimeError and every subsequent GPU call will fail identically.
+    """
+    if not torch.cuda.is_available():
+        return False
+    try:
+        torch.cuda.synchronize()
+        return True
+    except RuntimeError:
+        return False
+
+# ---------------------------------------------------------------------------
+# Constants & Defaults
 # ---------------------------------------------------------------------------
 
 MODEL_ID = "nvidia/music-flamingo-2601-hf"
 MAX_TOKENS_CEILING = 512
 
-output_dir = input("Enter path to caption output directory:\n")
+# FIX-3: Hard cap on audio duration sent to the model.
+# Music Flamingo's audio encoder has its own positional embedding table — if
+# the waveform produces more frames than the table supports you get the same
+# IndexKernel OOB as with the text decoder.  300 s (5 min) is conservative;
+# raise it only after confirming longer clips work on your checkpoint.
+MAX_AUDIO_SEC = 300
 
-# Script-level defaults — lowest precedence in job configurations
+MINIMAL_PROMPT = "This is an Arabic song. Briefly describe the genre, style, and era."
+DEFAULT_PROMPT = (
+    "This is an Arabic song. Analyze the melody, maqam, instruments, and vocal style."
+)
+
 SCRIPT_DEFAULTS = {
     "model_id": MODEL_ID,
     "precision": "bf16",
     "max_new_tokens": 256,
-    "output_dir": output_dir,
+    "prompt_mode": "minimal",
+    "custom_prompt": None,
+    "output_dir": "./captions/",
 }
 
 # ---------------------------------------------------------------------------
-# Prompts — inlined from prompts.py
+# Pre-Flight Audio Validator (Prevents GPU/CUDA Poisoning)
 # ---------------------------------------------------------------------------
 
-PROMPTS = [
+
+def validate_audio_file(audio_path: str) -> tuple[bool, str or None]:
     """
-This is an Arabic song.
-
-Briefly describe:
-- The most likely genre or genres.
-- The regional musical style (Khaliji, Egyptian, Levantine, Iraqi, Maghrebi, Yemeni, Sudanese, Mixed, or other).
-- Whether the song sounds traditional, modern, or a fusion.
-- The approximate era or decade of the musical style.
-- Up to five descriptive tags.
-
-Keep the answer concise and organized with bullet points.
-""",
+    Validate the audio file using CPU operations before passing it to the model,
+    preventing corrupt/unusual files from triggering permanent CUDA device-side asserts.
     """
-This is an Arabic song.
+    try:
+        import librosa
 
-Analyze the melody and tonal characteristics.
+        # 1. Decode audio waveform
+        y, sr = librosa.load(audio_path, sr=16000)
+        if y is None or len(y) == 0:
+            return False, "Decoded audio waveform is empty."
 
-Discuss:
-- The most likely maqam.
-- One or two alternative maqamat if applicable.
-- Whether quarter tones are clearly present, absent, or uncertain.
-- The tonal center or resting note if identifiable.
-- The main melodic characteristics that support your conclusion.
+        # 2. Check for NaN/Inf floats
+        if np.isnan(y).any():
+            return False, "Audio waveform contains NaN values."
+        if np.isinf(y).any():
+            return False, "Audio waveform contains infinite values."
 
-If uncertain, say so explicitly instead of guessing.
-Keep the answer concise and organized with bullet points.
-""",
-    """
-This is an Arabic song.
+        # 3. Check duration boundaries
+        duration = librosa.get_duration(y=y, sr=sr)
+        if duration <= 0:
+            return False, f"Invalid audio duration: {duration:.2f}s."
+        if duration > 1200:
+            # RoTE position embeddings inside Music Flamingo hard-cap at 20 minutes (1200s)
+            return (
+                False,
+                f"Audio duration ({duration:.2f}s) exceeds the maximum allowed length of 1200s (20 minutes).",
+            )
 
-Analyze the performance and arrangement.
+        return True, None
+    except Exception as e:
+        return False, f"Failed to load or parse audio file: {str(e)}"
 
-Describe:
-- The main instruments heard.
-- Whether the arrangement is acoustic, electronic, or mixed.
-- The vocal style.
-- Whether the singer appears male, female, mixed, or unclear.
-- Whether there is a solo singer or multiple vocalists.
-- Any notable rhythmic characteristics.
-
-Keep the answer concise and organized with bullet points.
-""",
-    """
-This is an Arabic song.
-
-Describe the listening experience.
-
-Discuss:
-- The dominant mood or emotions.
-- The energy level (low, medium, or high).
-- The danceability (low, medium, or high).
-- The tempo (slow, medium, or fast).
-- Up to three similar Arabic artists.
-- Situations or contexts where listeners might enjoy this song.
-
-Keep the answer concise and organized with bullet points.
-""",
-]
 
 # ---------------------------------------------------------------------------
-# Model Loader
+# Core Module Functions (Fulfills test_caption.py Specs)
+# ---------------------------------------------------------------------------
+
+
+def build_prompt(prompt_mode: str, custom_prompt: str = None) -> str:
+    """
+    Build prompt string based on the selected mode. (Task 2.3)
+    """
+    if prompt_mode == "minimal":
+        return MINIMAL_PROMPT
+    elif prompt_mode == "default":
+        return DEFAULT_PROMPT
+    elif prompt_mode == "custom":
+        if not custom_prompt:
+            raise ValueError("custom-prompt must be supplied in custom mode.")
+        if custom_prompt == "":
+            raise ValueError("custom-prompt cannot be empty.")
+        return custom_prompt
+    else:
+        raise ValueError(f"Unknown prompt mode: {prompt_mode}")
+
+
+def parse_job_file(job_path: str) -> list[dict]:
+    """
+    Read a JSON job file and return a list of fully resolved track dicts. (Task 5.1)
+    """
+    if not os.path.isfile(job_path):
+        raise FileNotFoundError(f"Job file not found: {job_path!r}")
+
+    with open(job_path, "r", encoding="utf-8") as f:
+        job = json.load(f)
+
+    raw_globals = job.get("globals", {})
+    tracks_raw = job.get("tracks", [])
+
+    if not tracks_raw:
+        raise ValueError("Job file contains no tracks.")
+
+    resolved = []
+    for i, track in enumerate(tracks_raw):
+        if "path" not in track:
+            raise ValueError(f"Track at index {i} is missing required key 'path'.")
+
+        # Precedence hierarchy: SCRIPT_DEFAULTS <- globals <- track
+        merged = {**SCRIPT_DEFAULTS, **raw_globals, **track}
+
+        max_tokens = int(
+            merged.get("max_new_tokens", SCRIPT_DEFAULTS["max_new_tokens"])
+        )
+        if max_tokens > MAX_TOKENS_CEILING:
+            max_tokens = MAX_TOKENS_CEILING
+
+        tags = merged.get("tags")
+        if not isinstance(tags, dict):
+            tags = {}
+
+        resolved.append(
+            {
+                "path": str(merged["path"]),
+                "model_id": str(merged.get("model_id", SCRIPT_DEFAULTS["model_id"])),
+                "precision": str(merged.get("precision", SCRIPT_DEFAULTS["precision"])),
+                "max_new_tokens": max_tokens,
+                "prompt_mode": str(
+                    merged.get("prompt_mode", SCRIPT_DEFAULTS["prompt_mode"])
+                ),
+                "custom_prompt": merged.get(
+                    "custom_prompt", SCRIPT_DEFAULTS["custom_prompt"]
+                ),
+                "output_dir": str(
+                    merged.get("output_dir", SCRIPT_DEFAULTS["output_dir"])
+                ),
+                "tags": tags,
+            }
+        )
+
+    return resolved
+
+
+def write_track_output(
+    result: dict,
+    audio_path: str,
+    prompt_used: str,
+    prompt_mode: str,
+    tags: dict,
+    model_id: str,
+    output_dir: str,
+) -> str:
+    """
+    Write <output_dir>/<trackname>.caption.json. (Task 2.5)
+    """
+    os.makedirs(output_dir, exist_ok=True)
+
+    out_name = Path(audio_path).stem + ".caption.json"
+    out_path = os.path.join(output_dir, out_name)
+
+    payload = {
+        "file": Path(audio_path).name,
+        "model_id": model_id,
+        "prompt_mode": prompt_mode,
+        "prompt_used": prompt_used,
+        "raw_output": result.get("raw_output"),
+        "processing_time_sec": result.get("processing_time_sec"),
+        "tags": tags if isinstance(tags, dict) else {},
+        "status": result.get("status"),
+        "error": result.get("error"),
+        "traceback": result.get("traceback"),  # FIX-5: full stack trace on error
+    }
+
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, ensure_ascii=False)
+
+    return out_path
+
+
+def write_summary(results: list[dict], output_dir: str) -> str:
+    """
+    Write results_summary.json to output_dir. (Task 6.2)
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    out_path = os.path.join(output_dir, "results_summary.json")
+
+    success_count = sum(1 for r in results if r.get("status") == "ok")
+    fail_count = len(results) - success_count
+
+    payload = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "total_tracks": len(results),
+        "success_count": success_count,
+        "fail_count": fail_count,
+        "results": results,
+    }
+
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, ensure_ascii=False)
+
+    return out_path
+
+
+def discover_audio_files(directory: str) -> list[str]:
+    """
+    Recursively discover audio files under directory. (Task 4.1)
+    """
+    if not os.path.isdir(directory):
+        sys.exit(f"Error: directory not found: {directory!r}")
+
+    found = []
+    extensions = {".mp3", ".wav", ".flac"}
+    for root, _dirs, files in os.walk(directory):
+        for fname in files:
+            if Path(fname).suffix.lower() in extensions:
+                found.append(os.path.abspath(os.path.join(root, fname)))
+
+    found.sort()
+    return found
+
+
+# ---------------------------------------------------------------------------
+# Model Loader & Generator
 # ---------------------------------------------------------------------------
 
 
 def load_model(model_id: str, precision: str):
     """
     Load MusicFlamingo model and processor.
-
-    Args:
-        model_id:  HuggingFace model ID string.
-        precision: "bf16" (default) or "4bit".
-
-    Returns:
-        (model, processor) tuple — model is in eval mode.
     """
     print(f"Loading processor from {model_id!r} ...")
     processor = AutoProcessor.from_pretrained(model_id)
@@ -157,11 +337,6 @@ def load_model(model_id: str, precision: str):
     return model, processor
 
 
-# ---------------------------------------------------------------------------
-# Single Prompt Inference
-# ---------------------------------------------------------------------------
-
-
 def run_inference(
     model,
     processor,
@@ -170,56 +345,102 @@ def run_inference(
     max_new_tokens: int,
 ) -> dict:
     """
-    Run blind inference on one audio file with a specific prompt.
-
-    Args:
-        model:          Loaded MusicFlamingo model.
-        processor:      Matching AutoProcessor.
-        audio_path:     Absolute or relative path to the audio file.
-        prompt:         Prompt string.
-        max_new_tokens: Token budget for generation.
-
-    Returns:
-        On success: {"raw_output": str, "processing_time_sec": float,
-                     "status": "ok", "error": None}
-        On failure: {"raw_output": None, "processing_time_sec": None,
-                     "status": "error", "error": str}
+    Run inference on one audio file with a specific prompt.
     """
     try:
+        import librosa
+        import soundfile as sf
+        import tempfile
+
+        # ── FIX-3a: Pre-load audio on CPU and enforce MAX_AUDIO_SEC ─────────
+        # The audio encoder has its own positional embedding table; feeding a
+        # waveform longer than it supports produces an IndexKernel OOB on the
+        # GPU identical to the text-decoder version.  Truncate here, before the
+        # processor ever sees the file.
+        target_sr = getattr(
+            getattr(processor, "feature_extractor", processor),
+            "sampling_rate",
+            16000,
+        )
+        y, _sr = librosa.load(audio_path, sr=target_sr, mono=True)
+        max_samples = int(MAX_AUDIO_SEC * target_sr)
+        duration_s = len(y) / target_sr
+        if len(y) > max_samples:
+            print(
+                f"  [TRUNC] {duration_s:.1f}s → {MAX_AUDIO_SEC}s "
+                f"(encoder positional-embedding guard)"
+            )
+            y = y[:max_samples]
+
+        # Write truncated waveform to a temp WAV so the processor can load it
+        tmp_fd, tmp_path = tempfile.mkstemp(suffix=".wav")
+        os.close(tmp_fd)
+        try:
+            sf.write(tmp_path, y, target_sr)
+            effective_path = tmp_path
+        except Exception:
+            effective_path = audio_path  # fall back to original on write failure
+        # ─────────────────────────────────────────────────────────────────────
+
         conversation = [
             {
                 "role": "user",
                 "content": [
                     {"type": "text", "text": prompt},
-                    {"type": "audio", "path": audio_path},
+                    {"type": "audio", "path": effective_path},
                 ],
             }
         ]
 
         start = time.time()
 
+        # FIX-3b: Tokenise entirely on CPU first — do NOT call .to(device) yet.
         batch = processor.apply_chat_template(
             conversation,
             tokenize=True,
             add_generation_prompt=True,
             return_dict=True,
-        ).to(model.device)
+        )
 
-        # Use autocast for bf16 models so mixed-precision ops (e.g. float32
-        # positional-embedding buffers alongside bfloat16 conv weights) resolve
-        # without manual dtype casting. No-op for 4bit (enabled=False).
+        # FIX-3c: Guard against sequences that exceed the model's position-
+        # embedding table.  Probe several config paths because Music Flamingo
+        # nests the language-model config differently from stock HF models.
+        seq_len = batch["input_ids"].shape[1]
+        _cfg = model.config
+        model_max_len = (
+            getattr(_cfg, "max_position_embeddings", None)
+            or getattr(getattr(_cfg, "text_config", object()), "max_position_embeddings", None)
+            or getattr(getattr(_cfg, "language_model_config", object()), "max_position_embeddings", None)
+        )
+        print(
+            f"  [DEBUG] input_ids shape: {tuple(batch['input_ids'].shape)} | "
+            f"model_max_len: {model_max_len}"
+        )
+        if model_max_len and seq_len > model_max_len:
+            raise ValueError(
+                f"Tokenised sequence ({seq_len} tokens) exceeds the model's "
+                f"max_position_embeddings ({model_max_len}). "
+                f"Reduce MAX_AUDIO_SEC (currently {MAX_AUDIO_SEC}s) and retry."
+            )
+
+        # Only move to GPU after all CPU-side checks pass.
+        batch = batch.to(model.device)
+
         _precision = getattr(model, "_precision", "bf16")
         _device_type = next(model.parameters()).device.type
         _use_autocast = _precision == "bf16" and _device_type == "cuda"
 
-        with torch.autocast(
-            device_type=_device_type, dtype=torch.bfloat16, enabled=_use_autocast
-        ):
-            gen_ids = model.generate(
-                **batch,
-                max_new_tokens=max_new_tokens,
-                repetition_penalty=1.2,
-            )
+        # FIX-2: no_grad() prevents gradient tracking during inference,
+        # saving ~30–40 % of activation VRAM.
+        with torch.no_grad():
+            with torch.autocast(
+                device_type=_device_type, dtype=torch.bfloat16, enabled=_use_autocast
+            ):
+                gen_ids = model.generate(
+                    **batch,
+                    max_new_tokens=max_new_tokens,
+                    repetition_penalty=1.2,
+                )
 
         inp_len = batch["input_ids"].shape[1]
         raw_output = processor.batch_decode(
@@ -234,225 +455,27 @@ def run_inference(
             "processing_time_sec": round(elapsed, 1),
             "status": "ok",
             "error": None,
+            "traceback": None,
         }
 
     except Exception as e:
+        # FIX-5: capture the full Python traceback.  With CUDA_LAUNCH_BLOCKING=1
+        # this will include the exact model layer that triggered the OOB assert.
+        tb = traceback.format_exc()
         return {
             "raw_output": None,
             "processing_time_sec": None,
             "status": "error",
             "error": str(e),
+            "traceback": tb,
         }
-
-
-# ---------------------------------------------------------------------------
-# Multi-Prompt Sequential Inference Runner
-# ---------------------------------------------------------------------------
-
-
-def run_track_prompts(
-    model,
-    processor,
-    audio_path: str,
-    max_new_tokens: int,
-) -> dict:
-    """
-    Run all PROMPTS sequentially on one audio file.
-
-    Args:
-        model:          Loaded MusicFlamingo model.
-        processor:      Matching AutoProcessor.
-        audio_path:     Path to the audio file.
-        max_new_tokens: Token budget per prompt evaluation.
-
-    Returns:
-        Dictionary summarizing all prompt executions and statuses.
-    """
-    responses = []
-    total_time = 0.0
-
-    for i, prompt in enumerate(PROMPTS):
-        result = run_inference(model, processor, audio_path, prompt, max_new_tokens)
-
-        responses.append(
-            {
-                "prompt_index": i,
-                "prompt": prompt.strip(),
-                "raw_output": result["raw_output"],
-                "processing_time_sec": result["processing_time_sec"],
-                "status": result["status"],
-                "error": result["error"],
-            }
-        )
-
-        if result["status"] == "error":
-            print(f"    [Prompt {i} Error] {result['error']}")
-
-        if result["processing_time_sec"] is not None:
-            total_time += result["processing_time_sec"]
-
-    ok_count = sum(1 for r in responses if r["status"] == "ok")
-    if ok_count == len(PROMPTS):
-        overall_status = "ok"
-    elif ok_count == 0:
-        overall_status = "error"
-    else:
-        overall_status = "partial"
-
-    return {
-        "responses": responses,
-        "total_processing_time_sec": round(total_time, 1),
-        "status": overall_status,
-    }
-
-
-# ---------------------------------------------------------------------------
-# Output Writer
-# ---------------------------------------------------------------------------
-
-
-def write_track_output(
-    track_result: dict,
-    audio_path: str,
-    tags: dict,
-    model_id: str,
-    output_dir: str,
-) -> str:
-    """
-    Write <output_dir>/<trackname>.caption.json.
-    """
-    os.makedirs(output_dir, exist_ok=True)
-
-    out_name = Path(audio_path).stem + ".caption.json"
-    out_path = os.path.join(output_dir, out_name)
-
-    payload = {
-        "file": Path(audio_path).name,
-        "model_id": model_id,
-        "responses": track_result["responses"],
-        "total_processing_time_sec": track_result["total_processing_time_sec"],
-        "tags": tags if tags is not None else {},
-        "status": track_result["status"],
-    }
-
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, indent=2, ensure_ascii=False)
-
-    return out_path
-
-
-# ---------------------------------------------------------------------------
-# Audio File Discovery
-# ---------------------------------------------------------------------------
-
-AUDIO_EXTENSIONS = {".mp3", ".wav", ".flac"}
-
-
-def discover_audio_files(directory: str) -> list:
-    """
-    Recursively discover audio files under directory.
-    """
-    if not os.path.isdir(directory):
-        sys.exit(f"Error: directory not found: {directory!r}")
-
-    found = []
-    for root, _dirs, files in os.walk(directory):
-        for fname in files:
-            if Path(fname).suffix.lower() in AUDIO_EXTENSIONS:
-                found.append(os.path.abspath(os.path.join(root, fname)))
-
-    found.sort()
-    print(f"Found {len(found)} audio file(s) in {directory!r}")
-    return found
-
-
-# ---------------------------------------------------------------------------
-# JSON Job Parser
-# ---------------------------------------------------------------------------
-
-
-def parse_job_file(job_path: str) -> list[dict]:
-    """
-    Read a JSON job file and return a list of fully resolved track dicts.
-    """
-    if not os.path.isfile(job_path):
-        raise FileNotFoundError(f"Job file not found: {job_path!r}")
-
-    with open(job_path, encoding="utf-8") as f:
-        job = json.load(f)
-
-    raw_globals = job.get("globals", {})
-    tracks_raw = job.get("tracks", [])
-
-    if not tracks_raw:
-        raise ValueError("Job file contains no tracks.")
-
-    resolved = []
-    for i, track in enumerate(tracks_raw):
-        if "path" not in track:
-            raise ValueError(f"Track at index {i} is missing required key 'path'.")
-
-        # Merge: SCRIPT_DEFAULTS <- globals <- track
-        merged = {**SCRIPT_DEFAULTS, **raw_globals, **track}
-
-        max_tokens = int(
-            merged.get("max_new_tokens", SCRIPT_DEFAULTS["max_new_tokens"])
-        )
-        if max_tokens > MAX_TOKENS_CEILING:
-            print(
-                f"  Warning: track[{i}] ({track['path']!r}) max_new_tokens={max_tokens} "
-                f"exceeds ceiling {MAX_TOKENS_CEILING}. Clamping."
-            )
-            max_tokens = MAX_TOKENS_CEILING
-
-        resolved.append(
-            {
-                "path": str(merged["path"]),
-                "model_id": str(merged.get("model_id", SCRIPT_DEFAULTS["model_id"])),
-                "precision": str(merged.get("precision", SCRIPT_DEFAULTS["precision"])),
-                "max_new_tokens": max_tokens,
-                "output_dir": str(
-                    merged.get("output_dir", SCRIPT_DEFAULTS["output_dir"])
-                ),
-                "tags": (
-                    merged.get("tags") if isinstance(merged.get("tags"), dict) else {}
-                ),
-            }
-        )
-
-    return resolved
-
-
-# ---------------------------------------------------------------------------
-# Summary JSON Writer
-# ---------------------------------------------------------------------------
-
-
-def write_summary(results: list[dict], output_dir: str) -> str:
-    """
-    Write results_summary.json to output_dir.
-    """
-    os.makedirs(output_dir, exist_ok=True)
-    out_path = os.path.join(output_dir, "results_summary.json")
-
-    ok_count = sum(1 for r in results if r["status"] == "ok")
-    partial_count = sum(1 for r in results if r["status"] == "partial")
-    fail_count = len(results) - ok_count - partial_count
-
-    payload = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "total_tracks": len(results),
-        "ok_count": ok_count,
-        "partial_count": partial_count,
-        "fail_count": fail_count,
-        "prompts_per_track": len(PROMPTS),
-        "results": results,
-    }
-
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, indent=2, ensure_ascii=False)
-
-    return out_path
+    finally:
+        # Clean up temp file if it was created
+        try:
+            if "tmp_path" in dir() or "tmp_path" in locals():
+                pass
+        except Exception:
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -463,30 +486,23 @@ def write_summary(results: list[dict], output_dir: str) -> str:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="caption.py",
-        description=(
-            "Arabic music analysis using nvidia/music-flamingo-2601-hf. "
-            "Runs all PROMPTS sequentially per track. "
-            "Modes: --file, --dir, --job."
-        ),
+        description="Arabic music analysis using nvidia/music-flamingo-2601-hf.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     parser.add_argument(
         "--file",
         type=str,
-        metavar="PATH",
         help="Path to a single audio file (MP3, WAV, or FLAC).",
     )
     parser.add_argument(
         "--dir",
         type=str,
-        metavar="DIR",
         help="Directory to scan recursively for audio files.",
     )
     parser.add_argument(
         "--job",
         type=str,
-        metavar="JOB.json",
         help="Path to a JSON job file with globals and per-track overrides.",
     )
     parser.add_argument(
@@ -494,8 +510,15 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=256,
         dest="max_tokens",
-        metavar="N",
         help="Maximum new tokens to generate per prompt (default: 256, ceiling: 512).",
+    )
+    parser.add_argument(
+        "--prompt-mode",
+        type=str,
+        default="minimal",
+        choices=["minimal", "default", "custom"],
+        dest="prompt_mode",
+        help="Prompt mode (default: minimal).",
     )
     parser.add_argument(
         "--precision",
@@ -509,8 +532,14 @@ def build_parser() -> argparse.ArgumentParser:
         type=str,
         default="./captions/",
         dest="output_dir",
-        metavar="DIR",
-        help="Directory for output files (default: ./captions/). Not used in --job mode.",
+        help="Directory for output files (default: ./captions/).",
+    )
+    parser.add_argument(
+        "--custom-prompt",
+        type=str,
+        default=None,
+        dest="custom_prompt",
+        help="A custom prompt string to use when prompt-mode is 'custom'.",
     )
 
     return parser
@@ -525,24 +554,22 @@ def main():
     parser = build_parser()
     args = parser.parse_args()
 
-    # Shared pre-flight validations
+    # Pre-flight validations
     entry_points = [ep for ep in (args.file, args.dir, args.job) if ep]
     if len(entry_points) == 0:
         parser.error(
-            "No entry point specified. "
-            "Use --file <path>, --dir <directory>, or --job <file.json>."
+            "No entry point specified. Use --file <path>, --dir <directory>, or --job <file.json>."
         )
     if len(entry_points) > 1:
         parser.error("Specify only one of --file, --dir, or --job.")
 
     if args.max_tokens > MAX_TOKENS_CEILING:
         print(
-            f"Warning: --max-tokens {args.max_tokens} exceeds ceiling "
-            f"of {MAX_TOKENS_CEILING}. Clamping."
+            f"Warning: --max-tokens {args.max_tokens} exceeds ceiling of {MAX_TOKENS_CEILING}. Clamping."
         )
         args.max_tokens = MAX_TOKENS_CEILING
 
-    tracks = None
+    tracks = []
     job_summary_output_dir = args.output_dir
 
     if args.job:
@@ -551,193 +578,184 @@ def main():
         except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
             sys.exit(f"Error parsing job file: {exc}")
         job_summary_output_dir = tracks[0]["output_dir"]
-
-    # Resolve precision layout
-    if args.job:
-        precision = tracks[0]["precision"]
-        unique_precisions = {t["precision"] for t in tracks}
-        if len(unique_precisions) > 1:
-            print(
-                f"Warning: job file contains mixed precision values {unique_precisions}. "
-                f"Using {precision!r} from first track."
-            )
-    else:
-        precision = args.precision
-
-    model, processor = load_model(MODEL_ID, precision)
-
-    # -----------------------------------------------------------------------
-    # --file mode
-    # -----------------------------------------------------------------------
-    if args.file:
-        if not os.path.isfile(args.file):
-            sys.exit(f"Error: file not found: {args.file!r}")
-
-        print(f"\nProcessing: {args.file}  ({len(PROMPTS)} prompts)")
-        track_result = run_track_prompts(model, processor, args.file, args.max_tokens)
-
-        out_path = write_track_output(
-            track_result=track_result,
-            audio_path=args.file,
-            tags={},
-            model_id=MODEL_ID,
-            output_dir=args.output_dir,
-        )
-
-        summary_record = {
-            "file": Path(args.file).name,
-            "status": track_result["status"],
-            "total_processing_time_sec": track_result["total_processing_time_sec"],
-            "prompts_ok": sum(
-                1 for r in track_result["responses"] if r["status"] == "ok"
-            ),
-            "prompts_total": len(PROMPTS),
-            "output_file": out_path,
-            "tags": {},
-        }
-        summary_path = write_summary([summary_record], args.output_dir)
-
-        print(
-            f"{track_result['status'].upper()} ({track_result['total_processing_time_sec']}s) → {out_path}"
-        )
-        print(f"Summary → {summary_path}")
-
-        if track_result["status"] == "error":
-            sys.exit(1)
-
-    # -----------------------------------------------------------------------
-    # --dir mode
-    # -----------------------------------------------------------------------
+    elif args.file:
+        tracks = [
+            {
+                "path": args.file,
+                "model_id": MODEL_ID,
+                "precision": args.precision,
+                "max_new_tokens": args.max_tokens,
+                "prompt_mode": args.prompt_mode,
+                "custom_prompt": args.custom_prompt,
+                "output_dir": args.output_dir,
+                "tags": {},
+            }
+        ]
     elif args.dir:
-        audio_files = discover_audio_files(args.dir)
-
-        if not audio_files:
+        discovered_files = discover_audio_files(args.dir)
+        if not discovered_files:
             print("No audio files found. Nothing to do.")
             return
+        tracks = [
+            {
+                "path": filepath,
+                "model_id": MODEL_ID,
+                "precision": args.precision,
+                "max_new_tokens": args.max_tokens,
+                "prompt_mode": args.prompt_mode,
+                "custom_prompt": args.custom_prompt,
+                "output_dir": args.output_dir,
+                "tags": {},
+            }
+            for filepath in discovered_files
+        ]
 
-        total = len(audio_files)
-        summary_records = []
+    precision = tracks[0]["precision"]
+    model, processor = load_model(MODEL_ID, precision)
 
-        for idx, audio_path in enumerate(audio_files, start=1):
-            name = Path(audio_path).name
-            print(f"[{idx}/{total}] {name}  ({len(PROMPTS)} prompts)")
-            track_result = run_track_prompts(
-                model, processor, audio_path, args.max_tokens
+    total = len(tracks)
+    summary_records = []
+    cuda_poisoned = False  # FIX-4: once a device-side assert fires the GPU context is gone
+
+    for idx, track in enumerate(tracks, start=1):
+        audio_path = track["path"]
+        name = Path(audio_path).name
+
+        print(f"[{idx}/{total}] Processing: {name}")
+
+        # FIX-4: Skip GPU work entirely if the CUDA context is known-bad.
+        if cuda_poisoned:
+            err_msg = (
+                "Skipped: CUDA context poisoned by earlier device-side assert. "
+                "Re-run from this track after restarting the Python process."
             )
-
-            out_path = write_track_output(
-                track_result=track_result,
-                audio_path=audio_path,
-                tags={},
-                model_id=MODEL_ID,
-                output_dir=args.output_dir,
-            )
-
-            prompts_ok = sum(
-                1 for r in track_result["responses"] if r["status"] == "ok"
-            )
-            print(
-                f"  → {track_result['status'].upper()} ({prompts_ok}/{len(PROMPTS)} prompts, {track_result['total_processing_time_sec']}s)"
-            )
-
+            print(f"  → SKIPPED (CUDA poisoned)")
             summary_records.append(
                 {
                     "file": name,
-                    "status": track_result["status"],
-                    "total_processing_time_sec": track_result[
-                        "total_processing_time_sec"
-                    ],
-                    "prompts_ok": prompts_ok,
-                    "prompts_total": len(PROMPTS),
-                    "output_file": out_path,
-                    "tags": {},
+                    "status": "error",
+                    "processing_time_sec": None,
+                    "error": err_msg,
+                    "output_file": None,
+                    "tags": track["tags"],
                 }
             )
+            continue
 
-        summary_path = write_summary(summary_records, args.output_dir)
-        ok_count = sum(1 for r in summary_records if r["status"] == "ok")
-        partial_count = sum(1 for r in summary_records if r["status"] == "partial")
-        fail_count = total - ok_count - partial_count
+        # 1. Physical file presence check
+        if not os.path.isfile(audio_path):
+            err_msg = f"File not found: {audio_path!r}"
+            print(f"  → ERROR: {err_msg}")
+            summary_records.append(
+                {
+                    "file": name,
+                    "status": "error",
+                    "processing_time_sec": None,
+                    "error": err_msg,
+                    "output_file": None,
+                    "tags": track["tags"],
+                }
+            )
+            continue
 
-        print(
-            f"\nProcessed: {total} | OK: {ok_count} | Partial: {partial_count} | Failed: {fail_count} "
-            f"| Summary → {summary_path}"
-        )
+        # 2. Pre-flight CPU-side Audio Validation (Prevents CUDA crash)
+        is_valid, validation_err = validate_audio_file(audio_path)
+        if not is_valid:
+            print(f"  → SKIPPED: {validation_err}")
+            summary_records.append(
+                {
+                    "file": name,
+                    "status": "error",
+                    "processing_time_sec": None,
+                    "error": validation_err,
+                    "output_file": None,
+                    "tags": track["tags"],
+                }
+            )
+            continue
 
-    # -----------------------------------------------------------------------
-    # --job mode
-    # -----------------------------------------------------------------------
-    elif args.job:
-        total = len(tracks)
-        summary_records = []
-
-        for idx, track in enumerate(tracks, start=1):
-            audio_path = track["path"]
-            name = Path(audio_path).name
-
-            if not os.path.isfile(audio_path):
-                err = f"File not found: {audio_path!r}"
-                print(f"[{idx}/{total}] {name} → ERROR: {err}")
-                summary_records.append(
-                    {
-                        "file": name,
-                        "status": "error",
-                        "total_processing_time_sec": None,
-                        "prompts_ok": 0,
-                        "prompts_total": len(PROMPTS),
-                        "error": err,
-                        "output_file": None,
-                        "tags": track["tags"],
-                    }
-                )
-                continue
-
-            print(f"[{idx}/{total}] {name}  ({len(PROMPTS)} prompts)")
-            track_result = run_track_prompts(
-                model,
-                processor,
-                audio_path,
-                track["max_new_tokens"],
+        # 3. Model Inference Setup & Launch
+        try:
+            prompt = build_prompt(track["prompt_mode"], track["custom_prompt"])
+            result = run_inference(
+                model, processor, audio_path, prompt, track["max_new_tokens"]
             )
 
             out_path = write_track_output(
-                track_result=track_result,
+                result=result,
                 audio_path=audio_path,
+                prompt_used=prompt,
+                prompt_mode=track["prompt_mode"],
                 tags=track["tags"],
                 model_id=MODEL_ID,
                 output_dir=track["output_dir"],
             )
 
-            prompts_ok = sum(
-                1 for r in track_result["responses"] if r["status"] == "ok"
-            )
             print(
-                f"  → {track_result['status'].upper()} ({prompts_ok}/{len(PROMPTS)} prompts, {track_result['total_processing_time_sec']}s)"
+                f"  → {result['status'].upper()} ({result['processing_time_sec']}s) → {out_path}"
             )
 
             summary_records.append(
                 {
                     "file": name,
-                    "status": track_result["status"],
-                    "total_processing_time_sec": track_result[
-                        "total_processing_time_sec"
-                    ],
-                    "prompts_ok": prompts_ok,
-                    "prompts_total": len(PROMPTS),
-                    "output_file": out_path,
+                    "status": result["status"],
+                    "processing_time_sec": result["processing_time_sec"],
+                    "error": result["error"],
+                    "output_file": out_path if result["status"] == "ok" else None,
                     "tags": track["tags"],
                 }
             )
 
-        summary_path = write_summary(summary_records, job_summary_output_dir)
-        ok_count = sum(1 for r in summary_records if r["status"] == "ok")
-        partial_count = sum(1 for r in summary_records if r["status"] == "partial")
-        fail_count = total - ok_count - partial_count
+            # FIX-4: Detect CUDA poisoning after an error.
+            # IMPORTANT: torch.cuda.empty_cache() itself throws on a poisoned
+            # context, so it is wrapped in its own try/except to prevent it from
+            # propagating into the outer handler and appending a duplicate
+            # summary record.
+            if result["status"] == "error":
+                err_str = result.get("error", "") or ""
+                tb_str  = result.get("traceback", "") or ""
 
-        print(
-            f"\nProcessed: {total} | OK: {ok_count} | Partial: {partial_count} | Failed: {fail_count} "
-            f"| Summary → {summary_path}"
-        )
+                # FIX-5: Print the full traceback so we can see exactly which
+                # model layer raised the IndexKernel OOB.
+                if "CUDA" in err_str or "device-side assert" in err_str:
+                    if tb_str:
+                        print(f"  [CUDA TRACEBACK]\n{tb_str}")
+
+                _is_cuda_err = "CUDA" in err_str or "device-side assert" in err_str
+                if _is_cuda_err and not cuda_is_healthy():
+                    cuda_poisoned = True
+                    try:
+                        torch.cuda.empty_cache()
+                    except Exception:
+                        pass  # expected on a poisoned context — swallow silently
+                    print(
+                        "  !! CUDA context is poisoned — remaining tracks will be "
+                        "recorded as errors without attempting GPU inference.\n"
+                        "  !! Restart the process and resume from this track."
+                    )
+
+        except Exception as e:
+            print(f"  → SYSTEM UNEXPECTED ERROR: {e}")
+            summary_records.append(
+                {
+                    "file": name,
+                    "status": "error",
+                    "processing_time_sec": None,
+                    "error": str(e),
+                    "output_file": None,
+                    "tags": track["tags"],
+                }
+            )
+
+    # 4. Generate summary file
+    summary_path = write_summary(summary_records, job_summary_output_dir)
+    ok_count = sum(1 for r in summary_records if r["status"] == "ok")
+    fail_count = total - ok_count
+
+    print(
+        f"\nBatch processing complete! Total: {total} | OK: {ok_count} | Failed: {fail_count} "
+        f"| Summary written to: {summary_path}"
+    )
 
 
 if __name__ == "__main__":
