@@ -10,6 +10,7 @@ intend to mine for patterns later.
 """
 
 CAPTIONING_PROMPTS = {
+
     "genre": (
         "Listen to this track and identify its genre with precision. Name the primary "
         "genre, then any subgenres or fusion elements present. If it blends multiple "
@@ -21,6 +22,7 @@ CAPTIONING_PROMPTS = {
         "BPM if discernible. Do not describe instrumentation, vocals, or production here, "
         "stay strictly on genre classification."
     ),
+
     "vocals": (
         "Listen to the vocal performance in this track and describe it technically. "
         "Identify vocal gender, register (e.g., baritone, alto, tenor, contralto), and "
@@ -32,6 +34,7 @@ CAPTIONING_PROMPTS = {
         "List any backing vocals, harmonies, or vocal layering separately from the lead. "
         "If there are no vocals, state that explicitly."
     ),
+
     "instrumentation": (
         "Identify every instrument audible in this track, ordered from most to least "
         "prominent in the mix. For each instrument, describe the playing technique or "
@@ -43,6 +46,7 @@ CAPTIONING_PROMPTS = {
         "identified. Do not comment on mixing or mastering here, only what instruments "
         "are present and how they're played."
     ),
+
     "production": (
         "Describe the production and mixing characteristics of this track using "
         "recording-engineer language, not subjective impressions. Cover: stereo image "
@@ -55,6 +59,7 @@ CAPTIONING_PROMPTS = {
         "audible production artifacts (tape saturation, vinyl crackle, sidechain pumping, "
         "harsh digital edges)."
     ),
+
     "mastering": (
         "Evaluate the final mastering characteristics of this track. Describe overall "
         "loudness and dynamic range (heavily compressed/loud versus dynamic with real "
@@ -66,6 +71,7 @@ CAPTIONING_PROMPTS = {
         "mastered or modern/digital-mastered, and whether it sounds professionally "
         "polished or intentionally raw/unmastered."
     ),
+
 }
 
 
