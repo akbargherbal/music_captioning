@@ -1,122 +1,127 @@
-# AI Music Captioning & Suno Prompt Synthesis
+# AI Music Captioning
 
-A pipeline for analyzing audio tracks and generating high-quality, descriptive music captions optimized for AI music generators like Suno.ai.
-
-Instead of processing an entire track sequentially, this tool extracts **four landmark windows** (start, early, pre-mid, post-mid) and analyzes them using Nvidia's `music-flamingo-hf` vision-language-audio model. The resulting structured JSON is then passed to an LLM (using provided system prompts) to synthesize a single, cohesive style prompt.
+A small, crash-resumable pipeline for analyzing a directory of audio tracks with Nvidia's `music-flamingo` model. For every track, it asks a fixed set of questions (genre, vocals, instrumentation, production, mastering) and writes one JSON file per track containing the answers.
 
 ## 🚀 Key Features
 
-- **Landmark Chunking:** Efficiently summarizes a track by analyzing 4 specific temporal windows rather than the entire file, saving time and compute.
-- **Optimized for Google Colab (T4):** Runs comfortably on a 15 GB VRAM GPU using 4-bit quantization (`bitsandbytes`) and expandable PyTorch memory segments.
-- **Two Extraction Modes:**
-  - `quick`: Generates one dense, comma-separated summary per chunk.
-  - `detailed`: Uses four focused tag-cluster prompts per chunk (genre, instruments, vocals, tempo/key).
-- **LLM Synthesis Prompts:** Includes carefully crafted System and User prompts to guide an LLM in merging the chunked JSON data into a perfect Suno-ready paragraph.
+- **Full-track analysis.** Each track is analyzed as a whole (trimmed to a configurable max duration as a VRAM-safety cap), not split into fixed-length chunks.
+- **Prompt set lives in one file.** `prompts.py` holds a `CAPTIONING_PROMPTS` dict — one entry per question asked of every track. Add, remove, or edit a category there; `caption.py` needs no changes.
+- **Crash-resumable.** Each track's JSON is rewritten to disk immediately after *every* category finishes, not after the whole track or the whole run. If the process dies partway through (e.g. a Colab disconnect), at most the one in-flight category is lost.
+- **Resumes automatically on re-run.** Re-running the same command skips any track that's already fully done and, for a partially-done track, only re-runs the categories still missing. `--overwrite` forces everything to be redone.
+- **Recursive directory scan.** Pass any folder via `--dir`; subdirectories at any depth are scanned. Non-audio files (scripts, text, logs, partial-download artifacts) are simply ignored.
+- **Degrades gracefully on bad input.** Missing files, corrupt/empty audio, and CUDA failures are caught per-track and recorded as `status: "error"` rather than crashing the whole batch.
+- **`--dry-run` mode.** Exercises the full file I/O / resume logic with placeholder text and no GPU or model — useful for validating a run before committing GPU time.
 
 ## 📋 Prerequisites & Installation
 
-Ensure you have Python 3.8+ installed. You will need PyTorch and the latest Hugging Face `transformers` library.
+Python 3.10+ (uses `tuple[bool, str | None]`-style type hints).
 
 ```bash
-# Upgrade pip
 pip install --upgrade pip
-
-# Install core dependencies
 pip install torch torchaudio
 pip install "git+https://github.com/huggingface/transformers" accelerate bitsandbytes
-
-# Install additional requirements
-pip install click librosa soundfile
+pip install librosa soundfile numpy
 ```
 
-_Note: If you are running this in Google Colab, you may also need to authenticate with Google Cloud if you are pulling audio files from a GCS bucket (as demonstrated in `Music_Captioning.md`)._
+`--dry-run` only needs `numpy` — torch and transformers are imported lazily so you can sanity-check the pipeline without the GPU stack installed.
 
-## 🛠️ Usage
-
-The workflow is split into two steps: **1. Audio Analysis (Extraction)** and **2. Caption Synthesis**.
-
-### Step 1: Audio Analysis
-
-Run the `music_caption.py` script to process a directory of `.mp3` or `.wav` files.
-
-```bash
-# Quick mode (default): one dense comma-separated summary per landmark chunk
-python music_caption.py --dir ./audio_files
-
-# Detailed mode: four focused tag-cluster prompts per chunk
-python music_caption.py --dir ./audio_files --mode detailed
-
-# Custom window size (default is 40 seconds per chunk)
-python music_caption.py --dir ./audio_files --window-seconds 30
-```
-
-This will generate a `.json` file for every audio track in the target directory, containing the model's analysis of the 4 landmark chunks.
-
-### Step 2: Caption Synthesis
-
-The Python script outputs raw, chunked data. To convert this into a flowing, Suno-ready prompt, use an LLM (like ChatGPT, Claude, or a local model) with the provided prompt templates.
-
-1. Copy the text from `PROMPT_SUNO_SYNTHESIS/SYSTEM_PROMPT.md` and set it as the LLM's System Prompt.
-2. Copy the text from `PROMPT_SUNO_SYNTHESIS/PROMPT_TEMPLATE.md`.
-3. Replace `{JSON_DUMP}` with the contents of your generated `.json` file.
-4. Send the prompt to the LLM.
-
-**Example LLM Output:**
-
-> _Middle Eastern folk fusion. A solo nylon-string acoustic guitar performs a melodic lead with frequent hammer-ons, pull-offs, and slides, accompanied by a secondary acoustic guitar providing rhythmic strumming. A male vocal performs wordless melismatic humming and chanting in a Phrygian dominant scale. The percussion consists of a darbuka playing a traditional Maqsum rhythm with sharp tek accents and resonant doum hits. The tempo is 105 BPM in 4/4 time. The arrangement features a call-and-response dynamic between the vocal lines and the guitar melodies._
-
-## 🎛️ CLI Reference (`music_caption.py`)
-
-| Option             | Default                               | Description                                                              |
-| :----------------- | :------------------------------------ | :----------------------------------------------------------------------- |
-| `--dir`            | **Required**                          | Directory containing `.mp3` / `.wav` files to process.                   |
-| `--mode`           | `quick`                               | `quick` (1 summary per chunk) or `detailed` (4 focused prompts).         |
-| `--window-seconds` | `40.0`                                | Duration of each landmark window in seconds.                             |
-| `--max-tokens`     | `120`                                 | Max new tokens per caption generation.                                   |
-| `--temperature`    | `0.3`                                 | Sampling temperature.                                                    |
-| `--top-p`          | `0.9`                                 | Nucleus sampling probability.                                            |
-| `--dtype`          | `auto`                                | Model data type (`auto`, `float16`, `bfloat16`, `float32`).              |
-| `--quantize`       | `4bit`                                | Weight quantization (`none`, `8bit`, `4bit`). Recommended: `4bit` on T4. |
-| `--flash-attn`     | `False`                               | Enable Flash Attention 2 (Requires Ampere+ GPU, NOT available on T4).    |
-| `--log-file`       | `<dir>/caption_audio_<timestamp>.log` | Path for the debug log file.                                             |
-
-## 📂 Output JSON Schema
-
-The script outputs a structured JSON file for each track, which looks like this:
-
-```json
-{
-  "metadata": {
-    "model": "nvidia/music-flamingo-hf",
-    "generated_at": "2026-04-22T06:28:14Z",
-    "audio_file": "/absolute/path/to/track.mp3",
-    "duration_seconds": 268.2,
-    "window_seconds": 40.0,
-    "total_chunks": 4,
-    "mode": "detailed"
-  },
-  "chunks": [
-    {
-      "chunk_index": 0,
-      "label": "start",
-      "start_seconds": 0.0,
-      "end_seconds": 40.0,
-      "captions": {
-        "genre_style": "Arabic folk, traditional Middle Eastern, acoustic ballad",
-        "instruments": "oud with intricate plucked melodies, acoustic guitar...",
-        "vocals": "male baritone, melismatic phrasing, rich vibrato...",
-        "tempo_key": "85.71 BPM, D minor, 4/4 time"
-      }
-    }
-    // ... early, pre_mid, and post_mid chunks follow
-  ]
-}
-```
+If your audio lives in a GCS bucket, download it locally first (e.g. `gsutil -m cp -r gs://your-bucket/tracks ./tracks`) so the script just sees a normal directory — it does not talk to GCS itself.
 
 ## 📁 Project Structure
 
-- `music_caption.py`: The core PyTorch/Transformers script for audio chunking and inference.
-- `Music_Captioning.md`: A Jupyter Notebook export demonstrating a full workflow (GCS download -> Inference -> GCS upload).
-- `PROMPT_SUNO_SYNTHESIS/`:
-  - `SYSTEM_PROMPT.md`: The system instructions for the synthesis LLM.
-  - `PROMPT_TEMPLATE.md`: The user prompt template for injecting the JSON data.
+```
+caption.py    # CLI entry point: discovery, audio prep, inference, resume, summary
+prompts.py    # CAPTIONING_PROMPTS — the set of questions asked per track
+```
+
+Both files should sit in the same directory. Your audio directory can be anywhere — pass its path via `--dir`.
+
+## 🛠️ Usage
+
+```bash
+# Scan a directory, run every prompt in prompts.py against every track
+python caption.py --dir ./tracks --output-dir ./captions
+
+# No args: scans the current directory, writes to ./captions/
+python caption.py
+
+# Only run a subset of categories
+python caption.py --dir ./tracks --categories genre,vocals
+
+# Force re-run of every category, even ones already marked done
+python caption.py --dir ./tracks --overwrite
+
+# Validate the pipeline without a GPU/model
+python caption.py --dir ./tracks --dry-run
+```
+
+This produces one `<track_stem>.caption.json` per audio file in `--output-dir`, plus two run-level summaries once the batch finishes: `results_summary.json` and `results_summary.csv` (one row per track, one column per category).
+
+### Folder layout
+
+The scan is recursive and extension-based (`.mp3 .wav .flac .m4a .ogg`), so flat or nested folders both work:
+
+```
+tracks/
+├── 01.mp3
+├── 02.mp3
+└── album2/
+    └── 01.mp3
+```
+
+One caveat: output filenames are derived from the track's filename stem only, not its folder path. `tracks/01.mp3` and `tracks/album2/01.mp3` would both write to `01.caption.json` and overwrite each other — keep filenames unique across subfolders, or rename before running at scale.
+
+## 🎛️ CLI Reference (`caption.py`)
+
+| Option           | Default        | Description                                                                 |
+| :---------------- | :------------- | :---------------------------------------------------------------------------- |
+| `--dir`           | `.`            | Directory to scan recursively.                                                |
+| `--file`          | `None`         | Process a single file instead of `--dir`.                                     |
+| `--output-dir`    | `./captions/`  | Where per-track JSON and summary files go.                                    |
+| `--categories`    | `all`          | Comma-separated subset of `prompts.py` keys to run.                           |
+| `--max-tokens`    | `1024`         | Max new tokens per prompt (ceiling: 4096).                                    |
+| `--precision`     | `bf16`         | `bf16` or `4bit`. 4-bit trades quality for VRAM headroom.                     |
+| `--overwrite`     | `False`        | Re-run categories even if already marked `"ok"` in existing output.           |
+| `--dry-run`       | `False`        | Skip model loading/inference; write placeholder text to test the pipeline.    |
+
+## 📂 Output JSON Schema
+
+One file per track, updated incrementally as each category completes:
+
+```json
+{
+  "file": "01.mp3",
+  "path": "/absolute/path/to/01.mp3",
+  "model_id": "nvidia/music-flamingo-2601-hf",
+  "last_updated": "2026-06-30T09:46:37+00:00",
+  "categories": {
+    "genre": {
+      "status": "ok",
+      "output": "Middle Eastern folk fusion blended with...",
+      "error": null,
+      "processing_time_sec": 4.2,
+      "audio_windows": 9,
+      "audio_covered_sec": 270,
+      "output_truncated": false,
+      "prompt_used": "Listen to this track and identify its genre..."
+    },
+    "vocals": { "status": "ok", "output": "...", "..." : "..." },
+    "instrumentation": { "status": "ok", "output": "...", "...": "..." },
+    "production": { "status": "ok", "output": "...", "...": "..." },
+    "mastering": { "status": "ok", "output": "...", "...": "..." }
+  }
+}
+```
+
+A category that failed (bad audio, CUDA error, etc.) records `"status": "error"` with an `"error"` message instead of `"output"`, so partial results for a track are always inspectable rather than silently missing.
+
+## 📊 Summary Outputs
+
+After the run, `results_summary.csv` gives a flat, spreadsheet-friendly view:
+
+```
+file,path,genre,vocals,instrumentation,production,mastering
+01.mp3,/path/to/01.mp3,"Middle Eastern folk fusion...","male baritone...","oud, acoustic guitar...","...","..."
+```
+
+`results_summary.json` contains the same data in full structured form (every track's complete JSON record).
