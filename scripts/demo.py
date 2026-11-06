@@ -53,6 +53,10 @@ def main(argv: list[str] | None = None) -> int:
         "--json", action="store_true", help="print only the JSON result"
     )
     parser.add_argument(
+        "--keep-chunk-captions", action="store_true",
+        help="keep the per-chunk captions in the JSON (for rewrite experiments)",
+    )
+    parser.add_argument(
         "--experimental-suno", action="store_true",
         help="also emit the unsupported suno_prompt string (see docs/TAG_AUDIT.md)",
     )
@@ -82,7 +86,8 @@ def main(argv: list[str] | None = None) -> int:
     result = caption_and_tag(
         captioner, args.audio, experimental_suno=args.experimental_suno
     )
-    result.pop("chunk_captions", None)
+    if not args.keep_chunk_captions:
+        result.pop("chunk_captions", None)
 
     if args.out is not None:
         args.out.parent.mkdir(parents=True, exist_ok=True)
