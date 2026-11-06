@@ -198,6 +198,34 @@ the computed 259.189 s, so chunking must plan on the *measured* trimmed duration
 or it emits a 0.03 s fragment that ffprobe cannot even read. Both backends now
 measure first, and `_split_audio` discards sub-second trailing fragments.
 
+## Run 5 — GGUF vs fp16 rewrite A/B (2026-11-06)
+
+First real comparison of the two rewrite engines, run on the stored
+`chunk_captions` of `fadhl_shaker_selected` (24 tracks, no re-captioning) via
+`scripts/rewrite_ab.py`. Same model (`Qwen3-4B-Instruct-2507`), same system
+prompt, same verifier; only the engine and the weight format differ.
+
+| Backend | Weights | ok | fallback | s/track | Mean words | Term coverage |
+|---|---|---:|---:|---:|---:|---:|
+| `hf` | fp16 transformers | 24/24 | 0 | 18.2 | 147.9 | 80.3% |
+| `llamacpp` | Q8_0 GGUF (4.0 GB) | 24/24 | 0 | **5.8** | 149.8 | **81.8%** |
+
+- Total: 437.6 s (hf) vs 139.4 s (llamacpp) — **3.1× faster** end to end.
+- The first track absorbs warmup: 153.0 s (hf) and 24.6 s (llama-server start);
+  excluding it, 12.4 vs 5.0 s/track, still ~2.5×.
+- Quality did not drop: the quantized run kept slightly *more* instrument/vocal
+  terms (81.8% vs 80.3%) and returned marginally longer prose (149.8 vs 147.9
+  words), with zero verification fallbacks in both.
+- Per-track coverage is within a few points either way; no track regressed
+  sharply (worst delta: 87.5% vs 93.8% on `حظك ياقلبي`).
+- Peak RAM/VRAM were not sampled in this run (it used `049bbde`, before the
+  sampler landed in `87ffd49`); re-running on the newer commit adds those
+  columns.
+
+Interpretation: Q8_0 preserves the detail we verify, so the earlier worry that
+quantization would drop instruments did not materialize at this size. The
+engine, not the weights, accounts for most of the speedup.
+
 ## GPU smoke test
 
 Kept out of `pytest` (manual, needs GPU + model). Reproduce with:

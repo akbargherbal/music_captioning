@@ -1,10 +1,12 @@
 # GGUF rewrite experiment
 
-Status: **binaries published and the backend implemented** (2026-11-06); the
-A/B benchmark has not run yet. The current pipeline uses fp16 transformers and is
-already acceptable (24/24 rewritten, ~15 s/track on a T4). This document records
-the experiment: stock llama.cpp + a GGUF rewrite model, to see whether a
-quantized runtime is faster without losing detail.
+Status: **measured — GGUF wins** (2026-11-06). On 24 stored tracks the Q8_0
+GGUF under `llama-server` ran 3.1× faster than fp16 transformers (5.8 vs 18.2
+s/track end to end) with equal or better term coverage (81.8% vs 80.3%) and zero
+fallbacks in both. See Run 5 in [RESULTS.md](RESULTS.md).
+
+The default backend is still `hf` until the switch is approved: changing it also
+means deciding whether the already-polished albums must be re-polished.
 
 ## Published build (sm75-t4, 2026-11-06)
 
