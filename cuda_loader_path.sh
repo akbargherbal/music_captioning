@@ -55,6 +55,10 @@ cuda_loader_path() {
       [ -d "$d" ] && dirs="$dirs:$d"
     done
   done
+  # A locally installed toolkit (CPU build VM, or a Colab image that ships one).
+  for d in /usr/local/cuda*/lib64 /usr/local/cuda*/lib; do
+    [ -d "$d" ] && dirs="$dirs:$d"
+  done
   # /usr/lib64-nvidia carries libcuda.so.1 on Colab when it is not on the default path.
   dirs="${dirs}:/usr/lib64-nvidia"
   dirs="${dirs#:}"
