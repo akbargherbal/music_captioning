@@ -49,6 +49,19 @@ def main(argv: list[str] | None = None) -> int:
         "--quantization", choices=("8bit", "4bit", "none"), default="8bit",
         help="8-bit is the default: 4-bit raises hallucination slightly",
     )
+    parser.add_argument(
+        "--backend", choices=("hf", "llamacpp"), default="hf",
+        help="hf = transformers (default); llamacpp = GGUF under llama-server",
+    )
+    parser.add_argument(
+        "--gguf", type=Path, default=None,
+        help="GGUF weights for --backend llamacpp",
+    )
+    parser.add_argument(
+        "--server-bin", type=Path,
+        default=REPO_ROOT / "llama.cpp-text" / "build" / "bin" / "llama-server",
+        help="llama-server binary staged by plumbing/fetch_llamacpp_text.sh",
+    )
     parser.add_argument("--max-new-tokens", type=int, default=512)
     parser.add_argument(
         "--show-source", action="store_true", help="print the raw chunk text too"
@@ -57,17 +70,29 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     from src.rewrite import build_source_text, rewrite_caption
-    from src.rewriter_hf import HFRewriter
 
     sections = load_sections(args.input)
     source = build_source_text(sections)
     print(f"Sections: {len(sections)} | source words: {len(source.split())}")
 
-    rewriter = HFRewriter(
-        model_id=args.model,
-        quantization=args.quantization,
-        max_new_tokens=args.max_new_tokens,
-    )
+    if args.backend == "llamacpp":
+        if args.gguf is None:
+            raise SystemExit("--backend llamacpp needs --gguf PATH")
+        from src.rewriter_llama import LlamaCppRewriter
+
+        rewriter = LlamaCppRewriter(
+            model_path=args.gguf,
+            server_bin=args.server_bin,
+            max_new_tokens=args.max_new_tokens,
+        )
+    else:
+        from src.rewriter_hf import HFRewriter
+
+        rewriter = HFRewriter(
+            model_id=args.model,
+            quantization=args.quantization,
+            max_new_tokens=args.max_new_tokens,
+        )
     result = rewrite_caption(sections, rewriter)
 
     print(f"Status: {result.status} | model: {result.rewriter} | "

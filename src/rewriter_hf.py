@@ -60,6 +60,11 @@ class HFRewriter:
     def name(self) -> str:
         return self.model_id
 
+    @property
+    def prefetch_model_id(self) -> str:
+        """Hugging Face repo to download in the background during captioning."""
+        return self.model_id
+
     # -- loading ----------------------------------------------------------
     def _source(self) -> str:
         return str(self.model_dir) if self.model_dir is not None else self.model_id

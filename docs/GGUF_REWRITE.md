@@ -1,9 +1,9 @@
 # GGUF rewrite experiment
 
-Status: **binaries built and published** (2026-11-06); the rewrite benchmark has
-not run yet. The current pipeline uses fp16 transformers and is already
-acceptable (24/24 rewritten, ~15 s/track on a T4). This document records the
-next experiment: stock llama.cpp + a GGUF rewrite model, to see whether a
+Status: **binaries published and the backend implemented** (2026-11-06); the
+A/B benchmark has not run yet. The current pipeline uses fp16 transformers and is
+already acceptable (24/24 rewritten, ~15 s/track on a T4). This document records
+the experiment: stock llama.cpp + a GGUF rewrite model, to see whether a
 quantized runtime is faster without losing detail.
 
 ## Published build (sm75-t4, 2026-11-06)
@@ -109,20 +109,45 @@ bucket.
 Start with Q8_0: it should match the fp16 output closely, so any difference is
 the runtime rather than quantization. Only then compare Q6_K/Q4_K_M.
 
-## Plan
+## Running the A/B
 
-1. Build the binaries (above).
-2. Download one Q8_0 GGUF with `hf download <repo> <file>`.
-3. Add `LlamaCppRewriter` (`src/rewriter_llama.py`): start `llama-server` once
-   with `--jinja` (uses the GGUF's chat template), `-ngl 99`, small context, then
-   send one stateless chat completion per track. It implements the same
-   `rewrite(messages)` protocol as `HFRewriter`.
-4. Benchmark on the stored `chunk_captions` of
-   `outputs/fadhl_shaker_selected/*.json` (no re-captioning) and compare
-   instrument/vocal/production coverage, fallback count, and seconds per track
-   against the fp16 run.
-5. Keep it only if it matches fp16 quality and is clearly faster; otherwise
-   delete the experiment.
+`src/rewriter_llama.py` implements the same `rewrite(messages)` protocol as
+`HFRewriter`: it starts one `llama-server` (`--jinja`, `-ngl 99`, greedy,
+`-c 4096`) and sends one stateless chat completion per track. Nothing about the
+prompt or the verification changes.
+
+```bash
+# one album, both backends, no re-captioning
+python scripts/rewrite_ab.py outputs/fadhl_shaker_selected/*.json \
+  --backends hf,llamacpp \
+  --gguf models/Qwen3-4B-Instruct-2507-Q8_0.gguf \
+  --out /tmp/rewrite_ab.json
+```
+
+It reports, per backend: ok/fail counts, seconds per track, average words, and
+**term coverage** (share of source instrument/vocal terms that survive). Coverage
+is the proxy for lost detail; speed alone is not enough to switch.
+
+Quick single-file check:
+
+```bash
+python scripts/rewrite_demo.py track.json --backend llamacpp \
+  --gguf models/Qwen3-4B-Instruct-2507-Q8_0.gguf
+```
+
+To run the real batch with the GGUF backend:
+
+```bash
+python scripts/batch.py --root ... --repolish \
+  --rewrite-backend llamacpp \
+  --rewrite-gguf models/Qwen3-4B-Instruct-2507-Q8_0.gguf
+```
+
+## Decision rule
+
+Keep GGUF only if it (a) keeps the same ok/fallback profile, (b) loses clearly
+less detail than fp16 on coverage, and (c) is measurably faster per track.
+Otherwise the fp16 `HFRewriter` stays the default and this stays an experiment.
 
 ## Guardrails
 

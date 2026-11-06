@@ -430,6 +430,20 @@ def main(argv: list[str] | None = None) -> int:
              "loads fastest); quantization is only a memory fallback",
     )
     parser.add_argument(
+        "--rewrite-backend", choices=("hf", "llamacpp"), default="hf",
+        help="hf = transformers fp16 (default); llamacpp = GGUF under "
+             "llama-server (needs --rewrite-gguf)",
+    )
+    parser.add_argument(
+        "--rewrite-gguf", type=Path, default=None,
+        help="path to the GGUF weights used by --rewrite-backend llamacpp",
+    )
+    parser.add_argument(
+        "--llamacpp-server", type=Path,
+        default=REPO_ROOT / "llama.cpp-text" / "build" / "bin" / "llama-server",
+        help="llama-server binary staged by plumbing/fetch_llamacpp_text.sh",
+    )
+    parser.add_argument(
         "--rewrite-max-new-tokens", type=int, default=384,
         help="hard cap for one rewrite",
     )
@@ -530,24 +544,36 @@ def main(argv: list[str] | None = None) -> int:
     )
     rewriter = None
     if not args.no_rewrite:
-        from src.rewriter_hf import HFRewriter
+        if args.rewrite_backend == "llamacpp":
+            if args.rewrite_gguf is None:
+                parser.error("--rewrite-backend llamacpp needs --rewrite-gguf PATH")
+            from src.rewriter_llama import LlamaCppRewriter
 
-        rewriter = HFRewriter(
-            model_id=args.rewrite_model,
-            quantization=args.rewrite_quantization,
-            max_new_tokens=args.rewrite_max_new_tokens,
-        )
+            rewriter = LlamaCppRewriter(
+                model_path=args.rewrite_gguf,
+                server_bin=args.llamacpp_server,
+                max_new_tokens=args.rewrite_max_new_tokens,
+            )
+        else:
+            from src.rewriter_hf import HFRewriter
+
+            rewriter = HFRewriter(
+                model_id=args.rewrite_model,
+                quantization=args.rewrite_quantization,
+                max_new_tokens=args.rewrite_max_new_tokens,
+            )
     prefetch_thread = None
-    if rewriter is not None and not args.no_prefetch_rewrite:
-        print(f"Prefetching {rewriter.name} in the background...", flush=True)
-        prefetch_thread = prefetch_model(rewriter.model_id)
+    prefetch_id = getattr(rewriter, "prefetch_model_id", None)
+    if rewriter is not None and prefetch_id and not args.no_prefetch_rewrite:
+        print(f"Prefetching {prefetch_id} in the background...", flush=True)
+        prefetch_thread = prefetch_model(prefetch_id)
     t0 = time.time()
     if not args.repolish:
         captioner._load()
         print(f"MODEL LOAD {time.time() - t0:.1f}s", flush=True)
     if rewriter is not None:
-        print(f"Rewrite model: {rewriter.name} ({rewriter.quantization})",
-              flush=True)
+        mode = getattr(rewriter, "quantization", "gguf")
+        print(f"Rewrite model: {rewriter.name} ({mode})", flush=True)
 
     started = time.time()
     completed = 0
