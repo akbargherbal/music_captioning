@@ -62,11 +62,44 @@ from src.rewriter_hf import DEFAULT_MODEL_ID as DEFAULT_REWRITE_MODEL  # noqa: E
 
 DEFAULT_ROOT = "gs://akbar-december-2024-backup/DISCOGRAPHY"
 
+# Rewrite defaults. GGUF under llama-server is 3.1x faster than fp16
+# transformers with equal or better term coverage on a T4 (docs/RESULTS.md,
+# Run 5), so it is the default. The weights and the server binary are staged
+# outside git (models/, llama.cpp-text/).
+DEFAULT_REWRITE_BACKEND = "llamacpp"
+DEFAULT_REWRITE_GGUF = REPO_ROOT / "models" / "Qwen3-4B-Instruct-2507-Q8_0.gguf"
+DEFAULT_LLAMACPP_SERVER = (
+    REPO_ROOT / "llama.cpp-text" / "build" / "bin" / "llama-server"
+)
+
 # Repo-local fallback identity. A fresh Colab runtime has no global
 # user.name/user.email, so `git commit` fails and every album checkpoint is lost
 # (writing JSON + manifest without ever pushing). Set these if unset.
 FALLBACK_GIT_NAME = "akbargherbal"
 FALLBACK_GIT_EMAIL = "akbargherbal@users.noreply.github.com"
+
+
+def check_llamacpp_paths(gguf: Path | None, server: Path) -> None:
+    """Fail before an hour of captioning if the GGUF backend cannot run.
+
+    Captioning an album costs far more than the polish phase, so a missing GGUF
+    or a stale ``llama-server`` must be caught at startup, not after the
+    captioner has already done its work.
+    """
+    problems: list[str] = []
+    if gguf is None or not Path(gguf).exists():
+        problems.append(
+            f"GGUF weights not found: {gguf} (download with "
+            "'hf download unsloth/Qwen3-4B-Instruct-2507-GGUF "
+            "Qwen3-4B-Instruct-2507-Q8_0.gguf --local-dir models')"
+        )
+    if not Path(server).exists():
+        problems.append(
+            f"llama-server not found: {server} "
+            "(run ./plumbing/fetch_llamacpp_text.sh)"
+        )
+    if problems:
+        raise FileNotFoundError("; ".join(problems))
 
 
 def prefetch_model(model_id: str) -> threading.Thread:
@@ -430,17 +463,18 @@ def main(argv: list[str] | None = None) -> int:
              "loads fastest); quantization is only a memory fallback",
     )
     parser.add_argument(
-        "--rewrite-backend", choices=("hf", "llamacpp"), default="hf",
-        help="hf = transformers fp16 (default); llamacpp = GGUF under "
-             "llama-server (needs --rewrite-gguf)",
+        "--rewrite-backend", choices=("hf", "llamacpp"),
+        default=DEFAULT_REWRITE_BACKEND,
+        help="llamacpp = GGUF under llama-server (default, ~3x faster); "
+             "hf = fp16 transformers fallback",
     )
     parser.add_argument(
-        "--rewrite-gguf", type=Path, default=None,
-        help="path to the GGUF weights used by --rewrite-backend llamacpp",
+        "--rewrite-gguf", type=Path, default=DEFAULT_REWRITE_GGUF,
+        help="GGUF weights used by --rewrite-backend llamacpp "
+             "(default: models/Qwen3-4B-Instruct-2507-Q8_0.gguf)",
     )
     parser.add_argument(
-        "--llamacpp-server", type=Path,
-        default=REPO_ROOT / "llama.cpp-text" / "build" / "bin" / "llama-server",
+        "--llamacpp-server", type=Path, default=DEFAULT_LLAMACPP_SERVER,
         help="llama-server binary staged by plumbing/fetch_llamacpp_text.sh",
     )
     parser.add_argument(
@@ -545,8 +579,10 @@ def main(argv: list[str] | None = None) -> int:
     rewriter = None
     if not args.no_rewrite:
         if args.rewrite_backend == "llamacpp":
-            if args.rewrite_gguf is None:
-                parser.error("--rewrite-backend llamacpp needs --rewrite-gguf PATH")
+            try:
+                check_llamacpp_paths(args.rewrite_gguf, args.llamacpp_server)
+            except FileNotFoundError as exc:
+                parser.error(str(exc))
             from src.rewriter_llama import LlamaCppRewriter
 
             rewriter = LlamaCppRewriter(

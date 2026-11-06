@@ -1,12 +1,16 @@
 # GGUF rewrite experiment
 
-Status: **measured — GGUF wins** (2026-11-06). On 24 stored tracks the Q8_0
-GGUF under `llama-server` ran 3.1× faster than fp16 transformers (5.8 vs 18.2
-s/track end to end) with equal or better term coverage (81.8% vs 80.3%) and zero
-fallbacks in both. See Run 5 in [RESULTS.md](RESULTS.md).
+Status: **adopted as the default rewrite engine** (2026-11-06, user-approved).
+On 24 stored tracks the Q8_0 GGUF under `llama-server` ran 3.1× faster than fp16
+transformers (5.8 vs 18.2 s/track end to end) with equal or better term coverage
+(81.8% vs 80.3%) and zero fallbacks in both. See Run 5 in
+[RESULTS.md](RESULTS.md).
 
-The default backend is still `hf` until the switch is approved: changing it also
-means deciding whether the already-polished albums must be re-polished.
+`scripts/batch.py` defaults to `--rewrite-backend llamacpp` and
+`models/Qwen3-4B-Instruct-2507-Q8_0.gguf`; it checks the weights and
+`llama-server` at startup so a missing file cannot waste a caption pass.
+`CAPTION_PIPELINE_VERSION` stays 3 (the prompt and model are unchanged), and the
+one album polished with fp16 is re-polished with `--repolish`.
 
 ## Published build (sm75-t4, 2026-11-06)
 

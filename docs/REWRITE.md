@@ -1,9 +1,10 @@
 # Stateless caption rewrite
 
 Date: 2026-11-06
-Status: wired into `scripts/batch.py` as the per-album polish phase. The model
-and its checks are unit tested; real-caption quality on a T4 is still being
-validated.
+Status: wired into `scripts/batch.py` as the per-album polish phase. The default
+engine is **Q8_0 GGUF under `llama-server`** (3.1× faster than fp16 with equal or
+better coverage on 24 real tracks); `--rewrite-backend hf` keeps the fp16 path.
+The model and its checks are unit tested.
 
 ## Why this exists
 
@@ -80,17 +81,24 @@ lower is better; measured 2026):
 | Phi-4-mini | 3.8B | ~2.5 GB | 23.5% | 92.5% |
 | Ministral 3-8B | 8B | ~5 GB | 21.7% | 99.1% |
 
-Default: **`Qwen/Qwen3-4B-Instruct-2507`** (Apache-2.0) in **plain fp16, no
-quantization**. A 4B model is ~8 GiB, the captioner is unloaded first, so it
-fits alone on a 15 GiB T4. fp16 loads without the slow bitsandbytes pass and
-avoids dequantization overhead, which is what made the first run feel slow.
-`--rewrite-quantization 4bit` exists only as a memory fallback; 8-bit buys
-nothing on a T4. `Qwen3-8B` at 4-bit is the quality fallback if 4B is not good
-enough. Phi-4-mini and Llama-3.1-8B are rejected on their measured rates.
+Default: **`Qwen/Qwen3-4B-Instruct-2507`** (Apache-2.0). Since 2026-11-06 it runs
+as **Q8_0 GGUF under `llama-server`**, not fp16 transformers: on the same 24
+stored tracks it was 3.1× faster (5.8 vs 18.2 s/track) with slightly better term
+coverage (81.8% vs 80.3%) and zero fallbacks in both (Run 5 in
+[RESULTS.md](RESULTS.md)). `--rewrite-backend hf` keeps the fp16 path as a
+fallback; `--rewrite-quantization` then applies to that path only. `Qwen3-8B` at
+4-bit is the quality fallback if 4B turns out not to be good enough. Phi-4-mini
+and Llama-3.1-8B are rejected on their measured rates.
 
-The weights are downloaded in the background while captioning runs
-(`--no-prefetch-rewrite` disables it); the polish phase joins the download
-before it loads the model.
+fp16 remains the reference: a 4B model is ~8 GiB and fits alone on a 15 GiB T4
+(the captioner is unloaded first), but it costs roughly three times the polish
+time and double the VRAM of the quantized GGUF.
+
+The GGUF weights are not fetched by the HF prefetch thread; stage them once with
+`hf download unsloth/Qwen3-4B-Instruct-2507-GGUF
+Qwen3-4B-Instruct-2507-Q8_0.gguf --local-dir models` (or the GCS cache command in
+[GGUF_REWRITE.md](GGUF_REWRITE.md)). `scripts/batch.py` checks both the weights
+and `llama-server` at startup and exits before captioning if either is missing.
 
 Caveat: those benchmarks summarize news articles; this task condenses already
 written English and is easier. No model is at zero, which is why the
@@ -125,9 +133,15 @@ To try the rewrite on one track without touching the batch output:
 python scripts/demo.py "/content/fadhl_shaker_selected/حبيتك.mp3" \
   --keep-chunk-captions -o /tmp/habeetak.json
 
-python scripts/rewrite_demo.py /tmp/habeetak.json
-python scripts/rewrite_demo.py /tmp/habeetak.json --quantization 4bit
-python scripts/rewrite_demo.py /tmp/habeetak.json --model Qwen/Qwen3-8B
+# default: GGUF under llama-server
+python scripts/rewrite_demo.py /tmp/habeetak.json \
+  --backend llamacpp --gguf models/Qwen3-4B-Instruct-2507-Q8_0.gguf
+
+# fp16 reference
+python scripts/rewrite_demo.py /tmp/habeetak.json --backend hf
+
+# A/B the two engines on stored captions (no re-captioning)
+python scripts/rewrite_ab.py outputs/fadhl_shaker_selected/*.json --backends hf,llamacpp
 ```
 
 The script prints the status, rejection reasons, timing, and the rewrite. A
@@ -135,8 +149,11 @@ plain text file with one caption per paragraph works too.
 
 ## What is not done yet
 
-- Real-caption quality on a T4 (4B vs 8B) has not been measured yet.
+- Peak RAM/VRAM for the GGUF backend has not been measured (the A/B ran on an
+  earlier commit); re-running `scripts/rewrite_ab.py` on current `main` reports
+  both.
 - `scripts/demo.py` still shows the deterministic merge for a single file; only
   the batch pipeline runs the polish phase.
-- `CAPTION_PIPELINE_VERSION` is 3; keep it in sync if the prompt or model
-  changes.
+- `CAPTION_PIPELINE_VERSION` stays 3: switching the engine did not change the
+  prompt or the model, and the single fp16-polished album gets `--repolish`ed so
+  the discography ends up on one engine.
