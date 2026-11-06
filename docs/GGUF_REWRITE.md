@@ -1,9 +1,30 @@
 # GGUF rewrite experiment
 
-Status: prepared, not run. The current pipeline uses fp16 transformers and is
-already acceptable (24/24 rewritten, ~15 s/track on a T4). This document records
-the next experiment: stock llama.cpp + a GGUF rewrite model, to see whether a
+Status: **binaries built and published** (2026-11-06); the rewrite benchmark has
+not run yet. The current pipeline uses fp16 transformers and is already
+acceptable (24/24 rewritten, ~15 s/track on a T4). This document records the
+next experiment: stock llama.cpp + a GGUF rewrite model, to see whether a
 quantized runtime is faster without losing detail.
+
+## Published build (sm75-t4, 2026-11-06)
+
+Built on a CPU-only Colab VM with CUDA toolkit 13.0 (no GPU present; `nvcc`
+cross-compiled for `sm_75`), from llama.cpp commit
+`954de248ac6907dd05dc19f0f511ab18f2807a54` (pinned in `plumbing/llamacpp.pin`).
+
+| | |
+|---|---|
+| Tarball | 104.97 MiB, contains only `build/bin/llama-cli` + `llama-server` |
+| sha256 | `e75ffce18236def9b654c82f2031f38e24f3e8e0cd84e4d369905108e7378d0b` |
+| GCS | `binaries/sm75-t4/{llamacpp-text.tar.gz,.sha256,manifest.json,build.log.gz}` |
+| Verified | checksum re-downloaded and matched; archive has exactly 2 binaries |
+
+**Portability:** the binary is linked against the build host's glibc (this build:
+glibc 2.38 / `GLIBCXX_3.4.32`, i.e. Ubuntu 24.04) and against `libcudart.so.13` /
+`libcublas.so.13`. A Colab GPU image with an older glibc or a CUDA 12 runtime
+fails the `llama-cli --version` smoke test, which makes
+`fetch_llamacpp_text.sh` fall back to building locally instead of using a broken
+cache entry. Rebuild and republish after a Colab base-image change.
 
 ## Why GGUF
 
