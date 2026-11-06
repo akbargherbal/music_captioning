@@ -37,10 +37,25 @@ def test_coda_detection():
         "The outro fades out.",
         "It closes with a long silence.",
         "There is a brief silence.",
+        "The track comes to an abrupt end.",
+        "The arrangement draws to a close.",
+        "The closing section is sparse.",
     ):
         assert is_coda_claim(sentence), sentence
     assert not is_coda_claim("A piano carries the melody.")
     assert not is_coda_claim("The weekend arrives in the second verse.")
+
+
+def test_coda_detection_ignores_body_phrasing():
+    # "close" and "ends" are ordinary words in a mix description; only a
+    # track/song subject makes them an ending claim.
+    for sentence in (
+        "A close-miked vocal sits in front of the mix.",
+        "The melody ends on a suspended note.",
+        "The bass line closes the phrase.",
+        "The track opens abruptly with a drum fill.",
+    ):
+        assert not is_coda_claim(sentence), sentence
 
 
 def test_one_framing_only_and_false_coda_dropped():
@@ -74,6 +89,16 @@ def test_middle_coda_dropped_final_coda_kept():
     assert "concludes with a fade" not in merged
     assert "outro fades out slowly" in merged
     assert merged.count("An Arabic pop track") == 1
+
+
+def test_body_sentence_with_close_miked_is_kept():
+    sections = [
+        "An Arabic pop track with a slow groove. The piano leads.",
+        "A close-miked vocal sits in front of the mix. The guitar enters.",
+    ]
+    merged = merge_section_captions(sections)
+    assert "close-miked" in merged
+    assert "guitar enters" in merged
 
 
 def test_duplicate_sentence_removed_across_sections():

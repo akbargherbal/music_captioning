@@ -36,19 +36,18 @@ _WHOLE_SONG_OPENER = re.compile(
 )
 
 # Claims about how the audio stops. Only the final section may make one.
+# The verb forms require a track/song subject ("the track ends", "it closes"),
+# so body phrasing such as "a close-miked vocal" or "the phrase ends on a
+# suspended note" is not mistaken for an ending claim.
 _CODA_CLAIM = re.compile(
     r"\b(?:"
-    r"conclud(?:e|es|ed|ing)"
-    r"|ends?"
-    r"|ending"
-    r"|fades?[-\s]?out"
-    r"|outro"
-    r"|final\s+section"
-    r"|clos(?:e|es|ing)"
-    r"|abruptly"
-    r"|silence"
-    r"|tape[-\s]?stop"
-    r"|final\s+chord"
+    r"(?:track|song|piece|arrangement|audio|performance|it)\s+"
+    r"(?:conclud(?:e|es|ed)|ends?|fades?\s*out|closes?"
+    r"|comes?\s+to\s+an?\s+(?:abrupt\s+)?end"
+    r"|draws?\s+to\s+an?\s+(?:abrupt\s+)?close)\b"
+    r"|(?:concluding|closing|final)\s+(?:section|bars?|chord|moments?|seconds?)\b"
+    r"|(?:track|song|piece)'s\s+final\b"
+    r"|outro|fade[-\s]?out|tape[-\s]?stop|silence"
     r")\b",
     re.IGNORECASE,
 )
