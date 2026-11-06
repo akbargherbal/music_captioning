@@ -293,6 +293,7 @@ def test_captioned_album_is_reused_without_recaptioning(
             "caption_raw": " ".join(chunks),
             "caption": "",
             "rewrite_status": "pending",
+            "rewrite_reasons": ["stale reason from a previous polish"],
             "tags_experimental": True,
         }],
         "failed_tracks": [],
@@ -306,6 +307,7 @@ def test_captioned_album_is_reused_without_recaptioning(
     assert album_obj["tracks"][0]["chunk_captions"] == chunks
     assert album_obj["caption_stage"] == CAPTION_STAGE_POLISHED
     assert album_obj["tracks"][0]["rewrite_status"] == "ok"
+    assert "rewrite_reasons" not in album_obj["tracks"][0]
 
 
 def test_old_existing_output_is_not_reused_with_retry_failed(

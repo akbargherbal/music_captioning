@@ -299,6 +299,11 @@ def polish_album(album_obj: dict, rewriter) -> dict:
     }
     rewrite_seconds = 0.0
     for track in tracks:
+        # Reused track dicts may carry results/reasons from an earlier polish;
+        # clear them so a successful rewrite does not keep stale rejection text.
+        for key in ("rewrite_reasons", "rewrite_model", "rewrite_prompt_version"):
+            track.pop(key, None)
+
         chunks = list(track.get("chunk_captions") or [])
         if len(chunks) <= 1:
             track["caption"] = chunks[0] if chunks else track.get("caption_raw", "")
