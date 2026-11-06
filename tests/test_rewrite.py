@@ -139,6 +139,30 @@ def test_rejects_unchanged_text():
     assert any("unchanged" in r for r in reasons)
 
 
+def test_allows_ending_claim_when_final_section_says_fading_out():
+    sections = [
+        SECTIONS[0],
+        SECTIONS[1],
+        "A final chorus repeats the hook, then the groove keeps going before "
+        "fading out on the drum machine beat.",
+    ]
+    reasons = check_rewrite(sections, GOOD)
+    assert reasons == []
+
+
+def test_production_adjectives_are_not_invented_facts():
+    # "melodic", "textures" and "reverb-drenched" are in the production
+    # lexicon, but they are ordinary prose, not claims about the recording.
+    assert invented_terms("a clean mix with reverb", "a melodic texture, "
+                          "reverb-drenched and warm") == []
+    reasons = check_rewrite(
+        SECTIONS,
+        GOOD.replace("a touch of reverb behind the voice",
+                     "a reverb-drenched, melodic texture behind the voice"),
+    )
+    assert reasons == []
+
+
 def test_invented_terms_ignores_words_present_in_source():
     assert (
         invented_terms(

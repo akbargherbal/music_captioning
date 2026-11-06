@@ -30,7 +30,7 @@ from dataclasses import dataclass
 from typing import Protocol, Sequence
 
 from .merge import is_coda_claim, split_sentences
-from .tags import CATEGORIES, extract_tags
+from .tags import extract_tags
 
 # Bump when the instruction or the input layout changes: the rewrite output is
 # part of the caption, so stale results must not be reused (see resume.py).
@@ -56,6 +56,17 @@ _COMMENTARY = re.compile(
     r"\b(?:here(?:'s| is)|as an ai|rewritten|rewrite|summary:|below is)\b",
     re.IGNORECASE,
 )
+
+# "before fading out", "a fading beat": the final section does describe an
+# ending, even when it uses the progressive form the coda regex does not match.
+_ENDING_HINT = re.compile(
+    r"\b(?:fad(?:e|es|ed|ing)|fade[- ]?out|outro)\b", re.IGNORECASE
+)
+
+# Facts worth verifying. Production adjectives live in the lexicon too
+# ("melodic", "textures", "warm"), but they are stylistic wording, not claims
+# about the recording; rejecting them made 3 of 24 tracks fall back needlessly.
+VERIFIED_CATEGORIES = ("instruments", "vocals")
 
 
 class Rewriter(Protocol):
@@ -105,11 +116,16 @@ def _tokens(text: str) -> set[str]:
 
 
 def invented_terms(source: str, output: str) -> list[tuple[str, str]]:
-    """Lexicon terms in ``output`` whose words never appear in ``source``."""
+    """Instrument/vocal terms in ``output`` whose words never appear in ``source``.
+
+    Production terms are deliberately not checked: the lexicon includes
+    adjectives ("melodic", "warm", "textures") and hyphenated variants
+    ("reverb-drenched") that are ordinary prose, not invented facts.
+    """
     source_tokens = _tokens(source)
     found = extract_tags(output)
     invented: list[tuple[str, str]] = []
-    for category in CATEGORIES:
+    for category in VERIFIED_CATEGORIES:
         for term in found[category]:
             words = _tokens(term)
             if words and not words <= source_tokens:
@@ -144,11 +160,13 @@ def check_rewrite(sections: Sequence[str], output: str) -> list[str]:
         listed = ", ".join(f"{term} ({cat})" for cat, term in invented)
         reasons.append(f"invented terms: {listed}")
 
-    # A coda is only allowed when the last source section actually has one:
-    # mid-song cuts are not the end of the track.
+    # A coda is only allowed when the last source section actually describes
+    # an ending: mid-song cuts are not the end of the track.
     if is_coda_claim(text):
         last_section = split_sentences(sections[-1]) if sections else []
-        if not any(is_coda_claim(s) for s in last_section):
+        if not any(
+            is_coda_claim(s) or _ENDING_HINT.search(s) for s in last_section
+        ):
             reasons.append("ending claim not supported by the final section")
 
     return reasons

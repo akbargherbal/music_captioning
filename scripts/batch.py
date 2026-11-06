@@ -458,6 +458,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-albums", type=int, default=0, help="cap albums this run (0 = no cap)")
     parser.add_argument("--no-push", action="store_true", help="commit but do not push")
     parser.add_argument("--force", action="store_true", help="redo albums already in the manifest")
+    parser.add_argument(
+        "--repolish", action="store_true",
+        help="re-run only the polish phase on every album that has a JSON "
+             "(reuses the stored chunk_captions; useful to A/B a new rewrite model)",
+    )
     parser.add_argument("--retry-failed", action="store_true",
                         help="re-queue albums marked partial (some tracks failed) and "
                              "re-caption only the failed tracks")
@@ -485,6 +490,13 @@ def main(argv: list[str] | None = None) -> int:
     manifest = load_manifest(args.manifest)
     pending = pending_albums(albums, manifest, args.outputs,
                              force=args.force, retry_failed=args.retry_failed)
+    if args.repolish:
+        pending = [
+            key for key in albums
+            if album_output_path(
+                args.outputs, albums[key]["artist"], albums[key]["album"]
+            ).exists()
+        ]
     done = [k for k in albums if k not in pending]
 
     print(f"Caption pipeline version: {CAPTION_PIPELINE_VERSION}")
@@ -525,8 +537,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Prefetching {rewriter.name} in the background...", flush=True)
         prefetch_thread = prefetch_model(rewriter.model_id)
     t0 = time.time()
-    captioner._load()
-    print(f"MODEL LOAD {time.time() - t0:.1f}s", flush=True)
+    if not args.repolish:
+        captioner._load()
+        print(f"MODEL LOAD {time.time() - t0:.1f}s", flush=True)
     if rewriter is not None:
         print(f"Rewrite model: {rewriter.name} ({rewriter.quantization})",
               flush=True)
@@ -576,12 +589,21 @@ def main(argv: list[str] | None = None) -> int:
         prior_obj = None
         retry_only = False
         prior_path = album_output_path(args.outputs, entry["artist"], entry["album"])
-        if prior_path.exists() and not args.force:
+        if prior_path.exists() and (args.repolish or not args.force):
             try:
                 data = json.loads(prior_path.read_text(encoding="utf-8"))
             except (json.JSONDecodeError, OSError):
                 data = None
-            if isinstance(data, dict) and is_current_caption_output(data):
+            if (
+                args.repolish
+                and isinstance(data, dict)
+                and is_current_caption_output(data)
+                and data.get("tracks")
+            ):
+                # Reuse every stored caption and only redo the polish phase.
+                prior_obj = data
+                retry_only = True
+            elif isinstance(data, dict) and is_current_caption_output(data):
                 if args.retry_failed:
                     prior_obj = data
                     retry_only = data.get("status") != "ok"
@@ -609,7 +631,7 @@ def main(argv: list[str] | None = None) -> int:
                 min_bitrate_kbps=args.min_bitrate_kbps,
                 experimental_suno=args.experimental_suno,
                 rewriter=rewriter,
-                checkpoint=checkpoint,
+                checkpoint=checkpoint if not args.repolish else None,
                 before_polish=(
                     prefetch_thread.join if prefetch_thread is not None else None
                 ),

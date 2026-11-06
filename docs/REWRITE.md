@@ -45,7 +45,7 @@ After generation, a deterministic pass rejects an output when any of these hold:
 | unchanged | identical to the concatenated source |
 | markup | bullets, numbered lines, `#`, or a JSON object |
 | commentary | "here is", "as an AI", "summary:", ... |
-| invented terms | a lexicon term whose words do not appear in the source (`sitar` when only `oud` was mentioned) |
+| invented instruments/vocals | an instrument or vocal term whose words do not appear in the source (`sitar` when only `oud` was mentioned) |
 | false ending | a coda claim when the final source section makes none |
 
 On rejection nothing is deleted: the untouched source text is returned with
@@ -53,6 +53,17 @@ On rejection nothing is deleted: the untouched source text is returned with
 
 Term matching is lexical containment on stemmed words, not sentence similarity.
 It only guards against invented facts; it does not decide what to remove.
+Production terms are excluded from the check: the lexicon also contains
+adjectives and hyphenated variants ("melodic", "textures", "reverb-drenched"),
+which are prose rather than recording credits and caused needless fallbacks.
+
+To re-run only the polish phase on stored captions (for example to A/B a newer
+model) without re-captioning:
+
+```bash
+python scripts/batch.py --root /content/MyArtist --artist-name MY_ARTIST \
+  --repolish --rewrite-model ibm-granite/granite-4.1-3b
+```
 
 ## Model choice
 

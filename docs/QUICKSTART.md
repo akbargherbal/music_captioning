@@ -326,6 +326,7 @@ Controls for the polish phase:
 ```bash
 --rewrite-model Qwen/Qwen3-4B-Instruct-2507   # default
 --rewrite-quantization none                  # default: plain fp16, no quantization
+--repolish                                   # redo only polishing from stored captions
 --no-rewrite                                 # debug: caption only (album stays pending)
 ```
 
