@@ -157,21 +157,29 @@ def check_rewrite(sections: Sequence[str], output: str) -> list[str]:
 def rewrite_caption(
     sections: Sequence[str],
     rewriter: Rewriter | None,
+    *,
+    fallback: str | None = None,
 ) -> RewriteResult:
     """Rewrite concatenated chunk captions into one description.
 
     Stateless: one fresh message list per call. On any failure the untouched
     source text is returned with ``status="fallback"`` and the reasons, so the
-    caller can log it and nothing is lost.
+    caller can log it and nothing is lost. ``fallback`` lets the caller reuse the
+    deterministic merge already stored as ``caption_raw``.
     """
     source = build_source_text(sections)
     source_words = len(source.split())
+    fallback_text = (
+        fallback
+        if fallback is not None
+        else " ".join(s.strip() for s in sections if s and s.strip())
+    )
     if not source:
         return RewriteResult("", "fallback", ("empty source",), 0, 0)
     if rewriter is None:
         return RewriteResult(
-            source, "fallback", ("no rewriter configured",), source_words,
-            source_words,
+            fallback_text, "fallback", ("no rewriter configured",), source_words,
+            len(fallback_text.split()),
         )
 
     name = getattr(rewriter, "name", type(rewriter).__name__)
@@ -179,11 +187,11 @@ def rewrite_caption(
         output = rewriter.rewrite(build_messages(source))
     except Exception as exc:  # keep one bad track from killing a batch
         return RewriteResult(
-            source,
+            fallback_text,
             "fallback",
             (f"rewriter error: {type(exc).__name__}: {exc}",),
             source_words,
-            source_words,
+            len(fallback_text.split()),
             name,
         )
 
@@ -191,7 +199,7 @@ def rewrite_caption(
     reasons = check_rewrite(sections, output)
     if reasons:
         return RewriteResult(
-            source, "fallback", tuple(reasons), source_words,
+            fallback_text, "fallback", tuple(reasons), source_words,
             len(output.split()), name,
         )
     return RewriteResult(

@@ -5,6 +5,8 @@ from pathlib import Path
 
 from src.resume import (
     CAPTION_PIPELINE_VERSION,
+    CAPTION_STAGE_CAPTIONED,
+    CAPTION_STAGE_POLISHED,
     SkippedTrack,
     album_key,
     album_output_path,
@@ -22,7 +24,10 @@ from src.resume import (
     skip_reason,
 )
 
-CURRENT_OUTPUT = {"caption_pipeline_version": CAPTION_PIPELINE_VERSION}
+CURRENT_OUTPUT = {
+    "caption_pipeline_version": CAPTION_PIPELINE_VERSION,
+    "caption_stage": CAPTION_STAGE_POLISHED,
+}
 
 ROOT = "gs://bucket/DISCOGRAPHY"
 
@@ -97,6 +102,21 @@ def test_is_done_requires_file_and_current_pipeline(tmp_path: Path):
     )
     assert is_done("ELISSA/A", manifest, outputs) is True
     assert is_done("ELISSA/missing", manifest, outputs) is False
+
+
+def test_is_done_requires_polish_stage(tmp_path: Path):
+    outputs = tmp_path / "outputs"
+    (outputs / "ELISSA").mkdir(parents=True)
+    manifest = {"albums": {"ELISSA/A": {"path": "ELISSA/A.json"}}}
+    path = outputs / "ELISSA" / "A.json"
+    for stage in (None, CAPTION_STAGE_CAPTIONED):
+        data = {"caption_pipeline_version": CAPTION_PIPELINE_VERSION}
+        if stage:
+            data["caption_stage"] = stage
+        path.write_text(json.dumps(data), encoding="utf-8")
+        assert is_done("ELISSA/A", manifest, outputs) is False, data
+    path.write_text(json.dumps(CURRENT_OUTPUT), encoding="utf-8")
+    assert is_done("ELISSA/A", manifest, outputs) is True
 
 
 def test_is_done_rejects_old_and_malformed_versions(tmp_path: Path):

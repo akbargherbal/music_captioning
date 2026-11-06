@@ -22,7 +22,13 @@ MANIFEST_VERSION = 1
 # `scripts/batch.py` re-captions them instead of skipping them.
 #   1 (implicit) = no version field: fixed 60 s chunks + blind join
 #   2            = silence trim + rebalanced ~90 s chunks + deterministic merge
-CAPTION_PIPELINE_VERSION = 2
+#   3            = two-phase album: caption every track, then polish every track
+#                  with a small rewrite model; raw chunk captions are kept
+CAPTION_PIPELINE_VERSION = 3
+
+# Album lifecycle. A version-3 album is only "done" after the polish phase.
+CAPTION_STAGE_CAPTIONED = "captioned"
+CAPTION_STAGE_POLISHED = "polished"
 
 
 class SkippedTrack(Exception):
@@ -152,11 +158,12 @@ def is_current_caption_output(data: object) -> bool:
 
 
 def is_done(key: str, manifest: dict[str, object], outputs_root: Path | str) -> bool:
-    """An album is done only if it exists **and** uses the current pipeline.
+    """An album is done only if it exists **and** finished every caption stage.
 
     The album file is the source of truth: a manifest entry alone is not enough,
     because outputs produced by an older chunking/merge pipeline (or by the
-    pre-versioning code) must be re-captioned. Missing/corrupt JSON is not done.
+    pre-versioning code) must be re-captioned. Missing/corrupt JSON is not done,
+    and a version-3 album that was only captioned is not done until polished.
     """
     entry = (manifest.get("albums") or {}).get(key)  # type: ignore[union-attr]
     if not isinstance(entry, dict):
@@ -171,7 +178,11 @@ def is_done(key: str, manifest: dict[str, object], outputs_root: Path | str) -> 
         data = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
         return False
-    return is_current_caption_output(data)
+    return (
+        is_current_caption_output(data)
+        and isinstance(data, dict)
+        and data.get("caption_stage") == CAPTION_STAGE_POLISHED
+    )
 
 
 def album_status(key: str, manifest: dict[str, object]) -> str | None:

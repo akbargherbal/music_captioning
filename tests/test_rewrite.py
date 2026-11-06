@@ -95,7 +95,7 @@ def test_rejects_invented_instrument():
     result = rewrite_caption(SECTIONS, fake)
     assert not result.ok
     assert any("sitar" in r for r in result.reasons)
-    assert result.text == build_source_text(SECTIONS)
+    assert result.text == " ".join(SECTIONS)
 
 
 def test_rejects_ending_claim_when_final_section_has_none():
@@ -161,14 +161,14 @@ def test_rewriter_error_falls_back_to_source():
 
     result = rewrite_caption(SECTIONS, Broken())
     assert not result.ok
-    assert result.text == build_source_text(SECTIONS)
+    assert result.text == " ".join(SECTIONS)
     assert "CUDA out of memory" in result.reasons[0]
 
 
 def test_no_rewriter_returns_source_untouched():
     result = rewrite_caption(SECTIONS, None)
     assert not result.ok
-    assert result.text == build_source_text(SECTIONS)
+    assert result.text == " ".join(SECTIONS)
     assert "no rewriter" in result.reasons[0]
 
 

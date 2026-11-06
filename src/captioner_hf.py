@@ -219,6 +219,27 @@ class HFCaptioner:
         """Chunk count / trimmed seconds from the most recent ``caption_audio``."""
         return dict(self._last_run)
 
+    def unload(self) -> None:
+        """Drop the model so the next phase can have the T4's VRAM.
+
+        The batch runs captioning for the whole album, then polishing for the
+        whole album. Releasing the captioner before the rewrite model loads keeps
+        the two models from sharing VRAM; the weights are re-read from disk for
+        the next album.
+        """
+        self._model = None
+        self._processor = None
+        import gc
+
+        gc.collect()
+        try:
+            import torch
+
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception:  # pragma: no cover - CPU-only or no torch
+            pass
+
 
 def caption_and_tag(
     captioner: HFCaptioner,

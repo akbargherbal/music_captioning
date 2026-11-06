@@ -125,15 +125,21 @@ Both remain experimental; the union-vs-vote problem in
 
 Old album JSONs were produced by a different caption pipeline and must not be
 skipped by the resumable batch runner. Album output now carries
-`caption_pipeline_version` (`src/resume.py`, currently `2`; pre-versioning
-outputs have no field and count as version 1). `is_done()` reads the album file
-and requires the current version, so every pre-merge output is re-queued
-automatically — no `--force` and no hand-editing of `outputs/index.json`.
+`caption_pipeline_version` (`src/resume.py`, currently `3`; pre-versioning
+outputs have no field and count as version 1) and a `caption_stage`
+(`captioned` → `polished`). `is_done()` reads the album file and requires the
+current version **and** the `polished` stage, so every pre-merge or
+caption-only output is re-queued automatically — no `--force` and no
+hand-editing of `outputs/index.json`.
 
 `--retry-failed` also refuses to reuse per-track results from a version mismatch:
 the whole album is re-captioned, not just the previously failed tracks. Bump
-`CAPTION_PIPELINE_VERSION` whenever chunking, merge, prompt, model,
-quantization or decoding changes.
+`CAPTION_PIPELINE_VERSION` whenever chunking, merge, rewrite prompt/model,
+caption prompt/model, quantization or decoding changes.
+
+The deterministic merge described above is now only the fallback
+(`caption_raw`). The final `caption` comes from the stateless rewrite phase; the
+raw per-chunk captions stay in the album JSON for comparison.
 
 ## Known limits
 

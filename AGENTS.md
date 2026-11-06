@@ -177,8 +177,9 @@ Alternative backend (llama.cpp GGUF):
 
 - Python 3.10+, type hints on public functions, `pathlib` for paths.
 - `captioner.py` must: check files exist, raise clear errors, capture stderr, enforce a timeout, and never shell-interpolate user paths (use argument lists, not `shell=True`).
-- Long audio: trim leading/trailing silence (`ffmpeg silencedetect`, -50 dB, 0.5 s), then split into **equal** chunks with `plan_chunks()`. The HF backend targets ~90 s (cap 120 s); the GGUF path keeps the one-minute clips its author validated (cap 90 s). Equal chunks mean there is never a tiny final segment. Caption each chunk; merge tags with order-preserving dedupe; merge the prose with `src/merge.py` (one whole-song framing, no coda claims from non-final sections, near-duplicates dropped) instead of a blind `" ".join(...)`.
-- The merge is **deterministic string processing** — no second model call, no randomness.
+- Long audio: trim leading/trailing silence (`ffmpeg silencedetect`, -50 dB, 0.5 s), then split into **equal** chunks with `plan_chunks()`. The HF backend targets ~90 s (cap 120 s); the GGUF path keeps the one-minute clips its author validated (cap 90 s). Equal chunks mean there is never a tiny final segment. Caption each chunk; merge tags with order-preserving dedupe.
+- Keep every chunk caption (`chunk_captions`) and the deterministic merge (`caption_raw`) in the album JSON. The final `caption` is produced in a separate, **stateless** polish phase by a small instruct model (`src/rewrite.py`, plain text in/plain text out, no JSON, no history). Merging with `src/merge.py` is only the fallback, never the final prose.
+- The rewrite model and the audio captioner **never work at the same time**: finish captioning every track of the album, unload the captioner, then polish every track. The rewrite output is verified (no invented lexicon terms, no unsupported ending claim, length/markup checks); on failure the raw caption is kept with `rewrite_status: fallback` and the reasons. Verify, don't rewrite with heuristics.
 - Tag extraction is **deterministic lexicon matching** with word boundaries (`\b...\b`), lowercase, dedupe in order. Don't call a hosted LLM for it. Treat the output as **experimental** until `docs/TAG_AUDIT.md` is resolved.
 - Keep terms in `lexicon.json`, not hard-coded. Categories: `instruments`, `vocals`, `production`. Only emit a tag if the caption actually says it (e.g. no guessing vocal gender).
 - Output format: JSON `{instruments, vocals, production, caption, tags_experimental: true}`. The comma-joined `suno_prompt` is opt-in (`experimental_suno=True` / `--experimental-suno`), marked `suno_experimental`, and must not be advertised as a supported prompt.
@@ -194,13 +195,21 @@ Alternative backend (llama.cpp GGUF):
 - GitHub is the durable store; local disk is not. `scripts/batch.py` must
   checkpoint after **every album**: atomic write of
   `outputs/<ARTIST>/<album>.json`, update `outputs/index.json`, then
-  `git add` / `commit` / `push` immediately.
+  `git add` / `commit` / `push` immediately. It checkpoints twice per album —
+  once with the raw captions (`caption_stage: captioned`) and once after
+  polishing (`polished`) — so a rewrite crash never loses captioning work.
 - A fresh runtime resumes by `git pull` + reading the manifest. An album is done
-  only if its JSON exists **and** carries the current `caption_pipeline_version`
-  (`src/resume.py`). Missing or older versions are re-queued automatically, so a
-  caption-semantics change never silently reuses stale output. Bump the constant
-  whenever chunking, merge, prompt, model, quantization or decoding changes.
-  `--force` still redoes current albums.
+  only if its JSON exists, carries the current `caption_pipeline_version`
+  (`src/resume.py`, currently 3), **and** its `caption_stage` is `polished`.
+  Caption-only output is re-queued, so a caption-semantics or rewrite-semantics
+  change never silently reuses stale output. Bump the constant whenever
+  chunking, merge, rewrite prompt/model, caption prompt/model, quantization or
+  decoding changes. `--force` still redoes current albums.
+- Each album runs two strictly ordered phases: caption **all** its tracks, then
+  polish **all** its tracks with a separate small model. The raw per-chunk text
+  stays in the JSON, so a bad result can be traced to the captioner or to the
+  rewriter. `--no-rewrite` is a debug mode: the album stays `captioned` and is
+  re-captioned on the next normal run.
 - Audio is skip-if-present under `work/` (gitignored) and re-fetchable from
   GCS, so only the in-flight album is ever lost.
 - Writes must be atomic (temp file + `os.replace`) so a killed session cannot

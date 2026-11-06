@@ -308,11 +308,26 @@ python scripts/batch.py \
 This runner is designed for the project's own discography workflow; for a
 single file, use `demo.py`.
 
+Each album runs in two strictly ordered phases: it captions **all** tracks with
+the audio model, then unloads it and polishes **all** tracks with a small text
+model. The raw per-chunk captions (`chunk_captions`) and the deterministic merge
+(`caption_raw`) stay in the album JSON, so you can see whether a bad result came
+from the captioner or from the rewrite. The rewrite model is downloaded on first
+use (~8 GB for the default `Qwen3-4B-Instruct-2507` 8-bit).
+
 An album is skipped only when its JSON carries the current
-`caption_pipeline_version` (see `src/resume.py`). Outputs from an older
-chunking/merge pipeline have no such marker (or an older one) and are listed as
-pending, so they are re-captioned automatically. `--force` still redoes albums
-that are already current.
+`caption_pipeline_version` **and** `caption_stage: polished` (see
+`src/resume.py`). Older outputs, or albums that were only captioned, are listed
+as pending and are redone automatically. `--force` still redoes albums that are
+already current.
+
+Controls for the polish phase:
+
+```bash
+--rewrite-model Qwen/Qwen3-4B-Instruct-2507   # default
+--rewrite-quantization 8bit                  # 8bit | 4bit | none
+--no-rewrite                                 # debug: caption only (album stays pending)
+```
 
 ### Skip long or low-quality files
 

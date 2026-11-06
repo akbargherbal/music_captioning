@@ -1,9 +1,9 @@
 # Stateless caption rewrite
 
 Date: 2026-11-06
-Status: prototype. The rewrite module and its checks are implemented and unit
-tested; the batch/demo pipeline still uses the deterministic merge until the
-model is validated on real chunk captions on a Colab T4.
+Status: wired into `scripts/batch.py` as the per-album polish phase. The model
+and its checks are unit tested; real-caption quality on a T4 is still being
+validated.
 
 ## Why this exists
 
@@ -79,30 +79,47 @@ Caveat: those benchmarks summarize news articles; this task condenses already
 written English and is easier. No model is at zero, which is why the
 verification pass remains.
 
-## Usage (prototype)
+## Where it runs (per album, two phases)
 
-On Colab, capture the raw chunk captions for one track:
+`scripts/batch.py` never interleaves the models:
+
+1. **Caption** every track of the album with the audio captioner. Each track
+   stores `chunk_captions` (raw model output per chunk) and `caption_raw` (the
+   deterministic merge).
+2. Unload the captioner, then **polish** every track with the rewrite model.
+   Single-chunk tracks are left as they are. The caption-only album is already
+   checkpointed (written, manifest updated, committed) with
+   `caption_stage: "captioned"`, and is checkpointed again as `"polished"` after
+   the rewrite phase.
+
+If the rewrite model fails to load, the album stays `captioned`, the raw
+captions remain committed, and the next run reuses them instead of re-captioning
+the whole album.
+
+The raw captions are never deleted, so a bad result can be traced to the
+captioner (look at `chunk_captions`) or to the rewrite model (compare
+`caption_raw` and `caption`, and read `rewrite_status` / `rewrite_reasons`).
+
+## Manual experiment
+
+To try the rewrite on one track without touching the batch output:
 
 ```bash
 python scripts/demo.py "/content/fadhl_shaker_selected/حبيتك.mp3" \
   --keep-chunk-captions -o /tmp/habeetak.json
-```
 
-Then rewrite them (the model is downloaded on first use):
-
-```bash
 python scripts/rewrite_demo.py /tmp/habeetak.json
 python scripts/rewrite_demo.py /tmp/habeetak.json --quantization 4bit
 python scripts/rewrite_demo.py /tmp/habeetak.json --model Qwen/Qwen3-8B
 ```
 
-A plain text file with one caption per paragraph works too. The script prints
-the status, rejection reasons, timing, and the rewrite.
+The script prints the status, rejection reasons, timing, and the rewrite. A
+plain text file with one caption per paragraph works too.
 
 ## What is not done yet
 
-- The batch/demo pipeline still calls `merge_section_captions`; the rewrite is
-  not wired in.
-- `CAPTION_PIPELINE_VERSION` stays at 2 until the rewrite becomes part of the
-  output, then it must move to 3 (older albums re-queue automatically).
-- Quality on real captions (and 4B vs 8B) must be compared before wiring.
+- Real-caption quality on a T4 (4B vs 8B) has not been measured yet.
+- `scripts/demo.py` still shows the deterministic merge for a single file; only
+  the batch pipeline runs the polish phase.
+- `CAPTION_PIPELINE_VERSION` is 3; keep it in sync if the prompt or model
+  changes.

@@ -143,3 +143,18 @@ class HFRewriter:
     def last_run(self) -> dict[str, object]:
         """Metadata from the most recent rewrite."""
         return dict(self._last_run)
+
+    def unload(self) -> None:
+        """Drop the rewrite model, freeing VRAM for the next caption pass."""
+        self._model = None
+        self._tokenizer = None
+        import gc
+
+        gc.collect()
+        try:
+            import torch
+
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception:  # pragma: no cover - CPU-only or no torch
+            pass

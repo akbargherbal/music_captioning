@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """Resumable batch captioning across ephemeral Colab runtimes.
 
-GitHub is the durable store. For every album we:
-  1. download its tracks from GCS (skip files already cached),
-  2. caption them,
-  3. atomically write outputs/<ARTIST>/<album>.json,
-  4. update outputs/index.json,
-  5. git add/commit/push immediately.
+GitHub is the durable store. Each album runs in two strictly separated phases:
+
+  1. **Caption** every track (audio captioner only), keeping the raw per-chunk
+     text in ``chunk_captions`` and the deterministic merge in ``caption_raw``.
+  2. **Polish** every track (small rewrite model only): the captioner is
+     unloaded first, so the two models never work at the same time.
+
+Then the album JSON is written atomically, the manifest updated, and the work
+committed/pushed immediately. The raw chunk captions stay in the JSON, so a bad
+result can be traced to the captioner or to the rewrite model.
 
 On a fresh runtime, run the same command: it pulls, reads the manifest, and
-skips every album already pushed. Nothing is redone — only the in-flight album
-is lost if the runtime dies.
+skips every album already polished. Nothing is redone — only the in-flight
+album is lost if the runtime dies.
 
 A single bad track does not sink its album: the track is logged under
 `failed_tracks`, the rest of the album is written/committed, and the album is
@@ -31,12 +35,15 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Callable
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from src.resume import (  # noqa: E402
     CAPTION_PIPELINE_VERSION,
+    CAPTION_STAGE_CAPTIONED,
+    CAPTION_STAGE_POLISHED,
     SkippedTrack,
     album_output_path,
     album_status,
@@ -50,6 +57,7 @@ from src.resume import (  # noqa: E402
     skip_reason,
 )
 from src.tags import CATEGORIES  # noqa: E402
+from src.rewriter_hf import DEFAULT_MODEL_ID as DEFAULT_REWRITE_MODEL  # noqa: E402
 
 DEFAULT_ROOT = "gs://akbar-december-2024-backup/DISCOGRAPHY"
 
@@ -113,33 +121,28 @@ def git_checkpoint(repo: Path, message: str, push: bool, retries: int = 3) -> No
     print("  WARNING: could not push; work is committed locally only")
 
 
-def process_album(
+def caption_album(
     captioner,
     entry: dict,
     workdir: Path,
-    outputs: Path,
     existing: dict | None = None,
     retry_only_failed: bool = False,
     max_track_seconds: float = 0.0,
     min_bitrate_kbps: float = 0.0,
     experimental_suno: bool = False,
 ) -> dict:
-    """Caption one album, **isolating per-track failures**.
+    """Phase 1: caption **every** track of the album, keeping the raw text.
 
-    A track that raises is recorded under ``failed_tracks`` and skipped; the
-    remaining tracks are still written and committed. A track longer than
-    ``max_track_seconds`` (e.g. a concert) or below ``min_bitrate_kbps`` (low
-    quality) is recorded under ``skipped_tracks`` instead. Only if *every*
-    non-skipped track fails does the album count as failed — in that case
-    nothing is written, so it stays pending.
+    Nothing is polished here. Each track stores the untouched per-chunk
+    captions (``chunk_captions``) and the deterministic merge (``caption_raw``)
+    so the rewrite phase, and a human, can compare what the captioner said with
+    what the editor produced.
     """
     from src.captioner import audio_stream_info
     from src.captioner_hf import caption_and_tag
     from src.tags import TAGS_EXPERIMENTAL, merge_tags, to_suno
 
-    # Never reuse per-track results from an older caption pipeline, even when
-    # --retry-failed asks for a partial retry: those captions are what we are
-    # replacing.
+    # Never reuse per-track results from an older caption pipeline.
     if existing is not None and not is_current_caption_output(existing):
         existing = None
         retry_only_failed = False
@@ -164,7 +167,7 @@ def process_album(
             captioner, local, experimental_suno=experimental_suno
         )
         caption_s = time.time() - t0
-        result.pop("chunk_captions", None)
+        chunks = list(result.get("chunk_captions") or [])
         run = getattr(captioner, "last_run", {}) or {}
         track_obj = {
             "file": filename,
@@ -176,7 +179,11 @@ def process_album(
             "instruments": result["instruments"],
             "vocals": result["vocals"],
             "production": result["production"],
-            "caption": result["caption"],
+            # Kept for audit: what the captioner wrote, before any editing.
+            "chunk_captions": chunks,
+            "caption_raw": result["caption"],
+            "caption": "",
+            "rewrite_status": "pending",
             "tags_experimental": TAGS_EXPERIMENTAL,
         }
         if experimental_suno:
@@ -222,6 +229,7 @@ def process_album(
         "production": merged["production"],
         "tags_experimental": TAGS_EXPERIMENTAL,
         "caption_pipeline_version": CAPTION_PIPELINE_VERSION,
+        "caption_stage": CAPTION_STAGE_CAPTIONED,
         "tracks": track_results,
         "failed_tracks": failed,
         "skipped_tracks": skipped,
@@ -229,7 +237,138 @@ def process_album(
     if experimental_suno:
         album_obj["suno_prompt"] = to_suno(merged)
         album_obj["suno_experimental"] = True
-    atomic_write_json(album_output_path(outputs, artist, album), album_obj)
+    return album_obj
+
+
+def polish_album(album_obj: dict, rewriter) -> dict:
+    """Phase 2: rewrite every multi-chunk track with the small model.
+
+    Runs **after** every caption in the album exists (the captioner is unloaded
+    by the caller). Single-chunk tracks are already one coherent description and
+    are left untouched. A rejected rewrite falls back to ``caption_raw`` and
+    records the reason; the raw chunk text is never removed.
+    """
+    from src.rewrite import REWRITE_PROMPT_VERSION, rewrite_caption
+
+    tracks = album_obj.get("tracks") or []
+    if rewriter is None:
+        for track in tracks:
+            track["caption"] = track.get("caption_raw", "")
+            track["rewrite_status"] = "disabled"
+        album_obj["caption_stage"] = CAPTION_STAGE_CAPTIONED
+        album_obj["rewrite"] = {
+            "model": None,
+            "prompt_version": REWRITE_PROMPT_VERSION,
+            "disabled": len(tracks),
+        }
+        return album_obj
+
+    summary: dict[str, object] = {
+        "model": getattr(rewriter, "name", None),
+        "prompt_version": REWRITE_PROMPT_VERSION,
+        "ok": 0,
+        "fallback": 0,
+        "error": 0,
+        "single_chunk": 0,
+    }
+    rewrite_seconds = 0.0
+    for track in tracks:
+        chunks = list(track.get("chunk_captions") or [])
+        if len(chunks) <= 1:
+            track["caption"] = chunks[0] if chunks else track.get("caption_raw", "")
+            track["rewrite_status"] = "single_chunk"
+            summary["single_chunk"] = int(summary["single_chunk"]) + 1
+            continue
+
+        started = time.time()
+        result = rewrite_caption(
+            chunks, rewriter, fallback=track.get("caption_raw")
+        )
+        elapsed = time.time() - started
+        rewrite_seconds += elapsed
+        track["caption"] = result.text
+        track["rewrite_seconds"] = round(elapsed, 1)
+        track["rewrite_model"] = result.rewriter
+        track["rewrite_prompt_version"] = result.prompt_version
+        if result.reasons:
+            track["rewrite_reasons"] = list(result.reasons)
+        if result.ok:
+            track["rewrite_status"] = "ok"
+            summary["ok"] = int(summary["ok"]) + 1
+        elif any(r.startswith("rewriter error:") for r in result.reasons):
+            # The model itself failed (load/OOM); keep the raw caption and
+            # leave the album at 'captioned' so the next run retries only this.
+            track["rewrite_status"] = "error"
+            summary["error"] = int(summary["error"]) + 1
+        else:
+            track["rewrite_status"] = "fallback"
+            summary["fallback"] = int(summary["fallback"]) + 1
+
+    attempted = int(summary["ok"]) + int(summary["fallback"]) + int(summary["error"])
+    if attempted and int(summary["ok"]) == 0 and int(summary["error"]) == attempted:
+        # Every rewrite errored: do not mark the album done, and do not lose the
+        # captioning work already on disk.
+        album_obj["caption_stage"] = CAPTION_STAGE_CAPTIONED
+        summary["status"] = "failed"
+    else:
+        album_obj["caption_stage"] = CAPTION_STAGE_POLISHED
+        summary["status"] = "ok"
+    album_obj["rewrite"] = summary
+    album_obj["total_rewrite_seconds"] = round(rewrite_seconds, 1)
+    return album_obj
+
+
+def process_album(
+    captioner,
+    entry: dict,
+    workdir: Path,
+    outputs: Path,
+    existing: dict | None = None,
+    retry_only_failed: bool = False,
+    max_track_seconds: float = 0.0,
+    min_bitrate_kbps: float = 0.0,
+    experimental_suno: bool = False,
+    rewriter=None,
+    rewrite: bool = True,
+    checkpoint: Callable[[dict, str], None] | None = None,
+) -> dict:
+    """Caption **all** tracks, then polish **all** tracks, then write the album.
+
+    The two phases never interleave: the captioner is unloaded before the
+    rewrite model is used. ``checkpoint(obj, stage)`` is called after the caption
+    phase so the caller can persist/commit the raw captions before polishing;
+    that way a rewrite crash never loses the captioning work. A track that raises
+    is recorded under ``failed_tracks`` and skipped; a track over
+    ``max_track_seconds`` or below ``min_bitrate_kbps`` is recorded under
+    ``skipped_tracks``. Only if *every* non-skipped track fails does the album
+    count as failed.
+    """
+    album_obj = caption_album(
+        captioner, entry, workdir,
+        existing=existing,
+        retry_only_failed=retry_only_failed,
+        max_track_seconds=max_track_seconds,
+        min_bitrate_kbps=min_bitrate_kbps,
+        experimental_suno=experimental_suno,
+    )
+
+    if checkpoint is not None:
+        checkpoint(album_obj, CAPTION_STAGE_CAPTIONED)
+
+    if rewrite and rewriter is not None:
+        unload = getattr(captioner, "unload", None)
+        if callable(unload):
+            unload()
+        album_obj = polish_album(album_obj, rewriter)
+        unload = getattr(rewriter, "unload", None)
+        if callable(unload):
+            unload()
+    else:
+        album_obj = polish_album(album_obj, None)
+
+    atomic_write_json(
+        album_output_path(outputs, entry["artist"], entry["album"]), album_obj
+    )
     return album_obj
 
 
@@ -246,6 +385,24 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--outputs", type=Path, default=REPO_ROOT / "outputs")
     parser.add_argument("--manifest", type=Path, default=REPO_ROOT / "outputs" / "index.json")
     parser.add_argument("--hf-model", type=Path, default=REPO_ROOT / "models" / "Ace-Step-Captioner-4bit")
+    parser.add_argument(
+        "--rewrite-model", default=DEFAULT_REWRITE_MODEL,
+        help="small instruct model used in the polish phase (default: "
+             "Qwen3-4B-Instruct-2507)",
+    )
+    parser.add_argument(
+        "--rewrite-quantization", choices=("8bit", "4bit", "none"), default="8bit",
+        help="rewrite-model quantization (default: 8bit; 4bit hallucinates slightly more)",
+    )
+    parser.add_argument(
+        "--rewrite-max-new-tokens", type=int, default=512,
+        help="hard cap for one rewrite",
+    )
+    parser.add_argument(
+        "--no-rewrite", action="store_true",
+        help="caption only (debug); albums stay at stage 'captioned' and are "
+             "re-captioned on the next normal run",
+    )
     parser.add_argument(
         "--chunk-seconds", type=float, default=None,
         help="target chunk length (default: 90 for the hf backend); chunks are "
@@ -319,13 +476,50 @@ def main(argv: list[str] | None = None) -> int:
         trim_silence=not args.no_trim_silence,
         **chunk_args,
     )
+    rewriter = None
+    if not args.no_rewrite:
+        from src.rewriter_hf import HFRewriter
+
+        rewriter = HFRewriter(
+            model_id=args.rewrite_model,
+            quantization=args.rewrite_quantization,
+            max_new_tokens=args.rewrite_max_new_tokens,
+        )
     t0 = time.time()
     captioner._load()
     print(f"MODEL LOAD {time.time() - t0:.1f}s", flush=True)
+    if rewriter is not None:
+        print(f"Rewrite model: {rewriter.name} ({rewriter.quantization})",
+              flush=True)
 
     started = time.time()
     completed = 0
     durations: list[float] = []
+
+    def record_album(key: str, entry: dict, album_obj: dict, stage: str,
+                     message: str) -> None:
+        atomic_write_json(
+            album_output_path(args.outputs, entry["artist"], entry["album"]),
+            album_obj,
+        )
+        manifest["albums"][key] = {
+            "path": f"{entry['artist']}/{entry['album']}.json",
+            "source_dir": entry["source_dir"],
+            "track_count": album_obj["track_count"],
+            "failed_count": album_obj.get("failed_count", 0),
+            "skipped_count": album_obj.get("skipped_count", 0),
+            "status": album_obj.get("status", "ok"),
+            "caption_pipeline_version": CAPTION_PIPELINE_VERSION,
+            "caption_stage": stage,
+            "rewrite_fallback_count": (album_obj.get("rewrite") or {}).get("fallback", 0),
+            "rewrite_error_count": (album_obj.get("rewrite") or {}).get("error", 0),
+            "total_caption_seconds": album_obj["total_caption_seconds"],
+            "completed_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        }
+        manifest["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+        atomic_write_json(args.manifest, manifest)
+        git_checkpoint(REPO_ROOT, message, push=push)
+
     for i, key in enumerate(pending, 1):
         if args.max_albums and completed >= args.max_albums:
             print(f"Reached --max-albums={args.max_albums}; stopping.")
@@ -342,19 +536,30 @@ def main(argv: list[str] | None = None) -> int:
 
         prior_obj = None
         retry_only = False
-        if args.retry_failed:
-            prior_path = album_output_path(args.outputs, entry["artist"], entry["album"])
-            if prior_path.exists():
-                try:
-                    prior_obj = json.loads(prior_path.read_text(encoding="utf-8"))
-                    if not is_current_caption_output(prior_obj):
-                        # Old pipeline output: redo the whole album, not just
-                        # the previously failed tracks.
-                        prior_obj = None
-                    else:
-                        retry_only = prior_obj.get("status") != "ok"
-                except (json.JSONDecodeError, OSError):
-                    prior_obj = None
+        prior_path = album_output_path(args.outputs, entry["artist"], entry["album"])
+        if prior_path.exists() and not args.force:
+            try:
+                data = json.loads(prior_path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                data = None
+            if isinstance(data, dict) and is_current_caption_output(data):
+                if args.retry_failed:
+                    prior_obj = data
+                    retry_only = data.get("status") != "ok"
+                elif data.get("caption_stage") == CAPTION_STAGE_CAPTIONED:
+                    # Captioning is already paid for but polishing failed or was
+                    # disabled: reuse every successful caption and retry only the
+                    # failed tracks, instead of re-captioning the whole album.
+                    prior_obj = data
+                    retry_only = True
+
+        def checkpoint(obj, stage, _key=key, _entry=entry):
+            # Persist+push the raw captions before the polish phase, so a rewrite
+            # crash never loses the captioning work.
+            record_album(
+                _key, _entry, obj, stage,
+                f"captions({_key}): {obj['track_count']} tracks [{stage}]",
+            )
 
         album_t0 = time.time()
         try:
@@ -364,45 +569,46 @@ def main(argv: list[str] | None = None) -> int:
                 max_track_seconds=args.max_track_seconds,
                 min_bitrate_kbps=args.min_bitrate_kbps,
                 experimental_suno=args.experimental_suno,
+                rewriter=rewriter,
+                checkpoint=checkpoint,
             )
         except Exception as exc:  # noqa: BLE001 - keep going
             print(f"  ERROR on {key}: {type(exc).__name__}: {exc}")
             continue
-
-        manifest["albums"][key] = {
-            "path": f"{entry['artist']}/{entry['album']}.json",
-            "source_dir": entry["source_dir"],
-            "track_count": album_obj["track_count"],
-            "failed_count": album_obj.get("failed_count", 0),
-            "skipped_count": album_obj.get("skipped_count", 0),
-            "status": album_obj.get("status", "ok"),
-            "caption_pipeline_version": CAPTION_PIPELINE_VERSION,
-            "total_caption_seconds": album_obj["total_caption_seconds"],
-            "completed_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        }
-        manifest["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
-        atomic_write_json(args.manifest, manifest)
 
         album_min = (time.time() - album_t0) / 60.0
         durations.append(album_min)
         completed += 1
         n_failed = album_obj.get("failed_count", 0)
         n_skipped = album_obj.get("skipped_count", 0)
+        rw = album_obj.get("rewrite") or {}
+        n_fallback = int(rw.get("fallback", 0) or 0)
+        n_error = int(rw.get("error", 0) or 0)
         print(f"  done in {album_min:.1f} min "
-              f"({album_obj['total_caption_seconds']}s captioning)", flush=True)
+              f"({album_obj['total_caption_seconds']}s captioning, "
+              f"{album_obj.get('total_rewrite_seconds', 0)}s polishing)",
+              flush=True)
         if n_skipped:
             print(f"  note: {n_skipped} track(s) skipped "
                   f"(over --max-track-seconds={args.max_track_seconds:.0f})", flush=True)
         if n_failed:
             print(f"  WARNING: {n_failed} track(s) failed; re-run with "
                   f"--retry-failed to retry just them.", flush=True)
-        git_checkpoint(
-            REPO_ROOT,
+        if n_fallback:
+            print(f"  WARNING: {n_fallback} rewrite(s) fell back to the raw "
+                  f"caption; see rewrite_reasons in the JSON", flush=True)
+        if n_error:
+            print(f"  WARNING: {n_error} rewrite(s) errored; album stays "
+                  f"'captioned' and will be retried without re-captioning",
+                  flush=True)
+        record_album(
+            key, entry, album_obj,
+            album_obj.get("caption_stage", CAPTION_STAGE_CAPTIONED),
             f"captions({key}): {album_obj['track_count']} tracks"
             + (f", {n_failed} failed" if n_failed else "")
             + (f", {n_skipped} skipped" if n_skipped else "")
+            + (f", {n_fallback} rewrite-fallback" if n_fallback else "")
             + f" ({len(done) + completed}/{len(albums)})",
-            push=push,
         )
 
     remaining = len(pending) - completed
