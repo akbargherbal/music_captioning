@@ -18,6 +18,12 @@
 
 ### Added
 
+- `docs/QUICKSTART.md`: a beginner-friendly, end-to-end guide (Colab setup,
+  first run, output fields, common tasks, troubleshooting, glossary) aimed at
+  people who are new to the project.
+- `docs/README.md`: an index of the project documentation, linked from the root
+  README.
+
 - `scripts/batch.py`: resumable discography runner. After every album it writes
   `outputs/<ARTIST>/<album>.json`, updates `outputs/index.json`, and commits +
   pushes — so a fresh (ephemeral) Colab runtime resumes where it stopped.

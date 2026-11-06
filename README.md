@@ -1,5 +1,9 @@
 # Music Captioning
 
+> **New here?** Start with [`docs/QUICKSTART.md`](docs/QUICKSTART.md). It walks
+> you through Colab setup, a first run, the output fields, troubleshooting and a
+> glossary — no prior knowledge of the model or Suno needed.
+
 Given **any music track**, produce a prose description plus **experimental**
 term lists describing its **instruments**, **vocals**, and **production**.
 
@@ -28,8 +32,14 @@ A llama.cpp GGUF backend is also supported; see *Alternative backend* below.
 - Google Colab with a **T4 GPU** (sm_75). No bf16, no FlashAttention.
 - `ffmpeg` / `ffprobe` on `PATH` (used to split long tracks).
 - Python 3.10+.
+- ~7 GB free disk for the 4-bit model (Colab gives this by default).
+- No Hugging Face token: both model repositories are public.
+- CPU-only is fine for `pytest`, but captioning needs the GPU.
 
 ## Quickstart (fresh Colab runtime, start to finish)
+
+For a slower walkthrough with troubleshooting and a glossary, use
+[`docs/QUICKSTART.md`](docs/QUICKSTART.md). The short version:
 
 Every step is idempotent — re-running skips what already exists. Colab already
 provides `torch`, `ffmpeg` and `ffprobe`; only the extra packages are installed.
@@ -106,7 +116,8 @@ Resulting experimental tags:
 
 By default `scripts/demo.py` **only prints**; nothing is written to disk. Pass
 `--out PATH` (e.g. `--out outputs/elisa.json`) to also save the JSON — parent
-directories are created and `outputs/` is gitignored.
+directories are created. The example path `outputs/elisa.json` is gitignored;
+batch album results under `outputs/<ARTIST>/` are tracked by git.
 
 `scripts/demo.py --json` prints:
 
@@ -215,6 +226,16 @@ PY
 python scripts/demo.py SONG.mp3 --backend llamacpp
 ```
 
+## Documentation
+
+| Document | What it covers |
+|---|---|
+| [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | First-time setup, first run, output fields, troubleshooting, glossary. |
+| [`docs/RESULTS.md`](docs/RESULTS.md) | Measured caption time and VRAM on a T4. |
+| [`docs/TAG_AUDIT.md`](docs/TAG_AUDIT.md) | Why the term lists are experimental; 5-track audit and corpus numbers. |
+| [`docs/TRANSCRIPTION.md`](docs/TRANSCRIPTION.md) | The separate ABC/maqam transcription pipeline. |
+| [`docs/README.md`](docs/README.md) | Index of all documents. |
+
 ## Layout
 
 ```
@@ -226,7 +247,9 @@ scripts/demo.py      # end-to-end CLI
 scripts/benchmark.py # per-track timing + VRAM benchmark
 scripts/build_llamacpp.sh
 tests/               # pure-Python, no GPU/model needed
+docs/QUICKSTART.md   # beginner walkthrough
 docs/RESULTS.md      # real measured VRAM + timing
+docs/TAG_AUDIT.md    # extraction accuracy audit
 ```
 
 ## Testing

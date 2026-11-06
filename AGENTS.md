@@ -85,10 +85,17 @@ Rejected options (don't switch to them silently):
 │   ├── benchmark.py                # per-track timing + VRAM benchmark
 │   ├── batch.py                    # resumable discography runner
 │   └── build_llamacpp.sh           # idempotent CUDA build (alternative runtime)
+├── docs/
+│   ├── QUICKSTART.md               # beginner walkthrough (start here)
+│   ├── README.md                   # documentation index
+│   └── RESULTS.md, TAG_AUDIT.md    # measurements + extraction audit
 └── models/                         # gitignored
 ```
 
 ## Setup commands
+
+For a beginner-friendly walkthrough, see `docs/QUICKSTART.md`. The commands
+below are the short version.
 
 Fresh Colab runtime, in order (all steps idempotent). Colab already provides
 `torch`, `ffmpeg` and `ffprobe`; the HF repos are public, so no token is needed.
