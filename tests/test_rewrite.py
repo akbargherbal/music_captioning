@@ -175,8 +175,8 @@ def test_no_rewriter_returns_source_untouched():
 def test_hf_rewriter_defaults():
     r = HFRewriter()
     assert r.name == DEFAULT_MODEL_ID
-    assert r.quantization == "8bit"
-    assert r.max_new_tokens == 512
+    assert r.quantization == "none"
+    assert r.max_new_tokens == 384
     assert HFRewriter(quantization="4bit").quantization == "4bit"
 
 

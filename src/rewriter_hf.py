@@ -4,9 +4,11 @@ The rewrite model is a small text-only instruct LLM (default
 ``Qwen/Qwen3-4B-Instruct-2507``), separate from the audio captioner. It receives
 a fixed system instruction plus the raw caption text and returns plain prose.
 
-T4 (sm_75) constraints apply: fp16 compute, no bf16, no FlashAttention. 8-bit
-weights are the default because 4-bit quantization raises hallucination rates
-slightly and a 4B model still fits beside the captioner (~8.4 GiB + ~4.3 GiB).
+T4 (sm_75) constraints apply: fp16 compute, no bf16, no FlashAttention. The
+default is **plain fp16** (`quantization="none"`): a 4B model is ~8 GiB and fits
+alone on the T4 (the captioner is unloaded first), it loads without the slow
+bitsandbytes quantization pass, and it avoids 8-bit dequantization overhead.
+Use 4-bit only if you must share the GPU; 8-bit buys nothing on a T4.
 
 Heavy imports are lazy, so the dataclass can be imported and inspected on a
 CPU-only runtime.
@@ -21,7 +23,7 @@ from pathlib import Path
 from .rewrite import REWRITE_PROMPT_VERSION
 
 DEFAULT_MODEL_ID = "Qwen/Qwen3-4B-Instruct-2507"
-DEFAULT_MAX_NEW_TOKENS = 512
+DEFAULT_MAX_NEW_TOKENS = 384
 
 
 class RewriterError(RuntimeError):
@@ -33,7 +35,7 @@ class HFRewriter:
     """Rewrite text with a small instruct model, one call at a time."""
 
     model_id: str = DEFAULT_MODEL_ID
-    quantization: str = "8bit"  # "8bit" | "4bit" | "none"
+    quantization: str = "none"  # "none" (fp16, default) | "4bit" | "8bit"
     max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS
     device: str = "auto"
     model_dir: Path | None = None  # local snapshot; defaults to the HF cache

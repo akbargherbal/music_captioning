@@ -33,6 +33,7 @@ import argparse
 import json
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import Callable
@@ -66,6 +67,31 @@ DEFAULT_ROOT = "gs://akbar-december-2024-backup/DISCOGRAPHY"
 # (writing JSON + manifest without ever pushing). Set these if unset.
 FALLBACK_GIT_NAME = "akbargherbal"
 FALLBACK_GIT_EMAIL = "akbargherbal@users.noreply.github.com"
+
+
+def prefetch_model(model_id: str) -> threading.Thread:
+    """Download the rewrite weights in the background (no GPU, no loading).
+
+    The polish phase runs after captioning; having the files already cached
+    removes a multi-minute download from the critical path. If the download is
+    still running when polish starts, the caller joins this thread first.
+    """
+
+    def run() -> None:
+        try:
+            from huggingface_hub import snapshot_download
+
+            snapshot_download(model_id)
+            print(f"[prefetch] {model_id} ready", flush=True)
+        except Exception as exc:  # noqa: BLE001 - never kill the batch
+            print(
+                f"[prefetch] {model_id} failed: {type(exc).__name__}: {exc}",
+                flush=True,
+            )
+
+    thread = threading.Thread(target=run, name="rewrite-prefetch", daemon=True)
+    thread.start()
+    return thread
 
 
 def _run(cmd: list[str]) -> subprocess.CompletedProcess[str]:
@@ -331,6 +357,7 @@ def process_album(
     rewriter=None,
     rewrite: bool = True,
     checkpoint: Callable[[dict, str], None] | None = None,
+    before_polish: Callable[[], None] | None = None,
 ) -> dict:
     """Caption **all** tracks, then polish **all** tracks, then write the album.
 
@@ -356,6 +383,8 @@ def process_album(
         checkpoint(album_obj, CAPTION_STAGE_CAPTIONED)
 
     if rewrite and rewriter is not None:
+        if before_polish is not None:
+            before_polish()  # e.g. wait for the background weight download
         unload = getattr(captioner, "unload", None)
         if callable(unload):
             unload()
@@ -391,17 +420,23 @@ def main(argv: list[str] | None = None) -> int:
              "Qwen3-4B-Instruct-2507)",
     )
     parser.add_argument(
-        "--rewrite-quantization", choices=("8bit", "4bit", "none"), default="8bit",
-        help="rewrite-model quantization (default: 8bit; 4bit hallucinates slightly more)",
+        "--rewrite-quantization", choices=("none", "4bit", "8bit"), default="none",
+        help="default none = plain fp16 (a 4B model fits alone on the T4 and "
+             "loads fastest); quantization is only a memory fallback",
     )
     parser.add_argument(
-        "--rewrite-max-new-tokens", type=int, default=512,
+        "--rewrite-max-new-tokens", type=int, default=384,
         help="hard cap for one rewrite",
     )
     parser.add_argument(
         "--no-rewrite", action="store_true",
         help="caption only (debug); albums stay at stage 'captioned' and are "
              "re-captioned on the next normal run",
+    )
+    parser.add_argument(
+        "--no-prefetch-rewrite", action="store_true",
+        help="do not download the rewrite weights in the background during "
+             "captioning (they are fetched when polish starts)",
     )
     parser.add_argument(
         "--chunk-seconds", type=float, default=None,
@@ -485,6 +520,10 @@ def main(argv: list[str] | None = None) -> int:
             quantization=args.rewrite_quantization,
             max_new_tokens=args.rewrite_max_new_tokens,
         )
+    prefetch_thread = None
+    if rewriter is not None and not args.no_prefetch_rewrite:
+        print(f"Prefetching {rewriter.name} in the background...", flush=True)
+        prefetch_thread = prefetch_model(rewriter.model_id)
     t0 = time.time()
     captioner._load()
     print(f"MODEL LOAD {time.time() - t0:.1f}s", flush=True)
@@ -571,6 +610,9 @@ def main(argv: list[str] | None = None) -> int:
                 experimental_suno=args.experimental_suno,
                 rewriter=rewriter,
                 checkpoint=checkpoint,
+                before_polish=(
+                    prefetch_thread.join if prefetch_thread is not None else None
+                ),
             )
         except Exception as exc:  # noqa: BLE001 - keep going
             print(f"  ERROR on {key}: {type(exc).__name__}: {exc}")

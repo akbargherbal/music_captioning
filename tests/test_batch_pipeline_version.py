@@ -141,10 +141,11 @@ def test_all_captions_run_before_any_rewrite(tmp_path, monkeypatch):
     album_obj = process_album(
         _StubCaptioner(events), entry, tmp_path / "work", tmp_path / "outputs",
         rewriter=rewriter,
+        before_polish=lambda: events.append("before-polish"),
     )
 
     assert events == [
-        "caption", "caption", "unload-captioner",
+        "caption", "caption", "before-polish", "unload-captioner",
         "rewrite", "rewrite", "unload-rewriter",
     ]
     assert album_obj["caption_stage"] == CAPTION_STAGE_POLISHED

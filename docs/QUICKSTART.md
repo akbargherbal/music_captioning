@@ -325,9 +325,13 @@ Controls for the polish phase:
 
 ```bash
 --rewrite-model Qwen/Qwen3-4B-Instruct-2507   # default
---rewrite-quantization 8bit                  # 8bit | 4bit | none
+--rewrite-quantization none                  # default: plain fp16, no quantization
 --no-rewrite                                 # debug: caption only (album stays pending)
 ```
+
+The rewrite weights are downloaded in the background while captioning runs, so
+the polish phase starts as soon as the model is loaded. Pass
+`--no-prefetch-rewrite` to fetch them at polish time instead.
 
 ### Skip long or low-quality files
 

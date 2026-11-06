@@ -69,11 +69,17 @@ lower is better; measured 2026):
 | Phi-4-mini | 3.8B | ~2.5 GB | 23.5% | 92.5% |
 | Ministral 3-8B | 8B | ~5 GB | 21.7% | 99.1% |
 
-Default: **`Qwen/Qwen3-4B-Instruct-2507`** (Apache-2.0) at 8-bit. It fits beside
-the captioner (~8.4 GiB + ~4.3 GiB on a 15 GiB T4), answers reliably, and its
-hallucination rate is close to the 8B/12B models. `Qwen3-8B` at 4-bit is the
-fallback if 4B quality is not good enough; it requires unloading the captioner
-first. Phi-4-mini and Llama-3.1-8B are rejected on their measured rates.
+Default: **`Qwen/Qwen3-4B-Instruct-2507`** (Apache-2.0) in **plain fp16, no
+quantization**. A 4B model is ~8 GiB, the captioner is unloaded first, so it
+fits alone on a 15 GiB T4. fp16 loads without the slow bitsandbytes pass and
+avoids dequantization overhead, which is what made the first run feel slow.
+`--rewrite-quantization 4bit` exists only as a memory fallback; 8-bit buys
+nothing on a T4. `Qwen3-8B` at 4-bit is the quality fallback if 4B is not good
+enough. Phi-4-mini and Llama-3.1-8B are rejected on their measured rates.
+
+The weights are downloaded in the background while captioning runs
+(`--no-prefetch-rewrite` disables it); the polish phase joins the download
+before it loads the model.
 
 Caveat: those benchmarks summarize news articles; this task condenses already
 written English and is easier. No model is at zero, which is why the
