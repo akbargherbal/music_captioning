@@ -55,3 +55,18 @@ def test_audio_duration_missing_file(tmp_path: Path):
 
     with pytest.raises(CaptionerError):
         audio_duration(tmp_path / "nope.wav")
+
+
+def test_gguf_chunk_defaults(tmp_path: Path):
+    cli = tmp_path / "llama-cli"
+    cli.write_text("#!/bin/sh\n")
+    model = tmp_path / "m.gguf"
+    model.write_text("x")
+    mmproj = tmp_path / "p.gguf"
+    mmproj.write_text("x")
+    cap = Captioner(llama_cli=cli, model=model, mmproj=mmproj)
+    # The GGUF author validated one-minute clips, so this backend keeps 60 s.
+    assert cap.chunk_seconds == 60.0
+    assert cap.max_chunk_seconds == 90.0
+    assert cap.trim_silence is True
+    assert cap.last_run == {}

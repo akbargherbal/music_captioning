@@ -158,10 +158,13 @@ def process_album(
         )
         caption_s = time.time() - t0
         result.pop("chunk_captions", None)
+        run = getattr(captioner, "last_run", {}) or {}
         track_obj = {
             "file": filename,
             "duration_s": round(duration or 0.0, 1),
             "bitrate_kbps": round(bitrate) if bitrate else None,
+            "chunk_count": run.get("chunk_count"),
+            "silence_trimmed_s": run.get("silence_trimmed_s"),
             "caption_seconds": round(caption_s, 1),
             "instruments": result["instruments"],
             "vocals": result["vocals"],
@@ -235,7 +238,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--outputs", type=Path, default=REPO_ROOT / "outputs")
     parser.add_argument("--manifest", type=Path, default=REPO_ROOT / "outputs" / "index.json")
     parser.add_argument("--hf-model", type=Path, default=REPO_ROOT / "models" / "Ace-Step-Captioner-4bit")
-    parser.add_argument("--chunk-seconds", type=float, default=60.0)
+    parser.add_argument(
+        "--chunk-seconds", type=float, default=None,
+        help="target chunk length (default: 90 for the hf backend); chunks are "
+             "rebalanced so there is never a tiny final one",
+    )
+    parser.add_argument(
+        "--no-trim-silence", action="store_true",
+        help="keep leading/trailing silence instead of trimming it before chunking",
+    )
     parser.add_argument("--max-track-seconds", type=float, default=480.0,
                         help="skip tracks longer than this (default 480 = 8 min; "
                              "0 disables the cap). Guards against concerts/long mixes.")
@@ -291,7 +302,14 @@ def main(argv: list[str] | None = None) -> int:
 
     from src.captioner_hf import HFCaptioner
 
-    captioner = HFCaptioner(model_dir=args.hf_model, chunk_seconds=args.chunk_seconds)
+    chunk_args = (
+        {} if args.chunk_seconds is None else {"chunk_seconds": args.chunk_seconds}
+    )
+    captioner = HFCaptioner(
+        model_dir=args.hf_model,
+        trim_silence=not args.no_trim_silence,
+        **chunk_args,
+    )
     t0 = time.time()
     captioner._load()
     print(f"MODEL LOAD {time.time() - t0:.1f}s", flush=True)

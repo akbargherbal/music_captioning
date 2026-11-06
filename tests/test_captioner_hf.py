@@ -40,3 +40,21 @@ def test_missing_audio_raises_before_model_load(tmp_path: Path):
     cap = HFCaptioner(model_dir=empty_model)
     with pytest.raises(CaptionerError):
         cap.caption_chunk(tmp_path / "missing.mp3")
+
+
+def test_hf_chunk_defaults(tmp_path: Path):
+    empty_model = tmp_path / "model"
+    empty_model.mkdir()
+    cap = HFCaptioner(model_dir=empty_model)
+    assert cap.chunk_seconds == 90.0
+    assert cap.max_chunk_seconds == 120.0
+    assert cap.trim_silence is True
+    assert cap.last_run == {}
+
+
+def test_missing_audio_raises_from_caption_audio(tmp_path: Path):
+    empty_model = tmp_path / "model"
+    empty_model.mkdir()
+    cap = HFCaptioner(model_dir=empty_model)
+    with pytest.raises(CaptionerError):
+        cap.caption_audio(tmp_path / "missing.mp3")

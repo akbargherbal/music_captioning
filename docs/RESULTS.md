@@ -173,6 +173,31 @@ A longer window does not yield a longer description: 133 / 150 / 170 / 190 s
 captions are 82–91 % identical word-for-word, so one-shot would not fix the
 repetition.
 
+## Run 4 — silence trim + equal chunks + merge (2026-11-06)
+
+Implements the fix recommended in Run 3 and validates it on the same track.
+Full write-up: [CHUNK_MERGE.md](CHUNK_MERGE.md). Model, prompt, quantization and
+decoding are unchanged; `pytest tests/ -q` -> 128 passed.
+
+- Track: `/content/fadhl_shaker_selected/حبيتك.mp3`, 266.256 s
+- Model load 43.9 s
+
+| Config | Chunks | Caption s | Peak alloc / reserved | Words | Framings | Coda |
+|---|---:|---:|---|---:|---:|---|
+| 60 s fixed, blind join (Run 3 baseline) | 5 | 54.1 | 8,211 / 8,888 MiB | 378 | 5 | one, describing the silent tail |
+| trim + 3 x 86.408 s + merge | 3 | 52.0 | 8,441 / 9,800 MiB | **210** | **1** | none; "tape-stop" absent |
+
+- Silence: 266.256 s -> 259.224 s (7.032 s trailing silence removed).
+- Per-chunk generation: 19.7 / 13.7 / 14.6 s; actual chunk lengths 86.424 / 86.400 / 86.400 s.
+- The merge dropped only the two repeated section openers; all 10 remaining
+  sentences were kept. Tags from the merged caption equal the union of the
+  per-chunk tags.
+
+One implementation detail measured here: a `-c copy` trim ends at 259.224 s, not
+the computed 259.189 s, so chunking must plan on the *measured* trimmed duration
+or it emits a 0.03 s fragment that ffprobe cannot even read. Both backends now
+measure first, and `_split_audio` discards sub-second trailing fragments.
+
 ## GPU smoke test
 
 Kept out of `pytest` (manual, needs GPU + model). Reproduce with:

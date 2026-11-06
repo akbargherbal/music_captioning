@@ -233,7 +233,7 @@ The JSON has these fields:
 | `tags_experimental` | Always `true`. A warning that the three lists are not a finished prompt. |
 | `suno_prompt` | Only present with `--experimental-suno`. Unsupported. |
 | `suno_experimental` | `true` when the prompt was requested. |
-| `chunk_captions` | Not saved by the CLI; the captioner's per-60-second text. |
+| `chunk_captions` | Not saved by the CLI; the captioner's per-chunk text (~90 s windows). |
 
 The term lists only contain words the caption actually says. The extractor does
 not guess. That is why it is safe to read, but also why it misses things the
@@ -262,14 +262,31 @@ needed.
 
 ### Process a long track
 
-`demo.py` splits long audio into 60-second chunks automatically. To change the
-chunk size:
+`demo.py` handles this automatically:
+
+1. leading and trailing silence is trimmed — only the silent edges are cut, the
+   quiet music itself stays;
+2. the track is split into **equal** chunks — ~90 s each by default — so there is
+   never a tiny leftover chunk at the end;
+3. each chunk is captioned, then the captions are merged into one description with
+   a single "this is the song" opening and no false ending from the middle of the
+   track.
+
+To change the target chunk length (the hard cap is 120 s for the `hf` backend;
+above ~190 s the T4 runs out of memory):
 
 ```bash
-python scripts/demo.py long_mix.mp3 --chunk-seconds 30
+python scripts/demo.py long_mix.mp3 --chunk-seconds 60
 ```
 
-Smaller chunks use less memory. Longer chunks give the model more context.
+Smaller chunks use less memory. Longer chunks give the model more context, up
+to about two minutes — beyond that the description stops getting richer.
+
+To keep the original silent edges:
+
+```bash
+python scripts/demo.py long_mix.mp3 --no-trim-silence
+```
 
 ### Process a folder of albums
 

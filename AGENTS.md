@@ -74,6 +74,7 @@ Rejected options (don't switch to them silently):
 ├── src/
 │   ├── captioner_hf.py             # transformers 4-bit backend (current)
 │   ├── captioner.py                # llama.cpp subprocess wrapper (alternative)
+│   ├── merge.py                    # deterministic per-chunk caption merge
 │   ├── resume.py                   # manifest + resume helpers
 │   ├── tags.py                     # lexicon + experimental term extraction
 │   └── lexicon.json                # instruments / vocals / production terms
@@ -176,7 +177,8 @@ Alternative backend (llama.cpp GGUF):
 
 - Python 3.10+, type hints on public functions, `pathlib` for paths.
 - `captioner.py` must: check files exist, raise clear errors, capture stderr, enforce a timeout, and never shell-interpolate user paths (use argument lists, not `shell=True`).
-- Split long audio into ~60 s chunks (the GGUF author validated one-minute clips); caption each; merge tags with order-preserving dedupe.
+- Long audio: trim leading/trailing silence (`ffmpeg silencedetect`, -50 dB, 0.5 s), then split into **equal** chunks with `plan_chunks()`. The HF backend targets ~90 s (cap 120 s); the GGUF path keeps the one-minute clips its author validated (cap 90 s). Equal chunks mean there is never a tiny final segment. Caption each chunk; merge tags with order-preserving dedupe; merge the prose with `src/merge.py` (one whole-song framing, no coda claims from non-final sections, near-duplicates dropped) instead of a blind `" ".join(...)`.
+- The merge is **deterministic string processing** — no second model call, no randomness.
 - Tag extraction is **deterministic lexicon matching** with word boundaries (`\b...\b`), lowercase, dedupe in order. Don't call a hosted LLM for it. Treat the output as **experimental** until `docs/TAG_AUDIT.md` is resolved.
 - Keep terms in `lexicon.json`, not hard-coded. Categories: `instruments`, `vocals`, `production`. Only emit a tag if the caption actually says it (e.g. no guessing vocal gender).
 - Output format: JSON `{instruments, vocals, production, caption, tags_experimental: true}`. The comma-joined `suno_prompt` is opt-in (`experimental_suno=True` / `--experimental-suno`), marked `suno_experimental`, and must not be advertised as a supported prompt.

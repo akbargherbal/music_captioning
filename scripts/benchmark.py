@@ -43,12 +43,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("input", type=Path, help="audio file or directory of audio")
     parser.add_argument("--out", type=Path, required=True, help="JSON output path")
     parser.add_argument("--hf-model", type=Path, default=DEFAULT_HF_MODEL)
-    parser.add_argument("--chunk-seconds", type=float, default=60.0)
+    parser.add_argument("--chunk-seconds", type=float, default=90.0,
+                        help="target chunk length (default 90 s for the hf backend)")
+    parser.add_argument("--max-chunk-seconds", type=float, default=120.0,
+                        help="hard cap per chunk (default 120 s; >190 s OOMs on a T4)")
+    parser.add_argument("--no-trim-silence", action="store_true",
+                        help="keep leading/trailing silence instead of trimming it")
     args = parser.parse_args(argv)
 
     import torch
-    from src.captioner import _split_audio, audio_duration
+    from src.captioner import _split_audio, audio_duration, plan_chunks, trim_silence_edges
     from src.captioner_hf import HFCaptioner
+    from src.merge import merge_section_captions
     from src.tags import TAGS_EXPERIMENTAL, extract_tags, merge_tags
 
     tracks = collect_audio(args.input)
@@ -57,7 +63,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Tracks: {len(tracks)}")
 
     captioner = HFCaptioner(
-        model_dir=args.hf_model, chunk_seconds=args.chunk_seconds
+        model_dir=args.hf_model,
+        chunk_seconds=args.chunk_seconds,
+        max_chunk_seconds=args.max_chunk_seconds,
+        trim_silence=not args.no_trim_silence,
     )
     t0 = time.time()
     captioner._load()
@@ -72,7 +81,21 @@ def main(argv: list[str] | None = None) -> int:
             duration = audio_duration(track)
             torch.cuda.reset_peak_memory_stats()
             with tempfile.TemporaryDirectory(prefix="bench_") as tmp:
-                chunks = _split_audio(track, Path(tmp), args.chunk_seconds)
+                workdir = Path(tmp)
+                source, removed = (track, 0.0)
+                if not args.no_trim_silence:
+                    source, removed = trim_silence_edges(track, workdir)
+                # Measure the trimmed file: stream-copy cuts snap to frames.
+                effective = audio_duration(source)
+                if removed:
+                    removed = max(0.0, duration - effective)
+                count, segment = plan_chunks(
+                    effective, args.chunk_seconds, args.max_chunk_seconds
+                )
+                chunks = (
+                    [source] if count <= 1
+                    else _split_audio(source, workdir, segment)
+                )
                 captions, chunk_times = [], []
                 for chunk in chunks:
                     tc = time.time()
@@ -81,7 +104,10 @@ def main(argv: list[str] | None = None) -> int:
             merged = merge_tags([extract_tags(c) for c in captions])
             entry.update({
                 "duration_s": round(duration, 1),
+                "trimmed_duration_s": round(effective, 1),
+                "silence_trimmed_s": round(removed, 1),
                 "chunks": len(captions),
+                "segment_seconds": round(segment, 1),
                 "chunk_seconds": [round(x, 1) for x in chunk_times],
                 "caption_seconds": round(sum(chunk_times), 1),
                 "peak_vram_mib": round(torch.cuda.max_memory_allocated() / 2**20),
@@ -89,7 +115,7 @@ def main(argv: list[str] | None = None) -> int:
                 "vocals": merged["vocals"],
                 "production": merged["production"],
                 "tags_experimental": TAGS_EXPERIMENTAL,
-                "caption": " ".join(c.strip() for c in captions),
+                "caption": merge_section_captions(captions),
             })
             print(f"[{i}/{len(tracks)}] {track.name}: {entry['caption_seconds']}s "
                   f"({entry['chunks']} chunks, audio {entry['duration_s']}s)")
@@ -107,6 +133,8 @@ def main(argv: list[str] | None = None) -> int:
         "source_dir": str(args.input),
         "model_dir": str(args.hf_model),
         "chunk_seconds": args.chunk_seconds,
+        "max_chunk_seconds": args.max_chunk_seconds,
+        "trim_silence": not args.no_trim_silence,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "load_seconds": round(load_s, 1),
         "track_count": len(results),

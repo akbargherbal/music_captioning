@@ -163,7 +163,11 @@ captioned window is given an ending; only the last one can be true.
 3. **Rebalanced chunks remove the tiny-tail problem**; a silence trim removes
    the silence-captioning problem; neither removes the repeated framing.
 
-## Recommended fix (not implemented)
+## Recommended fix (implemented)
+
+These three changes are now implemented in `src/merge.py` and
+`src/captioner*.py`; measured results are in
+[CHUNK_MERGE.md](CHUNK_MERGE.md).
 
 1. **Trim leading/trailing silence before splitting.** Deterministic and cheap;
    on this track it removes 7.1 s of silence that is currently fed to the model

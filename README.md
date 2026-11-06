@@ -133,8 +133,11 @@ batch album results under `outputs/<ARTIST>/` are tracked by git.
 
 The three lists are **experimental extracted terms**, not a generation prompt.
 Only terms the caption actually mentions are emitted (no guessing, e.g. no vocal
-gender unless stated). Long tracks are split into ~60 s chunks, captioned
-separately, and merged with order-preserving de-duplication.
+gender unless stated). Long tracks have leading/trailing silence trimmed, are
+split into equal ~90 s chunks (rebalanced so there is never a tiny final one),
+captioned separately, and then merged deterministically into a single
+description: one whole-song framing, and no "the song ends…" claims from
+sections that are not actually the end.
 
 The legacy comma-joined string is still available for experiments:
 

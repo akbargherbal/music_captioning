@@ -5,8 +5,11 @@ This runs the same captioner model as the GGUF path, but through HuggingFace
 the user approved switching runtime: it avoids the multi-minute CUDA build and
 uses the reference audio pipeline, which handles Qwen2.5-Omni audio natively.
 
-T4 constraints (AGENTS.md): no bf16, no FlashAttention. We therefore force
-``float16`` compute and ``sdpa`` attention.
+T4 constraints (AGENTS.md): no bf16, no FlashAttention. We therefore ask for
+``float16`` compute and ``sdpa`` attention. Note: the checkpoint config's own
+``dtype: bfloat16`` currently wins for the non-quantized tensors, so the decoder
+runs in bf16 despite the fp16 request (measured; see
+``docs/CHUNK_LENGTH_EXPERIMENT.md``). Making fp16 take effect is an open task.
 
 Heavy imports (torch / transformers / librosa) happen lazily inside methods so
 the module can be imported, and its pure helpers tested, on a CPU-only runtime.
@@ -18,11 +21,21 @@ import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .captioner import CaptionerError, _split_audio, audio_duration
+from .captioner import (
+    CaptionerError,
+    _split_audio,
+    audio_duration,
+    plan_chunks,
+    trim_silence_edges,
+)
+from .merge import merge_section_captions
 from .tags import extract_tags, merge_tags, to_suno
 
 PROMPT = "*Task* Describe this audio in detail"
-DEFAULT_CHUNK_SECONDS = 60.0
+# ~90 s keeps a 4.5-minute track at three windows (~8.5 GiB on a T4); 120 s is
+# the hard cap, well under the measured ~190 s OOM ceiling.
+DEFAULT_CHUNK_SECONDS = 90.0
+DEFAULT_MAX_CHUNK_SECONDS = 120.0
 
 
 @dataclass
@@ -33,10 +46,13 @@ class HFCaptioner:
     device: str = "auto"
     max_new_tokens: int = 400
     chunk_seconds: float = DEFAULT_CHUNK_SECONDS
+    max_chunk_seconds: float = DEFAULT_MAX_CHUNK_SECONDS
+    trim_silence: bool = True
     attn_implementation: str = "sdpa"
     load_in_4bit: bool = True
     _model: object = field(default=None, repr=False, compare=False)
     _processor: object = field(default=None, repr=False, compare=False)
+    _last_run: dict[str, float] = field(default_factory=dict, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         self.model_dir = Path(self.model_dir)
@@ -153,19 +169,55 @@ class HFCaptioner:
     def caption_audio(
         self, audio_path: Path | str, chunk_seconds: float | None = None
     ) -> list[str]:
-        """Caption a full track, splitting into ~60 s segments when needed."""
+        """Caption a full track in equal, silence-trimmed chunks.
+
+        Leading/trailing silence is trimmed first (unless ``trim_silence`` is
+        off), then the track is divided into the fewest equal chunks that fit
+        ``max_chunk_seconds`` (see :func:`plan_chunks`), so there is no tiny
+        final chunk. Returns one caption per chunk.
+
+        Details of the last run (chunk count, seconds of silence removed) are
+        left in :attr:`last_run` for callers that report them.
+        """
         path = Path(audio_path)
         if not path.exists():
             raise CaptionerError(f"audio not found: {path}")
-        chunk = chunk_seconds if chunk_seconds is not None else self.chunk_seconds
-        duration = audio_duration(path)
-        if duration <= chunk:
-            return [self.caption_chunk(path)]
+        target = self.chunk_seconds if chunk_seconds is None else chunk_seconds
+        original = audio_duration(path)
+
         with tempfile.TemporaryDirectory(prefix="acestep_hf_chunks_") as tmp:
-            chunks = _split_audio(path, Path(tmp), chunk)
-            if not chunks:
-                raise CaptionerError(f"ffmpeg produced no chunks for {path}")
-            return [self.caption_chunk(c) for c in chunks]
+            workdir = Path(tmp)
+            source, removed = (path, 0.0)
+            if self.trim_silence:
+                source, removed = trim_silence_edges(path, workdir)
+            # Measure the trimmed file: a stream copy snaps to frame boundaries,
+            # so it is not exactly ``original - removed``. Planning on the
+            # computed value can emit a spurious trailing fragment.
+            duration = audio_duration(source)
+            if removed:
+                removed = max(0.0, original - duration)
+            count, segment = plan_chunks(duration, target, self.max_chunk_seconds)
+            if count <= 1:
+                captions = [self.caption_chunk(source)]
+            else:
+                chunks = _split_audio(source, workdir, segment)
+                if not chunks:
+                    raise CaptionerError(f"ffmpeg produced no chunks for {path}")
+                captions = [self.caption_chunk(c) for c in chunks]
+
+        self._last_run = {
+            "original_duration_s": round(original, 3),
+            "duration_s": round(duration, 3),
+            "silence_trimmed_s": round(removed, 3),
+            "chunk_count": len(captions),
+            "segment_seconds": round(segment, 3) if count > 1 else round(duration, 3),
+        }
+        return captions
+
+    @property
+    def last_run(self) -> dict[str, float]:
+        """Chunk count / trimmed seconds from the most recent ``caption_audio``."""
+        return dict(self._last_run)
 
 
 def caption_and_tag(
@@ -185,7 +237,7 @@ def caption_and_tag(
         "instruments": merged["instruments"],
         "vocals": merged["vocals"],
         "production": merged["production"],
-        "caption": " ".join(c.strip() for c in captions),
+        "caption": merge_section_captions(captions),
         "chunk_captions": captions,
         "tags_experimental": True,
     }

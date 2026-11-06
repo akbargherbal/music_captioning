@@ -40,7 +40,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--model", type=Path, default=DEFAULT_MODEL)
     parser.add_argument("--mmproj", type=Path, default=DEFAULT_MMPROJ)
     parser.add_argument("--hf-model", type=Path, default=DEFAULT_HF_MODEL)
-    parser.add_argument("--chunk-seconds", type=float, default=60.0)
+    parser.add_argument(
+        "--chunk-seconds", type=float, default=None,
+        help="target chunk length (default: 90 for hf, 60 for llamacpp); chunks "
+             "are rebalanced so there is never a tiny final one",
+    )
+    parser.add_argument(
+        "--no-trim-silence", action="store_true",
+        help="keep leading/trailing silence instead of trimming it before chunking",
+    )
     parser.add_argument(
         "--json", action="store_true", help="print only the JSON result"
     )
@@ -54,15 +62,21 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    chunk_args = (
+        {} if args.chunk_seconds is None else {"chunk_seconds": args.chunk_seconds}
+    )
     if args.backend == "hf":
         from src.captioner_hf import HFCaptioner, caption_and_tag
         captioner = HFCaptioner(
-            model_dir=args.hf_model, chunk_seconds=args.chunk_seconds
+            model_dir=args.hf_model,
+            trim_silence=not args.no_trim_silence,
+            **chunk_args,
         )
     else:
         from src.captioner import Captioner, caption_and_tag
         captioner = Captioner(
-            llama_cli=args.llama_cli, model=args.model, mmproj=args.mmproj
+            llama_cli=args.llama_cli, model=args.model, mmproj=args.mmproj,
+            trim_silence=not args.no_trim_silence, **chunk_args,
         )
 
     result = caption_and_tag(
