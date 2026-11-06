@@ -316,9 +316,10 @@
       "failed_count": 0,
       "skipped_count": 0,
       "status": "ok",
-      "total_caption_seconds": 1285.4,
-      "completed_at": "2026-11-06T13:10:47"
+      "caption_pipeline_version": 2,
+      "total_caption_seconds": 1126.8,
+      "completed_at": "2026-11-06T15:50:35"
     }
   },
-  "updated_at": "2026-11-06T13:10:47"
+  "updated_at": "2026-11-06T15:50:35"
 }
