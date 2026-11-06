@@ -318,11 +318,11 @@
       "status": "ok",
       "caption_pipeline_version": 3,
       "caption_stage": "polished",
-      "rewrite_fallback_count": 1,
+      "rewrite_fallback_count": 0,
       "rewrite_error_count": 0,
       "total_caption_seconds": 1138.1,
-      "completed_at": "2026-11-06T17:23:02"
+      "completed_at": "2026-11-06T17:31:18"
     }
   },
-  "updated_at": "2026-11-06T17:23:02"
+  "updated_at": "2026-11-06T17:31:18"
 }
