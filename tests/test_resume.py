@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from src.resume import (
+    CAPTION_PIPELINE_VERSION,
     SkippedTrack,
     album_key,
     album_output_path,
@@ -12,6 +13,7 @@ from src.resume import (
     atomic_write_text,
     group_local_tracks,
     group_tracks,
+    is_current_caption_output,
     is_done,
     load_manifest,
     parse_gs_track,
@@ -19,6 +21,8 @@ from src.resume import (
     run_tracks,
     skip_reason,
 )
+
+CURRENT_OUTPUT = {"caption_pipeline_version": CAPTION_PIPELINE_VERSION}
 
 ROOT = "gs://bucket/DISCOGRAPHY"
 
@@ -80,20 +84,55 @@ def test_load_manifest_missing_and_corrupt(tmp_path: Path):
     assert load_manifest(bad)["albums"] == {}
 
 
-def test_is_done_requires_file(tmp_path: Path):
+def test_is_done_requires_file_and_current_pipeline(tmp_path: Path):
     outputs = tmp_path / "outputs"
     manifest = {"albums": {"ELISSA/A": {"path": "ELISSA/A.json"}}}
     assert is_done("ELISSA/A", manifest, outputs) is False
     (outputs / "ELISSA").mkdir(parents=True)
     (outputs / "ELISSA" / "A.json").write_text("{}")
+    # Pre-versioning output: the caption exists but must be redone.
+    assert is_done("ELISSA/A", manifest, outputs) is False
+    (outputs / "ELISSA" / "A.json").write_text(
+        json.dumps(CURRENT_OUTPUT), encoding="utf-8"
+    )
     assert is_done("ELISSA/A", manifest, outputs) is True
     assert is_done("ELISSA/missing", manifest, outputs) is False
+
+
+def test_is_done_rejects_old_and_malformed_versions(tmp_path: Path):
+    outputs = tmp_path / "outputs"
+    (outputs / "ELISSA").mkdir(parents=True)
+    manifest = {"albums": {"ELISSA/A": {"path": "ELISSA/A.json"}}}
+    for bad in (
+        {"caption_pipeline_version": CAPTION_PIPELINE_VERSION - 1},
+        {"caption_pipeline_version": CAPTION_PIPELINE_VERSION + 1},
+        {"caption_pipeline_version": "2"},
+        {"caption_pipeline_version": None},
+    ):
+        (outputs / "ELISSA" / "A.json").write_text(
+            json.dumps(bad), encoding="utf-8"
+        )
+        assert is_done("ELISSA/A", manifest, outputs) is False, bad
+    (outputs / "ELISSA" / "A.json").write_text("{not json", encoding="utf-8")
+    assert is_done("ELISSA/A", manifest, outputs) is False
+
+
+def test_is_current_caption_output():
+    assert is_current_caption_output(CURRENT_OUTPUT) is True
+    assert is_current_caption_output({}) is False
+    assert is_current_caption_output(None) is False
+    assert is_current_caption_output([]) is False
+    assert is_current_caption_output(
+        {"caption_pipeline_version": CAPTION_PIPELINE_VERSION - 1}
+    ) is False
 
 
 def test_pending_albums_and_force(tmp_path: Path):
     outputs = tmp_path / "outputs"
     (outputs / "ELISSA").mkdir(parents=True)
-    (outputs / "ELISSA" / "A.json").write_text("{}")
+    (outputs / "ELISSA" / "A.json").write_text(
+        json.dumps(CURRENT_OUTPUT), encoding="utf-8"
+    )
     albums = {
         "ELISSA/A": {"artist": "ELISSA", "album": "A", "tracks": []},
         "ELISSA/B": {"artist": "ELISSA", "album": "B", "tracks": []},
@@ -101,6 +140,15 @@ def test_pending_albums_and_force(tmp_path: Path):
     manifest = {"albums": {"ELISSA/A": {"path": "ELISSA/A.json"}}}
     assert pending_albums(albums, manifest, outputs) == ["ELISSA/B"]
     assert pending_albums(albums, manifest, outputs, force=True) == ["ELISSA/A", "ELISSA/B"]
+
+
+def test_pending_albums_requeues_old_caption_version(tmp_path: Path):
+    outputs = tmp_path / "outputs"
+    (outputs / "ELISSA").mkdir(parents=True)
+    (outputs / "ELISSA" / "A.json").write_text("{}", encoding="utf-8")
+    albums = {"ELISSA/A": {"artist": "ELISSA", "album": "A", "tracks": []}}
+    manifest = {"albums": {"ELISSA/A": {"path": "ELISSA/A.json"}}}
+    assert pending_albums(albums, manifest, outputs) == ["ELISSA/A"]
 
 
 def test_album_status_default_and_partial():
@@ -118,8 +166,8 @@ def test_album_status_default_and_partial():
 def test_pending_albums_retry_failed(tmp_path: Path):
     outputs = tmp_path / "outputs"
     (outputs / "ELISSA").mkdir(parents=True)
-    (outputs / "ELISSA" / "A.json").write_text("{}")
-    (outputs / "ELISSA" / "B.json").write_text("{}")
+    (outputs / "ELISSA" / "A.json").write_text(json.dumps(CURRENT_OUTPUT))
+    (outputs / "ELISSA" / "B.json").write_text(json.dumps(CURRENT_OUTPUT))
     albums = {
         "ELISSA/A": {"artist": "ELISSA", "album": "A", "tracks": []},
         "ELISSA/B": {"artist": "ELISSA", "album": "B", "tracks": []},

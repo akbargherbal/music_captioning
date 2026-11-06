@@ -195,8 +195,12 @@ Alternative backend (llama.cpp GGUF):
   checkpoint after **every album**: atomic write of
   `outputs/<ARTIST>/<album>.json`, update `outputs/index.json`, then
   `git add` / `commit` / `push` immediately.
-- A fresh runtime resumes by `git pull` + reading the manifest; never redo an
-  album whose JSON is present. `--force` is the only way to redo.
+- A fresh runtime resumes by `git pull` + reading the manifest. An album is done
+  only if its JSON exists **and** carries the current `caption_pipeline_version`
+  (`src/resume.py`). Missing or older versions are re-queued automatically, so a
+  caption-semantics change never silently reuses stale output. Bump the constant
+  whenever chunking, merge, prompt, model, quantization or decoding changes.
+  `--force` still redoes current albums.
 - Audio is skip-if-present under `work/` (gitignored) and re-fetchable from
   GCS, so only the in-flight album is ever lost.
 - Writes must be atomic (temp file + `os.replace`) so a killed session cannot

@@ -16,6 +16,14 @@ from typing import Callable
 AUDIO_SUFFIXES = {".mp3", ".wav", ".flac", ".m4a", ".ogg"}
 MANIFEST_VERSION = 1
 
+# Bump whenever caption semantics change: chunking, merge, prompt, model,
+# quantization or decoding. Album JSONs written by an older pipeline (or by the
+# pre-versioning code, which has no field at all) are treated as *not done*, so
+# `scripts/batch.py` re-captions them instead of skipping them.
+#   1 (implicit) = no version field: fixed 60 s chunks + blind join
+#   2            = silence trim + rebalanced ~90 s chunks + deterministic merge
+CAPTION_PIPELINE_VERSION = 2
+
 
 class SkippedTrack(Exception):
     """Raised by a track callback to skip a track *without* failing its album.
@@ -135,15 +143,35 @@ def load_manifest(path: Path | str) -> dict[str, object]:
     return {"version": MANIFEST_VERSION, "albums": {}}
 
 
+def is_current_caption_output(data: object) -> bool:
+    """True when an album JSON was written by the current caption pipeline."""
+    return (
+        isinstance(data, dict)
+        and data.get("caption_pipeline_version") == CAPTION_PIPELINE_VERSION
+    )
+
+
 def is_done(key: str, manifest: dict[str, object], outputs_root: Path | str) -> bool:
-    """An album is done only if the manifest lists it AND the file exists."""
+    """An album is done only if it exists **and** uses the current pipeline.
+
+    The album file is the source of truth: a manifest entry alone is not enough,
+    because outputs produced by an older chunking/merge pipeline (or by the
+    pre-versioning code) must be re-captioned. Missing/corrupt JSON is not done.
+    """
     entry = (manifest.get("albums") or {}).get(key)  # type: ignore[union-attr]
     if not isinstance(entry, dict):
         return False
     rel = entry.get("path")
     if not rel:
         return False
-    return (Path(outputs_root) / rel).exists()
+    path = Path(outputs_root) / rel
+    if not path.exists():
+        return False
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return False
+    return is_current_caption_output(data)
 
 
 def album_status(key: str, manifest: dict[str, object]) -> str | None:

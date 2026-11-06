@@ -308,6 +308,12 @@ python scripts/batch.py \
 This runner is designed for the project's own discography workflow; for a
 single file, use `demo.py`.
 
+An album is skipped only when its JSON carries the current
+`caption_pipeline_version` (see `src/resume.py`). Outputs from an older
+chunking/merge pipeline have no such marker (or an older one) and are listed as
+pending, so they are re-captioned automatically. `--force` still redoes albums
+that are already current.
+
 ### Skip long or low-quality files
 
 - `--max-track-seconds 480` skips tracks over 8 minutes. `0` disables the cap.

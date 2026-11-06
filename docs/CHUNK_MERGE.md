@@ -121,6 +121,20 @@ caption text differs:
 Both remain experimental; the union-vs-vote problem in
 [TAG_AUDIT.md](TAG_AUDIT.md) is unchanged by this work.
 
+## Resume invalidation
+
+Old album JSONs were produced by a different caption pipeline and must not be
+skipped by the resumable batch runner. Album output now carries
+`caption_pipeline_version` (`src/resume.py`, currently `2`; pre-versioning
+outputs have no field and count as version 1). `is_done()` reads the album file
+and requires the current version, so every pre-merge output is re-queued
+automatically — no `--force` and no hand-editing of `outputs/index.json`.
+
+`--retry-failed` also refuses to reuse per-track results from a version mismatch:
+the whole album is re-captioned, not just the previously failed tracks. Bump
+`CAPTION_PIPELINE_VERSION` whenever chunking, merge, prompt, model,
+quantization or decoding changes.
+
 ## Known limits
 
 - The merge removes repeated **framing** and **codas**; it cannot merge

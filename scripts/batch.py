@@ -36,14 +36,14 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from src.resume import (  # noqa: E402
+    CAPTION_PIPELINE_VERSION,
     SkippedTrack,
-    album_key,
     album_output_path,
     album_status,
     atomic_write_json,
     group_local_tracks,
     group_tracks,
-    is_done,
+    is_current_caption_output,
     load_manifest,
     pending_albums,
     run_tracks,
@@ -137,6 +137,13 @@ def process_album(
     from src.captioner_hf import caption_and_tag
     from src.tags import TAGS_EXPERIMENTAL, merge_tags, to_suno
 
+    # Never reuse per-track results from an older caption pipeline, even when
+    # --retry-failed asks for a partial retry: those captions are what we are
+    # replacing.
+    if existing is not None and not is_current_caption_output(existing):
+        existing = None
+        retry_only_failed = False
+
     artist, album = entry["artist"], entry["album"]
     album_dir = workdir / artist / album
 
@@ -214,6 +221,7 @@ def process_album(
         "vocals": merged["vocals"],
         "production": merged["production"],
         "tags_experimental": TAGS_EXPERIMENTAL,
+        "caption_pipeline_version": CAPTION_PIPELINE_VERSION,
         "tracks": track_results,
         "failed_tracks": failed,
         "skipped_tracks": skipped,
@@ -287,6 +295,7 @@ def main(argv: list[str] | None = None) -> int:
                              force=args.force, retry_failed=args.retry_failed)
     done = [k for k in albums if k not in pending]
 
+    print(f"Caption pipeline version: {CAPTION_PIPELINE_VERSION}")
     print(f"Albums found: {len(albums)} | done: {len(done)} | pending: {len(pending)}")
     if args.list:
         for key in pending:
@@ -338,7 +347,12 @@ def main(argv: list[str] | None = None) -> int:
             if prior_path.exists():
                 try:
                     prior_obj = json.loads(prior_path.read_text(encoding="utf-8"))
-                    retry_only = prior_obj.get("status") != "ok"
+                    if not is_current_caption_output(prior_obj):
+                        # Old pipeline output: redo the whole album, not just
+                        # the previously failed tracks.
+                        prior_obj = None
+                    else:
+                        retry_only = prior_obj.get("status") != "ok"
                 except (json.JSONDecodeError, OSError):
                     prior_obj = None
 
@@ -362,6 +376,7 @@ def main(argv: list[str] | None = None) -> int:
             "failed_count": album_obj.get("failed_count", 0),
             "skipped_count": album_obj.get("skipped_count", 0),
             "status": album_obj.get("status", "ok"),
+            "caption_pipeline_version": CAPTION_PIPELINE_VERSION,
             "total_caption_seconds": album_obj["total_caption_seconds"],
             "completed_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
         }
