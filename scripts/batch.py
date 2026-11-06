@@ -269,6 +269,11 @@ def caption_album(
     album_dir = workdir / artist / album
 
     def caption_one(filename: str, uri: str) -> dict:
+        if captioner is None:
+            raise RuntimeError(
+                "this run has no captioner (--repolish) and "
+                f"{filename} is not in the stored captions"
+            )
         if uri.startswith("gs://"):
             local = album_dir / filename
             download_track(uri, local)
@@ -629,16 +634,21 @@ def main(argv: list[str] | None = None) -> int:
         print("Nothing to do — all albums already captured.")
         return 0
 
-    from src.captioner_hf import HFCaptioner
-
     chunk_args = (
         {} if args.chunk_seconds is None else {"chunk_seconds": args.chunk_seconds}
     )
-    captioner = HFCaptioner(
-        model_dir=args.hf_model,
-        trim_silence=not args.no_trim_silence,
-        **chunk_args,
-    )
+    # --repolish only re-runs the polish phase, and polish reads chunk_captions
+    # from the stored JSON. Loading the audio captioner there is pointless and
+    # would need its ~6.4 GB weights on a session that never captions anything.
+    captioner = None
+    if not args.repolish:
+        from src.captioner_hf import HFCaptioner
+
+        captioner = HFCaptioner(
+            model_dir=args.hf_model,
+            trim_silence=not args.no_trim_silence,
+            **chunk_args,
+        )
     rewriter = None
     if not args.no_rewrite:
         if args.rewrite_backend == "llamacpp":

@@ -101,3 +101,94 @@ def test_failed_tracks_are_skipped_with_a_warning(tmp_path, capsys):
 
     assert [t["filename"] for t in albums["ARTIST/Album"]["tracks"]] == ["ok.mp3"]
     assert "skipping 1 failed track" in capsys.readouterr().out
+
+
+# -- the polish phase must run without any captioner -------------------------
+
+CLEAN = (
+    "A piano track with a clean mix. The piano carries the tune while the clean "
+    "mix keeps the instrument forward, and the piano returns over the same clean "
+    "mix without adding anything else to the texture. The arrangement stays "
+    "simple and focused from the first bar to the last, and the piano remains "
+    "the only voice in the piece throughout the whole performance, with the "
+    "clean mix holding it in place at every point of the track."
+)
+
+
+class _LongRewriter:
+    name = "stub-gguf"
+
+    def rewrite(self, messages):
+        return CLEAN
+
+    def unload(self):
+        pass
+
+
+def _stored_album(files: list[str]) -> dict:
+    chunks = ["A piano track with a clean mix.", "The piano returns over the mix."]
+    return {
+        "caption_pipeline_version": CAPTION_PIPELINE_VERSION,
+        "caption_stage": "captioned",
+        "status": "ok",
+        "tracks": [
+            {
+                "file": name,
+                "duration_s": 10.0,
+                "bitrate_kbps": 320,
+                "chunk_count": 2,
+                "silence_trimmed_s": 0.0,
+                "caption_seconds": 1.0,
+                "instruments": ["piano"],
+                "vocals": [],
+                "production": ["clean"],
+                "chunk_captions": chunks,
+                "caption_raw": " ".join(chunks),
+                "caption": "",
+                "rewrite_status": "pending",
+                "tags_experimental": True,
+            }
+            for name in files
+        ],
+        "failed_tracks": [],
+        "skipped_tracks": [],
+    }
+
+
+def test_repolish_runs_without_a_captioner(tmp_path):
+    from scripts.batch import process_album
+
+    entry = {
+        "artist": "ARTIST",
+        "album": "Album",
+        "source_dir": "/content/ARTIST",
+        "tracks": [{"filename": "a.mp3", "uri": ""}],
+    }
+    album_obj = process_album(
+        None, entry, tmp_path / "work", tmp_path / "outputs",
+        existing=_stored_album(["a.mp3"]), retry_only_failed=True,
+        rewriter=_LongRewriter(),
+    )
+    assert album_obj["caption_stage"] == "polished"
+    assert album_obj["tracks"][0]["rewrite_status"] == "ok"
+
+
+def test_repolish_reports_a_track_missing_from_storage(tmp_path):
+    from scripts.batch import process_album
+
+    entry = {
+        "artist": "ARTIST",
+        "album": "Album",
+        "source_dir": "/content/ARTIST",
+        "tracks": [
+            {"filename": "a.mp3", "uri": ""},
+            {"filename": "gone.mp3", "uri": ""},
+        ],
+    }
+    album_obj = process_album(
+        None, entry, tmp_path / "work", tmp_path / "outputs",
+        existing=_stored_album(["a.mp3"]), retry_only_failed=True,
+        rewriter=_LongRewriter(),
+    )
+    assert album_obj["status"] == "partial"
+    assert "not in the stored captions" in album_obj["failed_tracks"][0]["error"]
