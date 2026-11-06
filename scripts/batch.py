@@ -193,15 +193,26 @@ def albums_from_outputs(
     Tracks that failed captioning are skipped (their audio is not available
     here); a warning names them so the loss is visible.
     """
-    from src.resume import album_key
+    from src.resume import album_key, is_current_caption_output
 
     albums: dict[str, dict[str, object]] = {}
+    skipped_old = 0
     for path in sorted(Path(outputs_root).glob("*/*.json")):
+        if path.name == "manifest.json":
+            continue
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             continue
         if not isinstance(data, dict) or not data.get("tracks"):
+            continue
+        # Never re-polish an album captioned by an older pipeline: it has no
+        # chunk_captions (or captions with different semantics), so polishing it
+        # would overwrite a good description with an empty one.
+        if not is_current_caption_output(data) or not all(
+            t.get("chunk_captions") for t in data["tracks"]
+        ):
+            skipped_old += 1
             continue
         artist = str(data.get("artist") or path.parent.name)
         album = str(data.get("album") or path.stem)
@@ -221,6 +232,10 @@ def albums_from_outputs(
                 for t in data["tracks"] if t.get("file")
             ],
         }
+    if skipped_old:
+        print(f"  skipped {skipped_old} album(s) without current-version "
+              f"chunk_captions (they need captioning, not repolishing)",
+              flush=True)
     return albums
 
 

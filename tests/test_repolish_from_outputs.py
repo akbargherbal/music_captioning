@@ -67,9 +67,27 @@ def test_non_album_json_is_ignored(tmp_path):
     (outputs / "ARTIST").mkdir(parents=True)
     (outputs / "ARTIST" / "broken.json").write_text("{not json", encoding="utf-8")
     (outputs / "ARTIST" / "empty.json").write_text("{}", encoding="utf-8")
+    (outputs / "ARTIST" / "manifest.json").write_text(
+        json.dumps({"version": 1, "albums": {}}), encoding="utf-8"
+    )
     _write(outputs, _album("ARTIST", "Real", ["a.mp3"]))
 
     assert list(albums_from_outputs(outputs)) == ["ARTIST/Real"]
+
+
+def test_old_pipeline_albums_are_not_repolished(tmp_path, capsys):
+    """An older album has no chunk_captions; polishing it would blank it out."""
+    outputs = tmp_path / "outputs"
+    old = _album("ARTIST", "Old", ["a.mp3"])
+    del old["caption_pipeline_version"]
+    old["tracks"][0].pop("chunk_captions")
+    _write(outputs, old)
+    _write(outputs, _album("ARTIST", "New", ["b.mp3"]))
+
+    albums = albums_from_outputs(outputs)
+
+    assert list(albums) == ["ARTIST/New"]
+    assert "need captioning, not repolishing" in capsys.readouterr().out
 
 
 def test_failed_tracks_are_skipped_with_a_warning(tmp_path, capsys):
