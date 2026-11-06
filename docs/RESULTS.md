@@ -140,6 +140,39 @@ vocals:      female vocal, harmonies, melisma, vibrato
 production:  melody, four-on-the-floor, groove, melodic, clean, dynamic, punchy, bassline, layered, reverb, lush, spacious
 ```
 
+## Run 3 — chunk-length experiment (2026-11-06)
+
+Measurement only; no model, prompt, quantization or default-runtime change.
+Full write-up: [CHUNK_LENGTH_EXPERIMENT.md](CHUNK_LENGTH_EXPERIMENT.md).
+
+- Track: `/content/fadhl_shaker_selected/حبيتك.mp3`, 266.256 s
+- Model load 47.8 s, 6,519 MiB
+
+| Config | Chunks | Caption s | Peak alloc / reserved | Words | Notes |
+|---|---:|---:|---|---:|---|
+| 60 s fixed (current) | 5 | 54.1 | 8,211 / 8,888 MiB | 378 | 5 whole-song framings, 4 near-identical |
+| one-shot 266 s | 1 | — | — | — | **OOM** at prefill (4.66 GiB requested) |
+| 2 × 133.13 s | 2 | 36.3 | 9,803 / 10,044 MiB | 162 | fabricated coda at the cut |
+| 3 × 88.75 s | 3 | 46.8 | 8,462 / 9,890 MiB | 285 | no fabricated coda |
+
+Single-window ceiling: 190 s OK (12,838 MiB), 210 s OOM. The ~10 GiB line is
+≈140 s. Time never binds (190 s captions in 27 s).
+
+Two corrections to earlier assumptions:
+
+1. The decoder runs in **bf16, not fp16** (`config.dtype` is bfloat16 and wins
+   over the `bnb_4bit_compute_dtype` patch), which disqualifies the
+   memory-efficient SDPA kernel and causes the one-shot OOM. `AGENTS.md` says
+   fp16 compute; on this stack it is not. Forcing fp16 failed
+   (`Input type (c10::BFloat16) and bias type (c10::Half) should be the same`).
+2. The "ends abruptly, followed by a long silence" tail text is **not** a
+   hallucination: the file fades from ~254 s and is digital silence for the last
+   ~5.5 s (7.1 s below -50 dB). The real fabrication is at mid-song cuts.
+
+A longer window does not yield a longer description: 133 / 150 / 170 / 190 s
+captions are 82–91 % identical word-for-word, so one-shot would not fix the
+repetition.
+
 ## GPU smoke test
 
 Kept out of `pytest` (manual, needs GPU + model). Reproduce with:
