@@ -3,3 +3,6 @@
 # Empty = track upstream main (same default as arabmaqamrock's audio_cpp.pin).
 # Put a commit sha here before publishing a binary you want to reproduce later:
 #   git -C llama.cpp-text rev-parse HEAD
+#
+# Pinned for the published sm75-t4 build (CUDA 13.0, 2026-11-06).
+954de248ac6907dd05dc19f0f511ab18f2807a54
