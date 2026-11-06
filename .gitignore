@@ -18,6 +18,7 @@ work/
 
 # Build artifacts
 llama.cpp/
+llama.cpp-text/
 build/
 *.o
 
