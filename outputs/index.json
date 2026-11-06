@@ -308,7 +308,17 @@
       "status": "ok",
       "total_caption_seconds": 876.7,
       "completed_at": "2026-10-12T20:23:21"
+    },
+    "fadhl_shaker_selected/fadhl_shaker_selected": {
+      "path": "fadhl_shaker_selected/fadhl_shaker_selected.json",
+      "source_dir": "/content/fadhl_shaker_selected",
+      "track_count": 24,
+      "failed_count": 0,
+      "skipped_count": 0,
+      "status": "ok",
+      "total_caption_seconds": 1285.4,
+      "completed_at": "2026-11-06T13:10:47"
     }
   },
-  "updated_at": "2026-10-12T20:23:21"
+  "updated_at": "2026-11-06T13:10:47"
 }
