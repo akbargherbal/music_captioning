@@ -317,12 +317,12 @@
       "skipped_count": 0,
       "status": "ok",
       "caption_pipeline_version": 3,
-      "caption_stage": "captioned",
-      "rewrite_fallback_count": 0,
+      "caption_stage": "polished",
+      "rewrite_fallback_count": 6,
       "rewrite_error_count": 0,
       "total_caption_seconds": 1138.1,
-      "completed_at": "2026-11-06T17:08:55"
+      "completed_at": "2026-11-06T17:14:51"
     }
   },
-  "updated_at": "2026-11-06T17:08:55"
+  "updated_at": "2026-11-06T17:14:51"
 }
