@@ -37,8 +37,8 @@ Both Hugging Face repos are public, so **no HF token is needed**.
 
 ```bash
 # 0. Get the code (skip if already on this runtime / on Drive).
-git clone https://github.com/akbargherbal/music_captioning_oct_2026.git
-cd music_captioning_oct_2026
+git clone https://github.com/akbargherbal/music_captioning.git
+cd music_captioning
 
 # 1. Dependencies (torch itself is preinstalled on Colab).
 pip install -q -r requirements.txt

@@ -29,7 +29,7 @@ Last checkpoint commit: `67ff7a8` (`FADL_SHAKER/15.The Best Of`).
 
 | Item | Durable location |
 |---|---|
-| `outputs/abc_index.json` | **git** `music_captioning_oct_2026` |
+| `outputs/abc_index.json` | **git** `music_captioning` |
 | `scripts/`, `docs/` | **git** |
 | Packed album JSON (`outputs/<ARTIST>/abc/<album>.json`) | **GCS** `TRANSCRIPTS/<ARTIST>/abc/<album>.json` — **not in git** |
 | Raw SheetSage2 artifacts | **GCS** `TRANSCRIPTS/<ARTIST>/<album>.tar.gz` |
@@ -61,7 +61,7 @@ If git pushes fail, run `gh auth setup-git`.
 ## 3. Clone the data repo and rebuild the manifest
 
 ```bash
-git clone https://github.com/akbargherbal/music_captioning_oct_2026.git /content/mc
+git clone https://github.com/akbargherbal/music_captioning.git /content/mc
 cd /content/mc && mkdir -p work
 
 python3 scripts/abc_manifest.py \

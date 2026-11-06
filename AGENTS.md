@@ -96,8 +96,8 @@ Fresh Colab runtime, in order (all steps idempotent). Colab already provides
 Drive to persist it.
 
 ```bash
-git clone https://github.com/akbargherbal/music_captioning_oct_2026.git
-cd music_captioning_oct_2026
+git clone https://github.com/akbargherbal/music_captioning.git
+cd music_captioning
 pip install -q -r requirements.txt
 ```
 
