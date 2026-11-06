@@ -20,10 +20,18 @@
   ],
   "agents": {
     "build": {
-      "model": "deepseek/deepseek-flash#high"
+      "model": {
+        "providerID": "deepseek",
+        "model": "deepseek-flash",
+        "variant": "high"
+      }
     },
     "plan": {
-      "model": "deepseek/deepseek-flash#high"
+      "model": {
+        "providerID": "deepseek",
+        "model": "deepseek-flash",
+        "variant": "high"
+      }
     }
   }
 }
