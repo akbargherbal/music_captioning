@@ -38,6 +38,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from abcscore import normalize_title  # noqa: E402
+from src.tags import TAGS_EXPERIMENTAL  # noqa: E402
 
 DEFAULT_VAL_ALBUMS = (
     "ELISSA/Elissa - 2012  As3ad Wa7da",  # note the double space
@@ -207,7 +208,7 @@ def build_rows(outputs: Path, manifest: dict[str, dict],
             "audio_uri": mrow.get("source_uri") or track.get("source_uri"),
             "caption": caption,
             "caption_status": cap.get("status"),
-            "suno_prompt": cap_row.get("suno_prompt"),
+            "tags_experimental": TAGS_EXPERIMENTAL,
             "instruments": cap_row.get("instruments", []),
             "vocals": cap_row.get("vocals", []),
             "production": cap_row.get("production", []),

@@ -93,11 +93,23 @@ def test_to_suno_joins_comma_separated():
 
 def test_build_output_shape():
     out = build_output("A warm acoustic guitar with plate reverb.")
-    assert set(out) == {"instruments", "vocals", "production", "caption", "suno_prompt"}
+    assert set(out) == {
+        "instruments", "vocals", "production", "caption", "tags_experimental"
+    }
     assert out["caption"] == "A warm acoustic guitar with plate reverb."
     assert "acoustic guitar" in out["instruments"]
     assert "plate reverb" in out["production"]
+    assert out["tags_experimental"] is True
+    assert "suno_prompt" not in out
+
+
+def test_suno_prompt_is_opt_in_and_marked_experimental():
+    out = build_output(
+        "A warm acoustic guitar with plate reverb.", experimental_suno=True
+    )
+    assert out["suno_experimental"] is True
     assert isinstance(out["suno_prompt"], str)
+    assert "acoustic guitar" in out["suno_prompt"]
 
 
 def test_merge_tags_order_preserving_dedupe():

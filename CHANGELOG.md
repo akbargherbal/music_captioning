@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Deterministic term extraction is now explicitly experimental.** The
+  comma-joined `suno_prompt` is no longer a default output; it is opt-in via
+  `experimental_suno=True` / `--experimental-suno`, and is marked
+  `suno_experimental`. Outputs now carry `tags_experimental: true`.
+- Removed `suno_prompt` from all existing files under `outputs/` and from the
+  demo, batch, benchmark and ABC-dataset paths.
+- Added `docs/TAG_AUDIT.md`: 5-track audit plus corpus numbers for the known
+  gaps (no genre/mood, plural and phrase misses, chunk contradictions, no
+  negation). The feature stays experimental until that bar is met.
+- README/AGENTS now describe the output as experimental term lists rather than
+  a finished Suno prompt.
+
 ### Added
 
 - `scripts/batch.py`: resumable discography runner. After every album it writes

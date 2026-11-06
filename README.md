@@ -1,19 +1,25 @@
 # Music Captioning
 
-Given **any music track**, produce Suno-style prompt tags describing its
-**instruments**, **vocals**, and **production**.
+Given **any music track**, produce a prose description plus **experimental**
+term lists describing its **instruments**, **vocals**, and **production**.
 
 Pipeline:
 
 ```
 audio ─▶ ACE-Step Captioner ─▶ prose caption
-      ─▶ deterministic lexicon tag extractor ─▶ Suno prompt string
+      ─▶ experimental deterministic term extraction
 ```
 
 The captioner is [`ACE-Step/acestep-captioner`](https://huggingface.co/ACE-Step/acestep-captioner)
 (MIT, based on Qwen2.5-Omni-7B). It runs through **HuggingFace `transformers` in
-4-bit (nf4)** on the T4, using the reference audio pipeline. Tag extraction is
-plain Python — **no hosted LLM**.
+4-bit (nf4)** on the T4, using the reference audio pipeline. The term extraction
+is plain Python — **no hosted LLM**.
+
+> **The extracted terms are experimental, not a finished Suno prompt.**
+> A comma-joined `suno_prompt` string used to be emitted by default. It was
+> removed because it omits genre/mood, misses plurals and phrase forms, and
+> unions contradictory chunk captions. See `docs/TAG_AUDIT.md`. The string is
+> now opt-in (`--experimental-suno`) and marked `suno_experimental`.
 
 A llama.cpp GGUF backend is also supported; see *Alternative backend* below.
 
@@ -80,7 +86,7 @@ A representative chunk caption:
 > voice treated with a spacious reverb that enhances the track's dramatic and
 > longing mood.
 
-Resulting tags and Suno prompt:
+Resulting experimental tags:
 
 ```json
 {
@@ -91,7 +97,7 @@ Resulting tags and Suno prompt:
   "production": ["arpeggiated", "melody", "lush", "cinematic", "bassline",
                  "world-fusion", "melodic", "spacious", "reverb", "clean",
                  "punchy", "dynamic", "lo-fi", "vintage", "sample"],
-  "suno_prompt": "nylon-string guitar, string section, percussion, oud, synth strings, drum machine, darbuka, synth bass, tabla, synth pads, kick, violin, accordion, female vocal, singing, vibrato, melismatic, melisma, vocals, arpeggiated, melody, lush, cinematic, bassline, world-fusion, melodic, spacious, reverb, clean, punchy, dynamic, lo-fi, vintage, sample"
+  "tags_experimental": true
 }
 ```
 <!-- EXAMPLE_END -->
@@ -110,13 +116,23 @@ directories are created and `outputs/` is gitignored.
   "vocals": ["..."],
   "production": ["..."],
   "caption": "the raw prose caption",
-  "suno_prompt": "instruments, vocals, production"
+  "tags_experimental": true
 }
 ```
 
-Only tags the caption actually mentions are emitted (no guessing, e.g. no vocal
+The three lists are **experimental extracted terms**, not a generation prompt.
+Only terms the caption actually mentions are emitted (no guessing, e.g. no vocal
 gender unless stated). Long tracks are split into ~60 s chunks, captioned
 separately, and merged with order-preserving de-duplication.
+
+The legacy comma-joined string is still available for experiments:
+
+```bash
+python scripts/demo.py SONG.mp3 --experimental-suno
+```
+
+That adds `"suno_prompt"` and `"suno_experimental": true` to the output. Do not
+treat it as a supported Suno prompt until `docs/TAG_AUDIT.md` is resolved.
 
 ## Resumable batch across Colab sessions
 
@@ -176,9 +192,10 @@ python scripts/benchmark.py "/content/Elissa - 2008 Ayami Beek" \
   --out outputs/Elissa_2008_Ayami_Beek.json
 ```
 
-Writes one JSON with per-track chunk timings, caption seconds, peak VRAM, tags
-and Suno prompts, plus album totals and a `realtime_factor` (caption seconds ÷
-audio seconds). See `docs/RESULTS.md` for measured numbers.
+Writes one JSON with per-track chunk timings, caption seconds, peak VRAM and
+experimental tags (no `suno_prompt` by default), plus album totals and a
+`realtime_factor` (caption seconds ÷ audio seconds). See `docs/RESULTS.md` for
+measured numbers.
 
 ## Alternative backend: llama.cpp GGUF
 
@@ -203,7 +220,7 @@ python scripts/demo.py SONG.mp3 --backend llamacpp
 ```
 src/captioner_hf.py  # transformers 4-bit backend (current)
 src/captioner.py     # llama.cpp GGUF wrapper (alternative)
-src/tags.py          # lexicon + to_suno()
+src/tags.py          # lexicon + experimental term extraction
 src/lexicon.json     # instruments / vocals / production terms
 scripts/demo.py      # end-to-end CLI
 scripts/benchmark.py # per-track timing + VRAM benchmark
@@ -223,6 +240,10 @@ Runs on CPU with no model present (uses saved caption fixtures).
 ## Notes & limitations
 
 - The captioner is deterministic (greedy decoding) and capped at 400 tokens.
+- **Term extraction is experimental.** Known gaps: no genre/mood category,
+  plural/phrase misses (`trumpets`, `female lead vocal`, `pads`), contradictions
+  across chunks, and no negation handling. See `docs/TAG_AUDIT.md` for the
+  5-track audit and corpus numbers. These lists are not a Suno prompt.
 - VRAM/time are hardware-specific; see `docs/RESULTS.md` for measured numbers.
 - The 4-bit checkpoint is a community conversion (`Urabewe`); the base model and
   prompt are unchanged.

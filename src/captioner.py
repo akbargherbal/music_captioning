@@ -257,19 +257,32 @@ def _split_audio(path: Path, out_dir: Path, chunk_seconds: float) -> list[Path]:
     return sorted(out_dir.glob(f"chunk_*{suffix}"))
 
 
-def caption_and_tag(captioner: Captioner, audio_path: Path | str) -> dict[str, object]:
-    """Caption ``audio_path`` (chunked) and return merged tags + Suno prompt."""
+def caption_and_tag(
+    captioner: Captioner,
+    audio_path: Path | str,
+    *,
+    experimental_suno: bool = False,
+) -> dict[str, object]:
+    """Caption ``audio_path`` (chunked) and return experimental term lists.
+
+    ``suno_prompt`` is only added when ``experimental_suno=True`` and is marked
+    ``suno_experimental``; the default output is caption + experimental tags.
+    """
     from .tags import extract_tags, to_suno
 
     captions = captioner.caption_audio(audio_path)
     per_chunk = [extract_tags(c) for c in captions]
     merged = merge_tags(per_chunk)
     full_caption = " ".join(c.strip() for c in captions)
-    return {
+    result: dict[str, object] = {
         "instruments": merged["instruments"],
         "vocals": merged["vocals"],
         "production": merged["production"],
         "caption": full_caption,
         "chunk_captions": captions,
-        "suno_prompt": to_suno(merged),
+        "tags_experimental": True,
     }
+    if experimental_suno:
+        result["suno_prompt"] = to_suno(merged)
+        result["suno_experimental"] = True
+    return result

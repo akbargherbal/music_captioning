@@ -150,7 +150,7 @@ def test_build_rows_joins_caption_and_writes_null_for_skipped(tmp_path: Path):
          "qc": {"parse": "ok", "flags": []}},
     ])
     _write_captions(outputs, "A", "Alb", [
-        {"file": "01. S.mp3", "caption": "a caption", "suno_prompt": "tags",
+        {"file": "01. S.mp3", "caption": "a caption",
          "instruments": ["oud"], "vocals": ["male vocal"],
          "production": ["reverb"]},
     ], skipped=["02. Long.mp3"])

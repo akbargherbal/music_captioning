@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""End-to-end demo: audio -> caption -> Suno-style prompt.
+"""End-to-end demo: audio -> caption -> experimental term lists.
 
 Usage:
     python scripts/demo.py /path/to/song.mp3            # transformers 4-bit (default)
     python scripts/demo.py /path/to/song.mp3 --backend llamacpp
+
+The deterministic tags are **experimental** (see docs/TAG_AUDIT.md). Pass
+``--experimental-suno`` to additionally print/save the unsupported prompt string.
 
 The hf backend needs models/Ace-Step-Captioner-4bit; the llamacpp backend needs
 the built llama-cli and the two GGUF files (see README).
@@ -42,6 +45,10 @@ def main(argv: list[str] | None = None) -> int:
         "--json", action="store_true", help="print only the JSON result"
     )
     parser.add_argument(
+        "--experimental-suno", action="store_true",
+        help="also emit the unsupported suno_prompt string (see docs/TAG_AUDIT.md)",
+    )
+    parser.add_argument(
         "-o", "--out", type=Path, default=None,
         help="write the JSON result to this path (parent dirs are created)",
     )
@@ -58,7 +65,9 @@ def main(argv: list[str] | None = None) -> int:
             llama_cli=args.llama_cli, model=args.model, mmproj=args.mmproj
         )
 
-    result = caption_and_tag(captioner, args.audio)
+    result = caption_and_tag(
+        captioner, args.audio, experimental_suno=args.experimental_suno
+    )
     result.pop("chunk_captions", None)
 
     if args.out is not None:
@@ -72,13 +81,15 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
         print("Caption:\n" + str(result["caption"]) + "\n")
-        print("Suno prompt:\n" + str(result["suno_prompt"]) + "\n")
-        print("Tags:")
+        print("Experimental tags (not a finished prompt):")
         print(json.dumps(
             {k: result[k] for k in ("instruments", "vocals", "production")},
             ensure_ascii=False,
             indent=2,
         ))
+        if args.experimental_suno:
+            print("\nExperimental Suno prompt (unsupported; see docs/TAG_AUDIT.md):")
+            print(str(result["suno_prompt"]))
     return 0
 
 

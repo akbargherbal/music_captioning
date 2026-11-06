@@ -1,8 +1,14 @@
-"""Deterministic lexicon-based tag extraction and Suno prompt assembly.
+"""Experimental, deterministic lexicon-based tag extraction.
 
 No hosted LLM is used here: matching is plain ``\\b``-delimited, case-insensitive
 substring matching against ``lexicon.json``. Longer/more specific terms win when
 spans overlap (e.g. "acoustic guitar" is kept, a bare "guitar" is not emitted).
+
+**Status: experimental.** The extracted terms are a lossy, auditable view of the
+caption, not a finished music-generation prompt. The known gaps (no genre/mood,
+plural and phrase misses, chunk contradictions, no negation) are documented in
+``docs/TAG_AUDIT.md``. ``to_suno()`` is kept for experiments only and must be
+opted into explicitly (``build_output(..., experimental_suno=True)``).
 """
 
 from __future__ import annotations
@@ -13,6 +19,10 @@ from pathlib import Path
 
 CATEGORIES = ("instruments", "vocals", "production")
 DEFAULT_LEXICON_PATH = Path(__file__).with_name("lexicon.json")
+
+# Marks every output that contains the deterministic term lists. Consumers
+# should treat these lists as experimental until docs/TAG_AUDIT.md is resolved.
+TAGS_EXPERIMENTAL = True
 
 
 def load_lexicon(path: Path | str | None = None) -> dict[str, list[str]]:
@@ -77,7 +87,12 @@ def extract_tags(
 
 
 def to_suno(tags: dict[str, list[str]]) -> str:
-    """Join all tags into a single comma-separated Suno prompt string."""
+    """Join all tags into a comma-separated string.
+
+    **Experimental.** This is not a supported Suno prompt: it omits genre and
+    mood, can contain synonym duplicates, and can carry contradictory chunk
+    tags. Only call it behind an explicit opt-in (see ``build_output``).
+    """
     parts: list[str] = []
     for cat in CATEGORIES:
         parts.extend(tags.get(cat, []))
@@ -96,14 +111,26 @@ def merge_tags(tag_dicts: list[dict[str, list[str]]]) -> dict[str, list[str]]:
 
 
 def build_output(
-    caption: str, lexicon: dict[str, list[str]] | None = None
+    caption: str,
+    lexicon: dict[str, list[str]] | None = None,
+    *,
+    experimental_suno: bool = False,
 ) -> dict[str, object]:
-    """Full result: per-category tags, original caption, and Suno prompt."""
+    """Full result: experimental term lists plus the original caption.
+
+    ``suno_prompt`` is **opt-in** and marked ``suno_experimental``. It is not
+    part of the default output because the deterministic string is not yet a
+    reliable generation prompt (see ``docs/TAG_AUDIT.md``).
+    """
     tags = extract_tags(caption, lexicon)
-    return {
+    out: dict[str, object] = {
         "instruments": tags["instruments"],
         "vocals": tags["vocals"],
         "production": tags["production"],
         "caption": (caption or "").strip(),
-        "suno_prompt": to_suno(tags),
+        "tags_experimental": TAGS_EXPERIMENTAL,
     }
+    if experimental_suno:
+        out["suno_prompt"] = to_suno(tags)
+        out["suno_experimental"] = True
+    return out

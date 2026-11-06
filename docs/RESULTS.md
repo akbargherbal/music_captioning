@@ -62,7 +62,7 @@ of audio.
 > vibrato, her voice treated with a spacious reverb that enhances the track's
 > dramatic and longing mood.
 
-### Extracted tags (merged across 6 chunks)
+### Extracted tags (merged across 6 chunks, experimental)
 
 ```json
 {
@@ -72,19 +72,14 @@ of audio.
   "vocals": ["female vocal", "singing", "vibrato", "melismatic", "melisma", "vocals"],
   "production": ["arpeggiated", "melody", "lush", "cinematic", "bassline",
                  "world-fusion", "melodic", "spacious", "reverb", "clean",
-                 "punchy", "dynamic", "lo-fi", "vintage", "sample"]
+                 "punchy", "dynamic", "lo-fi", "vintage", "sample"],
+  "tags_experimental": true
 }
 ```
 
-Suno prompt:
-
-```
-nylon-string guitar, string section, percussion, oud, synth strings, drum machine,
-darbuka, synth bass, tabla, synth pads, kick, violin, accordion, female vocal,
-singing, vibrato, melismatic, melisma, vocals, arpeggiated, melody, lush, cinematic,
-bassline, world-fusion, melodic, spacious, reverb, clean, punchy, dynamic, lo-fi,
-vintage, sample
-```
+These lists are **experimental** and are not a supported Suno prompt. The
+comma-joined string is opt-in only (`--experimental-suno`); see
+`docs/TAG_AUDIT.md` for why it was removed from the default output.
 
 ### Notes / errors encountered
 

@@ -4,13 +4,18 @@ Instructions for AI coding agents working in this repo. Read fully before changi
 
 ## Project goal
 
-Given **any music track**, produce Suno-style prompt tags describing:
+Given **any music track**, produce a prose description plus **experimental**
+term lists describing:
 
 1. **Instruments**
 2. **Vocals**
 3. **Production**
 
-Pipeline: `audio -> ACE-Step Captioner (4-bit transformers; GGUF/llama.cpp alternative) -> prose caption -> lexicon tag extractor -> Suno prompt string`.
+Pipeline: `audio -> ACE-Step Captioner (4-bit transformers; GGUF/llama.cpp alternative) -> prose caption -> experimental deterministic term extraction`.
+
+The comma-joined `suno_prompt` is **not** a default output. It is an
+experimental, opt-in string (`--experimental-suno`) because the deterministic
+extraction has known gaps; see `docs/TAG_AUDIT.md`.
 
 ## Hard environment constraints (Google Colab T4)
 
@@ -70,7 +75,7 @@ Rejected options (don't switch to them silently):
 │   ├── captioner_hf.py             # transformers 4-bit backend (current)
 │   ├── captioner.py                # llama.cpp subprocess wrapper (alternative)
 │   ├── resume.py                   # manifest + resume helpers
-│   ├── tags.py                     # lexicon + to_suno()
+│   ├── tags.py                     # lexicon + experimental term extraction
 │   └── lexicon.json                # instruments / vocals / production terms
 ├── tests/
 │   ├── test_tags.py                # pure-Python, no GPU needed
@@ -165,9 +170,9 @@ Alternative backend (llama.cpp GGUF):
 - Python 3.10+, type hints on public functions, `pathlib` for paths.
 - `captioner.py` must: check files exist, raise clear errors, capture stderr, enforce a timeout, and never shell-interpolate user paths (use argument lists, not `shell=True`).
 - Split long audio into ~60 s chunks (the GGUF author validated one-minute clips); caption each; merge tags with order-preserving dedupe.
-- Tag extraction is **deterministic lexicon matching** with word boundaries (`\b...\b`), lowercase, dedupe in order. Don't call a hosted LLM for it.
+- Tag extraction is **deterministic lexicon matching** with word boundaries (`\b...\b`), lowercase, dedupe in order. Don't call a hosted LLM for it. Treat the output as **experimental** until `docs/TAG_AUDIT.md` is resolved.
 - Keep terms in `lexicon.json`, not hard-coded. Categories: `instruments`, `vocals`, `production`. Only emit a tag if the caption actually says it (e.g. no guessing vocal gender).
-- Output format: JSON `{instruments, vocals, production, caption}` plus a comma-joined Suno prompt string.
+- Output format: JSON `{instruments, vocals, production, caption, tags_experimental: true}`. The comma-joined `suno_prompt` is opt-in (`experimental_suno=True` / `--experimental-suno`), marked `suno_experimental`, and must not be advertised as a supported prompt.
 
 ## Testing
 

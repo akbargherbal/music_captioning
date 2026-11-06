@@ -168,15 +168,28 @@ class HFCaptioner:
             return [self.caption_chunk(c) for c in chunks]
 
 
-def caption_and_tag(captioner: HFCaptioner, audio_path: Path | str) -> dict[str, object]:
-    """Caption (chunked) and return merged tags + Suno prompt."""
+def caption_and_tag(
+    captioner: HFCaptioner,
+    audio_path: Path | str,
+    *,
+    experimental_suno: bool = False,
+) -> dict[str, object]:
+    """Caption (chunked) and return the caption plus experimental term lists.
+
+    ``suno_prompt`` is only added when ``experimental_suno=True`` and is marked
+    ``suno_experimental``; the default output is caption + experimental tags.
+    """
     captions = captioner.caption_audio(audio_path)
     merged = merge_tags([extract_tags(c) for c in captions])
-    return {
+    result: dict[str, object] = {
         "instruments": merged["instruments"],
         "vocals": merged["vocals"],
         "production": merged["production"],
         "caption": " ".join(c.strip() for c in captions),
         "chunk_captions": captions,
-        "suno_prompt": to_suno(merged),
+        "tags_experimental": True,
     }
+    if experimental_suno:
+        result["suno_prompt"] = to_suno(merged)
+        result["suno_experimental"] = True
+    return result

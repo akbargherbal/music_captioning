@@ -49,7 +49,7 @@ def main(argv: list[str] | None = None) -> int:
     import torch
     from src.captioner import _split_audio, audio_duration
     from src.captioner_hf import HFCaptioner
-    from src.tags import extract_tags, merge_tags, to_suno
+    from src.tags import TAGS_EXPERIMENTAL, extract_tags, merge_tags
 
     tracks = collect_audio(args.input)
     if not tracks:
@@ -88,8 +88,8 @@ def main(argv: list[str] | None = None) -> int:
                 "instruments": merged["instruments"],
                 "vocals": merged["vocals"],
                 "production": merged["production"],
+                "tags_experimental": TAGS_EXPERIMENTAL,
                 "caption": " ".join(c.strip() for c in captions),
-                "suno_prompt": to_suno(merged),
             })
             print(f"[{i}/{len(tracks)}] {track.name}: {entry['caption_seconds']}s "
                   f"({entry['chunks']} chunks, audio {entry['duration_s']}s)")

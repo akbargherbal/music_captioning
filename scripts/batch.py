@@ -122,6 +122,7 @@ def process_album(
     retry_only_failed: bool = False,
     max_track_seconds: float = 0.0,
     min_bitrate_kbps: float = 0.0,
+    experimental_suno: bool = False,
 ) -> dict:
     """Caption one album, **isolating per-track failures**.
 
@@ -134,7 +135,7 @@ def process_album(
     """
     from src.captioner import audio_stream_info
     from src.captioner_hf import caption_and_tag
-    from src.tags import merge_tags, to_suno
+    from src.tags import TAGS_EXPERIMENTAL, merge_tags, to_suno
 
     artist, album = entry["artist"], entry["album"]
     album_dir = workdir / artist / album
@@ -152,10 +153,12 @@ def process_album(
         if reason:
             raise SkippedTrack(reason)
         t0 = time.time()
-        result = caption_and_tag(captioner, local)
+        result = caption_and_tag(
+            captioner, local, experimental_suno=experimental_suno
+        )
         caption_s = time.time() - t0
         result.pop("chunk_captions", None)
-        return {
+        track_obj = {
             "file": filename,
             "duration_s": round(duration or 0.0, 1),
             "bitrate_kbps": round(bitrate) if bitrate else None,
@@ -164,8 +167,12 @@ def process_album(
             "vocals": result["vocals"],
             "production": result["production"],
             "caption": result["caption"],
-            "suno_prompt": result["suno_prompt"],
+            "tags_experimental": TAGS_EXPERIMENTAL,
         }
+        if experimental_suno:
+            track_obj["suno_prompt"] = result["suno_prompt"]
+            track_obj["suno_experimental"] = True
+        return track_obj
 
     track_results, failed, skipped = run_tracks(
         entry["tracks"], caption_one,
@@ -203,11 +210,14 @@ def process_album(
         "instruments": merged["instruments"],
         "vocals": merged["vocals"],
         "production": merged["production"],
-        "suno_prompt": to_suno(merged),
+        "tags_experimental": TAGS_EXPERIMENTAL,
         "tracks": track_results,
         "failed_tracks": failed,
         "skipped_tracks": skipped,
     }
+    if experimental_suno:
+        album_obj["suno_prompt"] = to_suno(merged)
+        album_obj["suno_experimental"] = True
     atomic_write_json(album_output_path(outputs, artist, album), album_obj)
     return album_obj
 
@@ -240,6 +250,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--retry-failed", action="store_true",
                         help="re-queue albums marked partial (some tracks failed) and "
                              "re-caption only the failed tracks")
+    parser.add_argument("--experimental-suno", action="store_true",
+                        help="also write the unsupported suno_prompt string "
+                             "(default: omit; see docs/TAG_AUDIT.md)")
     parser.add_argument("--list", action="store_true", help="show pending albums and exit")
     args = parser.parse_args(argv)
 
@@ -318,6 +331,7 @@ def main(argv: list[str] | None = None) -> int:
                 existing=prior_obj, retry_only_failed=retry_only,
                 max_track_seconds=args.max_track_seconds,
                 min_bitrate_kbps=args.min_bitrate_kbps,
+                experimental_suno=args.experimental_suno,
             )
         except Exception as exc:  # noqa: BLE001 - keep going
             print(f"  ERROR on {key}: {type(exc).__name__}: {exc}")
