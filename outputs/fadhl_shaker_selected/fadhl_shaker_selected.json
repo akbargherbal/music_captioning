@@ -2,7 +2,7 @@
   "artist": "fadhl_shaker_selected",
   "album": "fadhl_shaker_selected",
   "source_dir": "/content/fadhl_shaker_selected",
-  "generated_at": "2026-11-06T18:52:51",
+  "generated_at": "2026-11-06T18:57:20",
   "status": "ok",
   "track_count": 24,
   "failed_count": 0,
@@ -151,7 +151,7 @@
       "caption": "An energetic Arabic pop track driven by a powerful, syncopated darbuka rhythm and a prominent, melodic oud line. A passionate male lead vocal, rich with melismatic ornamentation and vibrato, soars over the mix, enhanced by reverb and supported by a powerful male choir that chants in a call-and-response fashion, adding an anthemic quality to the chorus. A lush, synthesized string section provides dramatic swells and counter-melodies, creating a full, cinematic soundscape. The track features a dynamic instrumental break highlighting the interplay between the oud and strings before returning to the vocal-led chorus. The production is clean, modern, and punchy, blending traditional Middle Eastern instrumentation with a driving, dance-oriented beat to deliver a dramatic and compelling feel.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 6.8,
+      "rewrite_seconds": 6.5,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -202,7 +202,7 @@
       "caption": "An upbeat, driving Arabic pop track with a strong Khaleeji influence, built on a punchy electronic drum machine beat and a rhythmic synth bassline. A melodic oud carries the main instrumental hook, weaving through the arrangement alongside lush synth strings and pads. A passionate male lead vocal, rich with traditional melisma and vibrato, delivers the main melody over a lush bed of synth pads and string layers. The chorus features a powerful male choir singing in unison, creating an anthemic and communal feel. The production blends traditional Arabic melodicism with contemporary pop and electronic elements, featuring prominent reverb on the vocals that give the track a spacious, grand sound reminiscent of late 90s or early 2000s Arabic pop. The rhythm is syncopated and vibrant, with a strong emphasis on both romantic and rhythmic qualities, enhanced by cinematic strings and a foundational bassline.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.2,
+      "rewrite_seconds": 4.3,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -259,7 +259,7 @@
       "caption": "An energetic Arabic pop track driven by a fast, intricate oud melody and a driving darbuka rhythm, featuring a passionate male vocal rich with melismatic ornamentation and vibrato. The lead vocal is clear and emotionally charged, delivered with significant reverb, soaring over a lush bed of synth strings and a solid bassline. The arrangement blends traditional and modern elements, built on a steady mid-tempo beat combining a modern kick drum with traditional hand percussion. A punchy drum machine and rhythmic synth bassline support the groove, while atmospheric pads and layered vocal harmonies add depth and emotional resonance. Dynamic instrumental sections highlight the oud's expressive solo, which takes center stage in a long, evolving instrumental bridge before fading out on the rhythmic groove. Chanted ad-libs and layered backing vocals enhance the song's celebratory and romantic character, giving the production a spacious, modern, and anthemic feel.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.2,
+      "rewrite_seconds": 4.3,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -316,7 +316,7 @@
       "caption": "A melancholic Arabic pop track built on a steady, mid-tempo electronic beat featuring a darbuka and a simple kick-snare pattern, underpinned by a deep synth bass. The arrangement centers on a prominent, emotive oud melody that weaves through the composition, complemented by lush cinematic string pads, subtle string-like textures, and a ney-like synth flute providing poignant melodic fills. A passionate male vocal, rich with traditional Arabic melisma and vibrato, delivers an emotional performance enhanced by spacious reverb. Layered choral-style backing vocals add to the song's grand, dramatic atmosphere. The track begins with a brief atmospheric intro featuring a plucked synth arpeggio, before the main groove and oud melody take center stage. During instrumental breaks, an accordion joins the arrangement. The song builds to a chorus with anthemic quality, followed by an extended instrumental section showcasing the oud and strings, concluding with a fade-out.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.4,
+      "rewrite_seconds": 4.5,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -364,7 +364,7 @@
       "caption": "An upbeat, driving Arabic pop track with a strong 90s aesthetic features a punchy synthesized drum machine beat and a rhythmic synth bassline. A passionate male lead vocal delivers the main melody, supported by a powerful male chorus that engages in call-and-response phrases and harmonic layers. The instrumentation includes a distinctive synth lead playing an oriental scale during instrumental breaks, along with synth pads and percussive hits. A fast-paced, synthesized string melody—possibly mimicking an oud or qanun—appears in the instrumental sections, layered over the pads. The production is clean, modern, and energetic, with noticeable reverb on the vocals creating a spacious, lively atmosphere. The track maintains a high-energy, danceable groove throughout, fading out with a filtered effect where the chorus echoes into the distance, ideal for belly dancing or a party setting.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.0,
+      "rewrite_seconds": 4.2,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -408,7 +408,7 @@
       "caption": "An energetic Arabic pop track features a powerful, emotive male lead vocal rich with melismatic ornamentation, soaring over a dense arrangement of oud, synth strings, and a driving bassline. The rhythm section is syncopated, highlighting a prominent darbuka and other Middle Eastern percussion, blended with a modern pop drum machine beat and lively hand percussion. A virtuosic accordion melody adds a distinctive, emotive layer. A male choir provides strong, anthemic backing vocals in a call-and-response style, enhancing the communal and dynamic feel. The production is clean and spacious, with reverb applied to vocals and lead instruments, creating a full, vibrant, and danceable soundscape that seamlessly blends traditional instrumentation with contemporary pop sensibilities.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 3.4,
+      "rewrite_seconds": 3.5,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -461,7 +461,7 @@
       "caption": "A dramatic and cinematic Arabic pop track opens with a clean piano melody and an emotive oud performance, rich with intricate ornamentation and vibrato. A lush, sweeping string section enters, building an epic atmosphere alongside rhythmic hand percussion, likely a darbuka. The arrangement swells into a powerful, driving chorus where a passionate male vocal, sung in Arabic with characteristic melisma, soars over the full ensemble. The production is spacious and polished, with significant reverb enhancing the grand, emotional soundscape. The track is driven by a steady, mid-tempo beat combining a darbuka-style hand drum with a modern kick and snare, supported by lush synth pads that create a dramatic backdrop. A prominent synth lead emulates an oud or strings, carrying the main melodic hook. An expressive violin takes the lead during an extended instrumental break, delivering soaring, expressive lines that weave through the driving rhythm. The song briefly transitions into an atmospheric section featuring an oud-like plucked string instrument before returning to the main vocal theme and fading out.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.9,
+      "rewrite_seconds": 5.0,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -515,7 +515,7 @@
       "caption": "A grand, cinematic Arabic pop ballad opens with a lush orchestral arrangement featuring sweeping strings, dramatic piano arpeggios, and a prominent oud melody. A powerful, emotive male vocal enters, delivering a passionate performance rich with vibrato and melismatic phrasing. The track builds into a mid-tempo, driving rhythm with the introduction of a steady drum machine beat and a supportive bassline, blending traditional Arabic orchestration with a modern pop sensibility. The overall mood is deeply romantic and yearning, carried by the soaring vocals and the majestic, layered instrumentation. An energetic Arabic pop track features a powerful, passionate male vocal and a driving, synthesized dance beat, centered around a catchy, fast-paced instrumental hook played on a synthesized string instrument that mimics an oud or qanun with intricate melodic runs. A punchy synth bass and a four-on-the-floor drum machine pattern create an insistent, danceable groove. The production is clean and modern, with the emotional vocals prominently placed in the mix, enhanced by reverb. The arrangement includes layered synthesizers such as string pads and a lead synth performing oriental-scale melodies. The track transitions into an extended instrumental section featuring a virtuosic synth lead solo, punctuated by expressive vocal ad-libs and melismatic runs, creating a vibrant and celebratory dance floor atmosphere.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 6.3,
+      "rewrite_seconds": 6.4,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -571,7 +571,7 @@
       "caption": "A dramatic and cinematic Arabic pop track opens with a mournful, bowed string melody reminiscent of a cello, quickly building with a driving beat that combines traditional hand percussion and a modern drum machine, enhanced by shimmering, arpeggiated qanun-like synth textures. A passionate male lead vocal, rich with vibrato and emotional melisma, carries the main theme, supported by a powerful male choir singing in unison during the chorus, creating an anthemic and grand soundscape layered with lush orchestral strings. The arrangement is built on a steady, mid-tempo drum machine beat and a foundational synth bassline, with a prominent synth lead emulating the sound of an oud that plays intricate melodic lines and arpeggios, defining the song's instrumental hooks. Atmospheric synth pads add harmonic depth, and the production features generous reverb, giving the track a spacious, grand feel characteristic of its era. A call-and-response dynamic between the lead vocal and the male choir is especially prominent in the chorus sections.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.9,
+      "rewrite_seconds": 5.0,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -626,7 +626,7 @@
       "caption": "An upbeat Arabic dance-pop track driven by a punchy electronic drum machine beat and a rhythmic synth bassline, opening with festive sleigh bells before the main groove kicks in. A male vocalist delivers a passionate, melismatic lead vocal with emotional intensity and rich reverb and delay, characteristic of Arabic singing styles. The arrangement features a prominent, slightly reedy synth lead carrying the main melody, lush synth pads, and string layers that add harmonic depth. A catchy, looping synthesized accordion riff contributes to the energetic feel, complemented by darbuka-style percussion that creates an infectious belly dance groove. Layered vocal harmonies enhance the chorus, giving it an anthemic quality. The track includes a brief instrumental break highlighting the accordion hook and expressive vocal ad-libs before abruptly ending. A filtered, telephone-like vocal sample appears during a transitional instrumental section before the track fades out.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.1,
+      "rewrite_seconds": 4.3,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -676,7 +676,7 @@
       "caption": "The track opens with a melancholic, cinematic introduction featuring a clean piano melody and an emotive, mournful cello line. A dramatic orchestral hit follows, transitioning into a main section driven by a driving, mid-tempo Arabic pop beat with a distinct kick and clap pattern. A passionate male lead vocal, rich with vibrato and melisma, carries the melody, supported by lush synth strings and pads. A powerful male choir provides harmonic backing and call-and-response phrases, adding to the song's grand, dramatic scale. The rhythm section blends a modern pop drum machine with traditional percussion, creating a danceable yet intense groove. A brief atmospheric breakdown features a cello-like synth, leading into a more contemplative verse before building back into a high-energy chorus filled with layered vocal harmonies and a yearning mood. The track concludes with a lengthy instrumental section featuring an expressive, virtuosic violin solo that weaves through traditional Arabic scales, accompanied by atmospheric synth textures and a fading beat.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.7,
+      "rewrite_seconds": 4.9,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -723,7 +723,7 @@
       "caption": "An epic and dramatic Arabic pop ballad opens with a highly emotive, microtonal violin solo, setting a melancholic and cinematic tone. A powerful, passionate male vocal enters, delivering lyrics with significant vibrato and emotional intensity over a lush bed of orchestral strings and atmospheric synth pads. The arrangement features a prominent, virtuosic violin with soaring, ornamented melodies and traditional elements like oud and other strings, adding rich texture. A steady mid-tempo electronic drum beat with a strong kick and clap provides a modern rhythmic foundation. The track builds into a grand instrumental section with sweeping orchestral strings and a passionate violin solo, creating a powerful, cinematic atmosphere before transitioning into a more reflective vocal passage. The vocalist sings with passion and melisma, his voice soaring over grand, melancholic chord progressions. The beat subsides, emphasizing the introspective quality of the vocals and piano, all drenched in cavernous reverb, before fading out.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.6,
+      "rewrite_seconds": 4.8,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -770,7 +770,7 @@
       "caption": "An upbeat Arabic pop track driven by a vibrant percussion section featuring a prominent darbuka and hand percussion, with a syncopated groove. A melodic oud carries the main instrumental theme, playing intricate melodic lines, complemented by bright synthesized accordion-like textures and lush synth strings. A solid synth bassline anchors the rhythm. The lead male vocal is clear, emotive, and rich with melismatic ornamentation, soaring over the mix with a touch of reverb. The chorus features a dynamic call-and-response with layered male backing vocals, adding a powerful, communal feel. The track includes an extended instrumental break that highlights the oud's virtuosity and the interplay between the oud and percussion, before returning to the infectious chorus.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 3.5,
+      "rewrite_seconds": 3.6,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -817,7 +817,7 @@
       "caption": "An energetic Arabic pop track is driven by a powerful, syncopated darbuka rhythm and a prominent, virtuosic ney flute melody that weaves throughout the song. A passionate male lead vocal, rich with melismatic ornamentation, delivers the main melody. The chorus introduces layered male backing vocals, creating a full, anthemic call-and-response texture. The production is clean and modern, blending traditional Middle Eastern instrumentation with a driving, danceable pop structure, evoking a mood that is both yearning and celebratory. The arrangement alternates between powerful chorus sections and more intimate verses, where a restrained but emotive lead vocal is supported by intricate melodic lines from the oud. A steady, programmed drum machine beat and a melodic synth bassline provide a mid-tempo foundation, with simple synth pads offering harmonic support. The track features expressive oud solos and a brief instrumental section at the end, concluding with a clean, melodic synth lead that fades out. A touch of reverb enhances the emotional weight of the vocals.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 5.0,
+      "rewrite_seconds": 5.2,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -863,7 +863,7 @@
       "caption": "The track opens with a fast, ornate melodic line on the oud or a synth emulation, establishing a dramatic and passionate tone. A strong, emotive male vocal enters, delivering lyrics with significant vibrato and melismatic runs typical of Arabic music. A lush cinematic string section swells in, building tension before transitioning into a mid-tempo Arabic pop groove. The arrangement features a driving beat with a prominent darbuka and full drum kit, supported by a solid bassline that anchors the rhythm. Synth strings and pads add harmonic depth, while the oud weaves intricate counter-melodies throughout the verses and chorus, maintaining traditional roots. The song follows a clear verse-chorus structure, building in intensity toward a powerful chorus, and concludes with an instrumental flourish that highlights the oud's virtuosity. An energetic instrumental break reprises the main melodic theme before ending abruptly.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.3,
+      "rewrite_seconds": 4.5,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -916,7 +916,7 @@
       "caption": "A dramatic and melancholic Arabic pop ballad opens with a gentle piano arpeggio, soon joined by a virtuosic and emotive accordion playing a lively, European-influenced melody. A powerful male vocal enters, delivering the lyrics with significant passion and vibrato over a steady, mid-tempo beat driven by acoustic drums and a supportive bassline. The arrangement builds with the addition of lush, cinematic strings, creating a rich, orchestral texture that underscores the song's emotional weight. The accordion remains a central melodic voice throughout, weaving intricate lines between the vocal phrases. The lead singer's passionate delivery is answered by a powerful, layered male choir, creating a dynamic call-and-response that builds to an intense emotional peak. The song blends traditional and modern elements, featuring a prominent oud playing melodic lines over a darbuka, a solid kick drum, and a clean bass guitar. Lush synth pads provide harmonic depth, and the track culminates in an expressive vocal ad-lib section before an abrupt, impactful ending. A distinctive, lively accordion melody takes center stage during instrumental breaks, adding a unique folk-like texture. The arrangement is built on a driving electronic beat and a prominent synth bassline, layered with cinematic synth strings.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 6.0,
+      "rewrite_seconds": 6.3,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -972,7 +972,7 @@
       "caption": "An energetic Arabic pop track driven by a powerful, emotive male vocal performance rich with melisma and vibrato, supported by a punchy drum machine beat and a melodic synth bassline. The song opens with a dramatic, cinematic saxophone melody, followed by a driving, danceable groove built on a modern drum machine and prominent darbuka-style hand percussion. A prominent oud carries the main melodic counterpoint, weaving intricate lines throughout, while a synthesized string section provides lush harmonic pads. A lead synth, possibly emulating an oud or qanun, plays intricate melodic lines during instrumental breaks. The production is clean and modern, with significant reverb on the vocals creating a grand, anthemic feel. The track features a soulful, melodic saxophone solo during an instrumental break, followed by a dynamic section with synth arpeggios and a brief, distorted guitar-like flourish before an abrupt end. The overall sound blends nostalgic late-90s/early-2000s production elements with vibrant, rhythmic instrumentation.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 5.2,
+      "rewrite_seconds": 5.4,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -1024,7 +1024,7 @@
       "caption": "An energetic Arabic dance-pop track driven by a powerful, syncopated drum machine beat and a funky synth bassline. A passionate male lead vocal, rich with melismatic ornamentation and vibrato, soars over the mix with significant reverb. A prominent synth lead emulates the sound of an oud or mizmar/zurna, carrying the main melody alongside lively keyboard chords and percussion. The chorus features layered male backing vocals in a call-and-response style, creating an anthemic and celebratory feel, with a unison choir adding to the expansive atmosphere. The instrumentation blends modern electronic elements with traditional Arabic sounds, including electronic percussion reminiscent of a darbuka. The arrangement includes a dynamic instrumental break with rhythmic vocal scatting and prominent synth work, maintaining a high-energy, club-ready groove throughout. The production is clean and modern, fusing traditional Arabic melodic sensibilities with a driving electronic dance rhythm.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.6,
+      "rewrite_seconds": 4.7,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -1070,7 +1070,7 @@
       "caption": "An energetic Arabic pop track driven by a powerful, syncopated drum machine beat and a prominent melodic oud performance, featuring a punchy electronic rhythm and a rhythmic synth bassline. The song opens with a dramatic, cinematic instrumental introduction led by a reedy synth melody, reminiscent of an accordion or mizmar, punctuated by orchestral stabs. A passionate male lead vocal, rich with vibrato and Arabic melisma, delivers the lyrics with a strong, clear tone, supported by a male chorus that engages in a call-and-response style, adding depth and a communal, celebratory feel. Layered synths, including string pads and melodic lead lines, weave through the mix, while traditional Middle Eastern instrumentation blends seamlessly with a modern, dance-oriented pop structure. The production is clean and vibrant, creating a high-energy, festive atmosphere ideal for belly dancing.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.3,
+      "rewrite_seconds": 4.5,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -1116,7 +1116,7 @@
       "caption": "The track opens with a virtuosic and dramatic oud taqsim, a rapid, improvisational flourish that establishes a passionate, cinematic tone. A powerful, emotive male vocal enters, delivering lyrics with significant melisma and vibrato characteristic of Arabic music. The arrangement builds into a full-band sound, blending traditional and modern elements: a driving rhythm section combines a standard drum kit with Middle Eastern percussion like the darbuka, while a lush string section provides a sweeping orchestral backdrop. The oud remains a central melodic voice throughout. The chorus is powerful and anthemic, followed by an instrumental break featuring a lively accordion melody over the driving beat before the track comes to an abrupt end. A passionate male vocal delivers emotional, melismatic runs, expressing a sense of longing and heartache, supported by a solid bassline, rhythmic percussion, and subtle synth pads. The chorus swells with intensity, vocals becoming more forceful. The track concludes with a dramatic slowdown, where the vocals become drawn-out and soaked in reverb, fading into a brief, atmospheric instrumental outro.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 5.3,
+      "rewrite_seconds": 5.4,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -1173,7 +1173,7 @@
       "caption": "A dramatic and cinematic Arabic pop track opens with an evocative piano and oud melody, quickly joined by lush, sweeping orchestral strings. A powerful, emotive male lead vocal enters, singing with passionate vibrato over a steady, mid-tempo beat driven by acoustic drums and bass. The arrangement features a prominent accordion that delivers expressive melodic lines and a fiery solo, trading phrases with the vocals and strings. Layered male backing vocals provide harmonic depth and a call-and-response dynamic, enhancing the song's grand, theatrical feel. A lush string section and a steady rhythm section of drums and bass guitar form the core of the arrangement. The production is clean and spacious, with significant reverb creating a concert hall ambiance. The track builds in intensity, conveying a sense of romantic yearning and drama, with a nostalgic, slightly European flavor characteristic of late 20th-century Middle Eastern music.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.5,
+      "rewrite_seconds": 4.6,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -1224,7 +1224,7 @@
       "caption": "The track opens with a virtuosic ney flute solo performing a traditional Arabic taqsim, adorned with intricate ornamentation over a subtle atmospheric pad. A smooth, melancholic male vocal enters, delivering an emotional melody typical of modern Arabic pop. The arrangement blends traditional and contemporary elements, featuring a gentle electronic beat, a deep synth bass, and lush string pads that support the lead vocal and ney. The energy builds into a more driving, rhythmic chorus with layered vocals and a prominent beat, creating a powerful, yearning atmosphere before an abrupt cut-off. A reverb-drenched male lead vocal drives the song, supported by lush cinematic synth strings and a steady mid-tempo electronic drum beat. A prominent synth lead carries the main melodic hook, while layered backing vocals create a grand, choir-like effect in the chorus, amplifying the song's melancholic mood. The arrangement breaks down into a more intimate, reflective section with just the lead vocal and sparse synth pads before fading out. A dynamic, modern beat incorporates the distinct sound of a darbuka, and a prominent instrumental section features a fast, melodic oud solo over the propulsive groove, transitioning into a more reflective vocal passage.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 6.1,
+      "rewrite_seconds": 6.0,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     },
@@ -1333,7 +1333,7 @@
       "caption": "An energetic Arabic pop track driven by a powerful, syncopated darbuka rhythm and a punchy synth bassline, featuring a driving drum machine beat. A passionate male lead vocal, rich with melisma and vibrato and slightly reverb-drenched, sings over the beat, answered by a dynamic male chorus in a call-and-response style that creates a celebratory, anthemic atmosphere. The instrumentation blends modern and traditional elements, with a bright, reedy synth lead carrying the main melody and Middle Eastern-style melodic flourishes, layered with synth strings and pads. A prominent, virtuosic violin plays fast, ornate melodies, placing both the vocals and the violin front and center in the mix. The production is bright, lively, and vibrant, designed for dancing, with a constant, high-tempo energy perfect for belly dancing or festive gatherings.",
       "rewrite_status": "ok",
       "tags_experimental": true,
-      "rewrite_seconds": 4.5,
+      "rewrite_seconds": 4.4,
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 1
     }
@@ -1349,5 +1349,5 @@
     "single_chunk": 0,
     "status": "ok"
   },
-  "total_rewrite_seconds": 114.9
+  "total_rewrite_seconds": 117.7
 }
