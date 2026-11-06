@@ -1,0 +1,5 @@
+# llama.cpp commit to build against.
+#
+# Empty = track upstream main (same default as arabmaqamrock's audio_cpp.pin).
+# Put a commit sha here before publishing a binary you want to reproduce later:
+#   git -C llama.cpp-text rev-parse HEAD

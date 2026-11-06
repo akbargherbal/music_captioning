@@ -12,42 +12,68 @@ different inference engine (CUDA kernels tuned for quantized weights) and smalle
 memory. Q4_K_M also loses more quality than fp16/Q8_0; the only way to know if
 that matters here is to run the same stored captions through it.
 
-## Build (idempotent)
+## Build once on a CPU-only VM
+
+The build does **not** need a GPU: `nvcc` cross-compiles for an explicit
+`--cuda-arch`. Build on any CPU VM (or a CPU Colab runtime with the CUDA
+toolkit), publish to GCS, then Colab only downloads. This mirrors
+`arabmaqamrock/plumbing/fetch_binary.sh`.
 
 ```bash
-bash scripts/build_llamacpp_text.sh
+# CPU-only VM: no GPU required
+./plumbing/fetch_llamacpp_text.sh --build --publish --cuda-arch 75
 ```
 
-Builds stock upstream (`ggml-org/llama.cpp`) with CUDA for `sm_75` into
-`llama.cpp-text/`, targets `llama-cli` and `llama-server`. This is separate from
-`scripts/build_llamacpp.sh` (the patched audio fork). Override the location with
-`LLAMACPP_TEXT_DIR` and the ref with `LLAMACPP_TEXT_REF`.
+Builds `llama-cli` + `llama-server` into `llama.cpp-text/` and uploads:
 
-### Keep the build in GCS (survives Colab resets)
+```
+gs://akbar-december-2024-backup/music_captioning/binaries/sm75-t4/
+  llamacpp-text.tar.gz
+  llamacpp-text.tar.gz.sha256
+  manifest.json          # llama.cpp commit, CUDA, flags, size, sha256, built_at
+```
+
+Pin the source commit in `plumbing/llamacpp.pin` before publishing if you want
+the build to be reproducible later (empty = track upstream main).
+
+## Fetch on Colab (no build)
 
 ```bash
-export LLAMACPP_TEXT_CACHE_GS=gs://YOUR_BUCKET/cache/llamacpp-text
-bash scripts/build_llamacpp_text.sh
+./plumbing/fetch_llamacpp_text.sh
 ```
 
-The first run builds and uploads `llamacpp-text-<ref>-cu<cuda>-sm75.tar.gz`
-(just `build/bin`). Later sessions download and extract it instead of building.
-The cache key includes the CUDA version and `sm_75`, and the restored binaries
-are smoke-tested with `llama-cli --version`; if they do not run on the new image,
-the script rebuilds automatically.
+Detects the GPU (`sm75-t4` on a T4), downloads the tarball, verifies SHA256,
+extracts it, loads `cuda_loader_path.sh`, and smoke-tests `llama-cli --version`.
+If the fetch, checksum, or smoke test fails, it falls back to building from
+source.
 
-- `LLAMACPP_TEXT_FORCE_BUILD=1` ignores the cache.
-- `bash scripts/build_llamacpp_text.sh --print-cache-key` prints the key.
-- The first run still needs `gcloud auth` (already used for the audio bucket).
+- `--force` re-stages even if binaries exist.
+- `--dry-run` prints the plan.
+- `--cuda-arch 75` is required only when building without a GPU.
 
-The GGUF weights can be cached the same way:
+### CUDA runtime mismatch
+
+A binary built against a different CUDA major than the Colab image needs the
+matching runtime libs. `cuda_loader_path.sh` prepends the `nvidia-*` wheel
+directories to `LD_LIBRARY_PATH`; the `manifest.json` records `cuda_toolkit` and
+`llamacpp_commit` so a mismatch can be diagnosed. The fetch script sources the
+loader before its smoke test.
+
+### GGUF weights cache
+
+Same idea: copy from GCS, else download from Hugging Face and publish:
 
 ```bash
 GGUF=Qwen3-4B-Instruct-2507-Q8_0.gguf
-gcloud storage cp "gs://YOUR_BUCKET/cache/gguf/$GGUF" models/ \
+PREFIX="gs://akbar-december-2024-backup/music_captioning"
+
+gcloud storage cp "$PREFIX/gguf/$GGUF" models/ \
   || { hf download unsloth/Qwen3-4B-Instruct-2507-GGUF "$GGUF" --local-dir models \
-       && gcloud storage cp "models/$GGUF" "gs://YOUR_BUCKET/cache/gguf/$GGUF"; }
+       && gcloud storage cp "models/$GGUF" "$PREFIX/gguf/$GGUF"; }
 ```
+
+`GCP_PREFIX` comes from `plumbing/env.sh`; override `GCP_ROOT` for another
+bucket.
 
 ## Candidate GGUFs (checked 2026-11-06)
 
