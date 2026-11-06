@@ -180,6 +180,50 @@ def git_checkpoint(repo: Path, message: str, push: bool, retries: int = 3) -> No
     print("  WARNING: could not push; work is committed locally only")
 
 
+def albums_from_outputs(
+    outputs_root: Path, artists: set[str] | None = None
+) -> dict[str, dict[str, object]]:
+    """Album entries rebuilt from stored JSONs, so ``--repolish`` needs no audio.
+
+    The polish phase only needs ``chunk_captions``. Without this, re-polishing
+    an album requires the original audio root to be reachable again just to
+    discover which albums exist — which breaks for local roots from an earlier
+    session.
+
+    Tracks that failed captioning are skipped (their audio is not available
+    here); a warning names them so the loss is visible.
+    """
+    from src.resume import album_key
+
+    albums: dict[str, dict[str, object]] = {}
+    for path in sorted(Path(outputs_root).glob("*/*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(data, dict) or not data.get("tracks"):
+            continue
+        artist = str(data.get("artist") or path.parent.name)
+        album = str(data.get("album") or path.stem)
+        if artists and artist not in artists:
+            continue
+        failed = data.get("failed_tracks") or []
+        if failed:
+            names = ", ".join(str(f.get("file")) for f in failed[:3])
+            print(f"  WARNING: {artist}/{album}: skipping {len(failed)} failed "
+                  f"track(s) in --repolish ({names})", flush=True)
+        albums[album_key(artist, album)] = {
+            "artist": artist,
+            "album": album,
+            "source_dir": data.get("source_dir") or "",
+            "tracks": [
+                {"filename": t["file"], "uri": ""}
+                for t in data["tracks"] if t.get("file")
+            ],
+        }
+    return albums
+
+
 def caption_album(
     captioner,
     entry: dict,
@@ -513,8 +557,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--force", action="store_true", help="redo albums already in the manifest")
     parser.add_argument(
         "--repolish", action="store_true",
-        help="re-run only the polish phase on every album that has a JSON "
-             "(reuses the stored chunk_captions; useful to A/B a new rewrite model)",
+        help="re-run only the polish phase on every album JSON under --outputs "
+             "(reuses stored chunk_captions, so --root/audio is not needed)",
     )
     parser.add_argument("--retry-failed", action="store_true",
                         help="re-queue albums marked partial (some tracks failed) and "
@@ -532,7 +576,11 @@ def main(argv: list[str] | None = None) -> int:
         if proc.returncode != 0:
             print(f"WARNING: git pull failed: {proc.stderr.strip()[:200]}")
 
-    if args.root.startswith("gs://"):
+    if args.repolish:
+        albums = albums_from_outputs(
+            args.outputs, set(args.artist) if args.artist else None
+        )
+    elif args.root.startswith("gs://"):
         albums = group_tracks(list_gs_mp3(args.root), args.root)
     else:
         albums = group_local_tracks(args.root, artist=args.artist_name)

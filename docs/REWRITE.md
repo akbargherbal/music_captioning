@@ -105,7 +105,6 @@ written English and is easier. No model is at zero, which is why the
 verification pass remains.
 
 ## Where it runs (per album, two phases)
-
 `scripts/batch.py` never interleaves the models:
 
 1. **Caption** every track of the album with the audio captioner. Each track
@@ -120,6 +119,11 @@ verification pass remains.
 If the rewrite model fails to load, the album stays `captioned`, the raw
 captions remain committed, and the next run reuses them instead of re-captioning
 the whole album.
+
+`--repolish` re-runs only this second phase and rebuilds the album list from
+`outputs/*/*.json`, so it needs neither the audio source nor a reachable
+`--root`: the stored `chunk_captions` are enough. It is the cheap way to change
+the rewrite engine or prompt across an existing discography.
 
 The raw captions are never deleted, so a bad result can be traced to the
 captioner (look at `chunk_captions`) or to the rewrite model (compare
