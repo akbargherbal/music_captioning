@@ -23,6 +23,32 @@ Builds stock upstream (`ggml-org/llama.cpp`) with CUDA for `sm_75` into
 `scripts/build_llamacpp.sh` (the patched audio fork). Override the location with
 `LLAMACPP_TEXT_DIR` and the ref with `LLAMACPP_TEXT_REF`.
 
+### Keep the build in GCS (survives Colab resets)
+
+```bash
+export LLAMACPP_TEXT_CACHE_GS=gs://YOUR_BUCKET/cache/llamacpp-text
+bash scripts/build_llamacpp_text.sh
+```
+
+The first run builds and uploads `llamacpp-text-<ref>-cu<cuda>-sm75.tar.gz`
+(just `build/bin`). Later sessions download and extract it instead of building.
+The cache key includes the CUDA version and `sm_75`, and the restored binaries
+are smoke-tested with `llama-cli --version`; if they do not run on the new image,
+the script rebuilds automatically.
+
+- `LLAMACPP_TEXT_FORCE_BUILD=1` ignores the cache.
+- `bash scripts/build_llamacpp_text.sh --print-cache-key` prints the key.
+- The first run still needs `gcloud auth` (already used for the audio bucket).
+
+The GGUF weights can be cached the same way:
+
+```bash
+GGUF=Qwen3-4B-Instruct-2507-Q8_0.gguf
+gcloud storage cp "gs://YOUR_BUCKET/cache/gguf/$GGUF" models/ \
+  || { hf download unsloth/Qwen3-4B-Instruct-2507-GGUF "$GGUF" --local-dir models \
+       && gcloud storage cp "models/$GGUF" "gs://YOUR_BUCKET/cache/gguf/$GGUF"; }
+```
+
 ## Candidate GGUFs (checked 2026-11-06)
 
 | Repo | Quant | Approx. size | Note |
