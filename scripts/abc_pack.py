@@ -67,8 +67,12 @@ def load_manifest(path: Path) -> list[dict]:
     with path.open(encoding="utf-8") as fh:
         for line in fh:
             line = line.strip()
-            if line:
-                rows.append(json.loads(line))
+            if not line:
+                continue
+            row = json.loads(line)
+            if row.get("record") == "header":
+                continue
+            rows.append(row)
     return rows
 
 
@@ -84,7 +88,9 @@ def load_prior_tracks(outputs: Path, skip: set[str]) -> list[dict]:
         if key in skip:
             continue
         for track in data.get("tracks", []):
-            prior.append({**track, "artist": data.get("artist"),
+            prior.append({**track,
+                          "artist": (track.get("source_artist")
+                                     or data.get("artist")),
                           "album": data.get("album")})
     return prior
 
@@ -93,15 +99,16 @@ def discover(raw_root: Path, flat_dir: Path | None,
              manifest: list[dict], artist: str | None,
              album: str | None) -> dict[str, list[tuple[Path, dict]]]:
     """Group raw track directories by ``ARTIST/album``."""
-    by_album_file = {(r["artist"], r["album"], r["file"]): r for r in manifest}
-    by_file: dict[str, list[dict]] = {}
+    by_album_stem = {(r["artist"], r["album"], Path(r["file"]).stem): r
+                     for r in manifest}
+    by_stem: dict[str, list[dict]] = {}
     for row in manifest:
-        by_file.setdefault(row["file"], []).append(row)
+        by_stem.setdefault(Path(row["file"]).stem, []).append(row)
 
     groups: dict[str, list[tuple[Path, dict]]] = {}
     if flat_dir is not None:
         for track_dir in sorted(p for p in flat_dir.iterdir() if p.is_dir()):
-            matches = by_file.get(track_dir.name + ".mp3", [])
+            matches = by_stem.get(track_dir.name, [])
             if len(matches) > 1:
                 # Disambiguate with --artist / --album when filenames collide.
                 matches = [m for m in matches
@@ -129,7 +136,7 @@ def discover(raw_root: Path, flat_dir: Path | None,
             if not alb_dir.is_dir():
                 continue
             for track_dir in sorted(p for p in alb_dir.iterdir() if p.is_dir()):
-                row = by_album_file.get((art, alb, track_dir.name + ".mp3"))
+                row = by_album_stem.get((art, alb, track_dir.name))
                 if row is None:
                     # The stem may have been suffixed by --on-collision.
                     candidates = [r for r in manifest
@@ -143,15 +150,31 @@ def discover(raw_root: Path, flat_dir: Path | None,
 
 
 def build_track(track_dir: Path, row: dict, artist: str, album: str,
-                raw_gcs: str | None = None) -> dict | None:
+                raw_gcs: str | None = None,
+                raw_archive: bool = False) -> dict | None:
     meta_path = track_dir / "meta.json"
     abc_path = track_dir / "score.abc"
     if not meta_path.is_file():
         return None
     meta = json.loads(meta_path.read_text(encoding="utf-8"))
     duration = meta.get("duration_s") or row.get("duration_s")
+    if raw_gcs:
+        raw_uri = (f"{raw_gcs.rstrip('/')}/{track_dir.name}.tar.gz"
+                   if raw_archive else
+                   f"{raw_gcs.rstrip('/')}/{track_dir.name}/")
+    else:
+        raw_uri = f"{GCS_TRANSCRIPTS}/{artist}/{album}/{track_dir.name}/"
+    source_artist = row.get("source_artist") or artist
     base = {
         "track_id": row["track_id"],
+        "artist": source_artist,
+        "source_artist": source_artist,
+        "album": album,
+        "video_id": row.get("video_id"),
+        "source_rank": row.get("source_rank"),
+        "youtube_title": row.get("youtube_title"),
+        "country": row.get("country"),
+        "tier": row.get("tier"),
         "file": row["file"],
         "title": row.get("title") or Path(row["file"]).stem,
         "track_no": row.get("track_no"),
@@ -159,7 +182,7 @@ def build_track(track_dir: Path, row: dict, artist: str, album: str,
         "audio_sha256": meta.get("source_wav_sha256"),
         "source_uri": row.get("source_uri"),
         "stem": track_dir.name,
-        "raw_gcs": raw_gcs or f"{GCS_TRANSCRIPTS}/{artist}/{album}/{track_dir.name}/",
+        "raw_gcs": raw_uri,
         "gpu_seconds": meta.get("seconds"),
         "transcribe_status": meta.get("status"),
     }
@@ -208,36 +231,46 @@ def build_track(track_dir: Path, row: dict, artist: str, album: str,
 
 def assign_duplicates(tracks: list[dict], prior: list[dict],
                       artist: str) -> None:
-    """Set ``duplicate_of`` by audio hash first, normalized title second."""
+    """Set ``duplicate_of`` by audio hash first, normalized title second.
+
+    For a synthetic group key such as ``YT500`` the real artist lives in
+    ``source_artist``; using it here prevents two different artists with the
+    same song title from being collapsed.
+    """
+    def key_artist(row: dict) -> str:
+        return str(row.get("source_artist") or row.get("artist") or artist)
+
     hash_index: dict[str, str] = {}
     title_index: dict[tuple[str, str], str] = {}
     for row in prior:
         if row.get("audio_sha256"):
             hash_index.setdefault(row["audio_sha256"], row["track_id"])
         title_index.setdefault(
-            (row.get("artist") or artist, normalize_title(row["title"])),
+            (key_artist(row), normalize_title(row["title"])),
             row["track_id"])
     for row in tracks:
         dup = None
         if row.get("audio_sha256") and row["audio_sha256"] in hash_index:
             dup = hash_index[row["audio_sha256"]]
         else:
-            dup = title_index.get((artist, normalize_title(row["title"])))
+            dup = title_index.get((key_artist(row), normalize_title(row["title"])))
         row["duplicate_of"] = dup
         if row.get("audio_sha256"):
             hash_index.setdefault(row["audio_sha256"], row["track_id"])
         title_index.setdefault(
-            (artist, normalize_title(row["title"])), row["track_id"])
+            (key_artist(row), normalize_title(row["title"])), row["track_id"])
 
 
 def pack_album(key: str, items: list[tuple[Path, dict]], outputs: Path,
                prior: list[dict], expected_ids: set[str],
-               raw_gcs: str | None = None) -> dict:
+               raw_gcs: str | None = None,
+               raw_archive: bool = False) -> dict:
     artist, album = key.split("/", 1)
     tracks: list[dict] = []
     failed: list[dict] = []
     for track_dir, row in items:
-        track = build_track(track_dir, row, artist, album, raw_gcs)
+        track = build_track(track_dir, row, artist, album, raw_gcs,
+                            raw_archive=raw_archive)
         if track is None:
             failed.append({"file": row["file"], "error": "missing meta.json"})
             continue
@@ -320,6 +353,9 @@ def main(argv: list[str] | None = None) -> int:
                     help="GCS URI to record as raw_gcs for every track in the "
                          "album (e.g. the per-album tar.gz); default is the "
                          "per-track directory")
+    ap.add_argument("--raw-archive", action="store_true",
+                    help="with --raw-gcs, record <raw-gcs>/<stem>.tar.gz "
+                         "instead of <raw-gcs>/<stem>/")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args(argv)
 
@@ -351,7 +387,8 @@ def main(argv: list[str] | None = None) -> int:
                   f"outputs/{key.split('/', 1)[0]}/abc/{key.split('/', 1)[1]}.json")
             continue
         block = pack_album(key, items, args.outputs, prior,
-                           expected_by_album.get(key, set()), args.raw_gcs)
+                           expected_by_album.get(key, set()), args.raw_gcs,
+                           raw_archive=args.raw_archive)
         index["albums"][key] = block
         # Newly packed rows become prior for the next album in this run.
         packed = json.loads(

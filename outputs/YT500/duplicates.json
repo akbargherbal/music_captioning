@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "generated_utc": "2026-11-09T12:35:50Z",
+  "policy": "transcribe all 495; duplicate_of is metadata, not a skip",
+  "groups": [
+    {
+      "group": "Amr Diab | Lealy Nahary",
+      "canonical": "YT500/shard-21/0261_byK0dlhokOA",
+      "reason": "same artist + normalized title; different audio bytes",
+      "members": [
+        {
+          "track_id": "YT500/shard-21/0261_byK0dlhokOA",
+          "video_id": "byK0dlhokOA",
+          "rank": 261,
+          "duration_s": 271.813,
+          "source_sha256": "b0fcf28e2316464ec1ff19f204b42d4bb2bbb09da1da915e7603a4a4cca2f39e",
+          "duplicate_of": null
+        },
+        {
+          "track_id": "YT500/shard-01/0299_xF5MexEUoOQ",
+          "video_id": "xF5MexEUoOQ",
+          "rank": 299,
+          "duration_s": 246.085,
+          "source_sha256": "a9fab6a4ede99657e0a2c23c134ec73a7282f2c72e3841b71b4dc7b68171f8bd",
+          "duplicate_of": "YT500/shard-21/0261_byK0dlhokOA"
+        }
+      ]
+    },
+    {
+      "group": "Hussain Al Jassmi | Qoul Regaat Leah",
+      "canonical": "YT500/shard-23/0339_PiPu_1FSrhQ",
+      "reason": "same artist + normalized title; different audio bytes",
+      "members": [
+        {
+          "track_id": "YT500/shard-23/0339_PiPu_1FSrhQ",
+          "video_id": "PiPu_1FSrhQ",
+          "rank": 339,
+          "duration_s": 229.135,
+          "source_sha256": "3b110e2bd90d87c24ad6f19f775863eb913a864cccbda78d872673ab28db5d7f",
+          "duplicate_of": null
+        },
+        {
+          "track_id": "YT500/shard-13/0613_yQMn7cOmnYs",
+          "video_id": "yQMn7cOmnYs",
+          "rank": 613,
+          "duration_s": 225.443,
+          "source_sha256": "e2eb4a1eee3b5a8377ac45c2d3348693c9d77c04e4c549d29072355a995bd909",
+          "duplicate_of": "YT500/shard-23/0339_PiPu_1FSrhQ"
+        }
+      ]
+    },
+    {
+      "group": "Majid Al Mohandis | Ana Blayak",
+      "canonical": "YT500/shard-02/0054_Pz59wizOqLw",
+      "reason": "same artist + normalized title; different audio bytes",
+      "members": [
+        {
+          "track_id": "YT500/shard-02/0054_Pz59wizOqLw",
+          "video_id": "Pz59wizOqLw",
+          "rank": 54,
+          "duration_s": 415.614,
+          "source_sha256": "8b767e0d61ecc86892875c3af6d8d012f2e355431fe9dbcfa8af6290ff5ae520",
+          "duplicate_of": null
+        },
+        {
+          "track_id": "YT500/shard-19/0181_QS0v8uxzfJM",
+          "video_id": "QS0v8uxzfJM",
+          "rank": 181,
+          "duration_s": 340.079,
+          "source_sha256": "8c29e8e665445555356eecabdc14be7f1f731ff48d90f204c091e5c9f541b28f",
+          "duplicate_of": "YT500/shard-02/0054_Pz59wizOqLw"
+        }
+      ]
+    },
+    {
+      "group": "Majid Al Mohandis | Ensaa",
+      "canonical": "YT500/shard-11/0220_nzbd8Zra2cY",
+      "reason": "same artist + normalized title; different audio bytes",
+      "members": [
+        {
+          "track_id": "YT500/shard-11/0220_nzbd8Zra2cY",
+          "video_id": "nzbd8Zra2cY",
+          "rank": 220,
+          "duration_s": 322.804,
+          "source_sha256": "705d4840996aaea048ebb676a66995610590185f1005b198160243ef372e6be9",
+          "duplicate_of": null
+        },
+        {
+          "track_id": "YT500/shard-24/0637_t58Atvs7e1k",
+          "video_id": "t58Atvs7e1k",
+          "rank": 637,
+          "duration_s": 276.178,
+          "source_sha256": "7de8550f7e67927c05c5bf025c7b5f0de3783c3bf711d09ac327dd992a025cc7",
+          "duplicate_of": "YT500/shard-11/0220_nzbd8Zra2cY"
+        }
+      ]
+    },
+    {
+      "group": "Majid Al Mohandis | Yhizak Al Shooq",
+      "canonical": "YT500/shard-23/0070_WtmVYOtqz98",
+      "reason": "same artist + normalized title; different audio bytes",
+      "members": [
+        {
+          "track_id": "YT500/shard-23/0070_WtmVYOtqz98",
+          "video_id": "WtmVYOtqz98",
+          "rank": 70,
+          "duration_s": 256.255,
+          "source_sha256": "44c134472fc1dc42b1b63f9decd2d43ccc376ffdc813d062b5dc1d15619bc2a0",
+          "duplicate_of": null
+        },
+        {
+          "track_id": "YT500/shard-22/0413_ikcfOn9VzYo",
+          "video_id": "ikcfOn9VzYo",
+          "rank": 413,
+          "duration_s": 361.465,
+          "source_sha256": "5527306e8a518ca36edc3b081922ce2dc4ded8faf5c6f596c92bab2783f8d32a",
+          "duplicate_of": "YT500/shard-23/0070_WtmVYOtqz98"
+        }
+      ]
+    }
+  ]
+}

@@ -30,8 +30,10 @@ from __future__ import annotations
 
 import argparse
 import base64
+import datetime as dt
 import hashlib
 import json
+import shutil
 import subprocess
 import sys
 import time
@@ -70,15 +72,40 @@ def run(cmd: list[str], *, cwd: Path | None = None,
                               text=True, check=False, timeout=timeout)
 
 
+def utcnow() -> str:
+    return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for block in iter(lambda: fh.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def verify_manifest_sha256(path: Path, expected: str | None) -> None:
+    if not expected:
+        return
+    actual = sha256_file(path)
+    if actual.lower() != expected.lower():
+        raise BatchError(
+            f"manifest hash mismatch: {path} is {actual}, expected {expected}")
+
+
 def load_manifest(path: Path) -> list[dict]:
     if not path.is_file():
-        raise BatchError(f"manifest not found: {path} (run scripts/abc_manifest.py)")
+        raise BatchError(f"manifest not found: {path} (run scripts/yt500_manifest.py)")
     rows = []
     with path.open(encoding="utf-8") as fh:
         for line in fh:
             line = line.strip()
-            if line:
-                rows.append(json.loads(line))
+            if not line:
+                continue
+            row = json.loads(line)
+            if row.get("record") == "header":
+                continue
+            rows.append(row)
     return rows
 
 
@@ -87,7 +114,8 @@ def group_albums(rows: list[dict]) -> dict[str, list[dict]]:
     for row in rows:
         albums.setdefault(f"{row['artist']}/{row['album']}", []).append(row)
     for tracks in albums.values():
-        tracks.sort(key=lambda r: (r.get("track_no") or 0, r["file"]))
+        tracks.sort(key=lambda r: (r.get("source_rank") or r.get("track_no") or 0,
+                                   r["file"]))
     return albums
 
 
@@ -187,11 +215,12 @@ def append_log(log: Path, text: str) -> None:
             fh.write("\n")
 
 
-def download_track(row: dict, album_dir: Path, log: Path) -> None:
-    """Download one track or raise BatchError with a useful message."""
-    dest = album_dir / row["file"]
-    if dest.is_file() and dest.stat().st_size > 0:
-        return
+def _expected_source_sha(row: dict) -> str | None:
+    value = row.get("source_sha256") or row.get("sha256")
+    return str(value) if value else None
+
+
+def _download_once(row: dict, dest: Path, log: Path) -> None:
     if GCS_WILDCARDS & set(row["source_uri"] + str(dest)):
         download_object_api(row["source_uri"], dest)
         return
@@ -203,6 +232,44 @@ def download_track(row: dict, album_dir: Path, log: Path) -> None:
                  (proc.stderr or proc.stdout or "").splitlines() if line.strip()]
         detail = " | ".join(lines[-2:]) if lines else f"exit {proc.returncode}"
         raise BatchError(f"download failed: {row['source_uri']}: {detail}")
+
+
+def download_track(row: dict, album_dir: Path, log: Path) -> None:
+    """Download one track, verify its SHA-256, and retry once if corrupt.
+
+    A local file is reused only when its hash matches the frozen manifest. A
+    mismatch deletes the cache file and re-downloads; a second mismatch is a
+    track failure, not a silent acceptance.
+    """
+    dest = album_dir / row["file"]
+    expected = _expected_source_sha(row)
+    if dest.is_file() and dest.stat().st_size > 0:
+        if not expected or sha256_file(dest) == expected:
+            return
+        append_log(log, f"CORRUPT cache {dest}: sha256 mismatch; re-downloading\n")
+        dest.unlink(missing_ok=True)
+
+    last_error = ""
+    for attempt in (1, 2):
+        try:
+            _download_once(row, dest, log)
+        except BatchError as exc:
+            last_error = str(exc)
+            if attempt == 1:
+                append_log(log, f"RETRY {row['track_id']}: {last_error}\n")
+                time.sleep(1)
+                continue
+            raise
+        if not expected:
+            return
+        actual = sha256_file(dest)
+        if actual == expected:
+            return
+        dest.unlink(missing_ok=True)
+        last_error = (f"sha256 mismatch for {row['file']}: "
+                      f"got {actual}, expected {expected}")
+        append_log(log, f"{last_error}; attempt {attempt}\n")
+    raise BatchError(f"download failed after retry: {row['source_uri']}: {last_error}")
 
 
 def download_album(rows: list[dict], album_dir: Path, log: Path,
@@ -332,11 +399,116 @@ def verify_archive(local: Path, remote_uri: str) -> None:
             f"local={local_md5} remote={remote_md5 or 'unreadable'}")
 
 
+def track_complete(track_dir: Path) -> bool:
+    """A restored/cached track is reusable only when its own hashes agree."""
+    meta_path = track_dir / "meta.json"
+    abc_path = track_dir / "score.abc"
+    if not meta_path.is_file() or not abc_path.is_file():
+        return False
+    try:
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    if meta.get("status") != "ok":
+        return False
+    expected = meta.get("abc_sha256")
+    if not expected:
+        return False
+    return sha256_file(abc_path) == expected
+
+
+def make_track_archive(out_dir: Path, track_dir: Path, archive: Path,
+                       log: Path) -> Path:
+    """Archive one complete track as ``<stem>.tar.gz`` (top-level ``<stem>/``)."""
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    tmp = archive.with_name(archive.name + ".tmp")
+    proc = run(["tar", "-czf", str(tmp), "-C", str(out_dir), track_dir.name],
+               log=log)
+    if proc.returncode != 0 or not tmp.is_file() or tmp.stat().st_size <= 0:
+        tmp.unlink(missing_ok=True)
+        raise BatchError(f"track archive creation failed: {archive}")
+    tmp.replace(archive)
+    return archive
+
+
+def remote_track_archive(remote_base: str, artist: str, album: str,
+                         stem: str) -> str:
+    return f"{remote_base.rstrip('/')}/{artist}/{album}/{stem}.tar.gz"
+
+
+def archive_track(out_dir: Path, track_dir: Path, remote_base: str,
+                  artist: str, album: str, archive_root: Path,
+                  log: Path) -> str:
+    """Archive, upload and verify one complete track; return its remote URI."""
+    if not track_complete(track_dir):
+        raise BatchError(f"refusing to archive incomplete track: {track_dir}")
+    archive = archive_root / artist / album / f"{track_dir.name}.tar.gz"
+    make_track_archive(out_dir, track_dir, archive, log)
+    remote = remote_track_archive(remote_base, artist, album, track_dir.name)
+    proc = run(["gcloud", "storage", "cp", str(archive), remote], log=log)
+    if proc.returncode != 0:
+        raise BatchError(f"track archive upload failed: {remote}")
+    verify_archive(archive, remote)
+    return remote
+
+
+def restore_track(out_dir: Path, stem: str, remote_uri: str,
+                  log: Path) -> bool:
+    """Restore one track archive into ``out_dir``; return True when usable."""
+    track_dir = out_dir / stem
+    if track_complete(track_dir):
+        return True
+    if track_dir.exists():
+        # A previous partial restore must not block a fresh transcription.
+        bad = out_dir / f".{stem}.restore-bad-{utcnow().replace(':', '')}"
+        track_dir.replace(bad)
+        log_line = f"moved incomplete restore aside: {track_dir} -> {bad}\n"
+        append_log(log, log_line)
+
+    listing = run(["gcloud", "storage", "ls", "-l", remote_uri])
+    if listing.returncode != 0:
+        return False
+    tmp_dir = out_dir.parent / ".restore"
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    archive = tmp_dir / f"{stem}.tar.gz"
+    proc = run(["gcloud", "storage", "cp", remote_uri, str(archive)], log=log)
+    if proc.returncode != 0:
+        return False
+    out_dir.mkdir(parents=True, exist_ok=True)
+    proc = run(["tar", "-xzf", str(archive), "-C", str(out_dir)], log=log)
+    archive.unlink(missing_ok=True)
+    if proc.returncode != 0 or not track_complete(track_dir):
+        if track_dir.exists():
+            bad = out_dir / f".{stem}.restore-bad-{utcnow().replace(':', '')}"
+            track_dir.replace(bad)
+        return False
+    return True
+
+
+def restore_shard(out_dir: Path, rows: list[dict], remote_base: str,
+                  artist: str, album: str, log: Path) -> int:
+    restored = 0
+    for row in rows:
+        stem = Path(row["file"]).stem
+        if track_complete(out_dir / stem):
+            continue
+        remote = remote_track_archive(remote_base, artist, album, stem)
+        if restore_track(out_dir, stem, remote, log):
+            restored += 1
+    if restored:
+        append_log(log, f"restored {restored} track(s) from {remote_base}\n")
+    return restored
+
+
 def run_transcribe(album_dir: Path, out_dir: Path, remaining_s: float,
-                   amr_dir: Path, log: Path) -> int:
+                   amr_dir: Path, log: Path, *, device: str = "cuda",
+                   on_collision: str = "error",
+                   per_track_timeout: float = 0.0) -> int:
     cmd = [str(amr_dir / "transcribe.sh"), str(album_dir),
-           "--device", "cuda", "--full", "--on-collision", "suffix",
+           "--device", device, "--full", "--on-collision", on_collision,
            "--out-dir", str(out_dir)]
+    if per_track_timeout > 0:
+        cmd += ["--per-track-timeout", str(int(per_track_timeout))]
     if remaining_s > 0:
         cmd += ["--time-budget", str(int(remaining_s))]
     proc = run(cmd, cwd=amr_dir, log=log)
@@ -371,12 +543,18 @@ def qc_album(out_dir: Path, rows: list[dict]) -> dict[str, str]:
 
 def pack_album(repo: Path, outputs: Path, manifest: Path, index: Path,
                artist: str, album: str, log: Path,
-               raw_gcs: str | None = None) -> None:
+               raw_gcs: str | None = None,
+               raw_archive: bool = False,
+               raw_root: Path | None = None) -> None:
     cmd = [sys.executable, str(repo / "scripts" / "abc_pack.py"),
            "--outputs", str(outputs), "--manifest", str(manifest),
            "--artist", artist, "--album", album, "--index", str(index)]
+    if raw_root is not None:
+        cmd += ["--raw-root", str(raw_root)]
     if raw_gcs:
         cmd += ["--raw-gcs", raw_gcs]
+    if raw_archive:
+        cmd += ["--raw-archive"]
     proc = run(cmd, log=log)
     if proc.returncode != 0:
         raise BatchError(f"abc_pack failed for {artist}/{album}")
@@ -403,12 +581,75 @@ def upload_packed(packed: Path, artist: str, album: str,
     return dest
 
 
+def _write_json_atomic(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+                   encoding="utf-8")
+    tmp.replace(path)
+
+
+def restore_index(index_path: Path, transcripts_root: str, log: Path) -> bool:
+    """Merge the GCS run index into the local index; return True if found."""
+    remote = f"{transcripts_root.rstrip('/')}/_index.json"
+    proc = run(["gcloud", "storage", "cat", remote])
+    if proc.returncode != 0 or not proc.stdout.strip():
+        append_log(log, f"no remote index at {remote}\n")
+        return False
+    try:
+        remote_index = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        append_log(log, f"remote index is not JSON: {remote}\n")
+        return False
+    local_index = load_index(index_path)
+    merged = remote_index
+    merged.setdefault("version", 1)
+    merged.setdefault("albums", {})
+    for key, entry in local_index.get("albums", {}).items():
+        old = merged["albums"].get(key)
+        if old is None or entry.get("status") == "done":
+            merged["albums"][key] = entry
+    _write_json_atomic(index_path, merged)
+    append_log(log, f"restored index {remote} "
+                    f"({len(merged['albums'])} shard(s))\n")
+    return True
+
+
+def upload_index(index_path: Path, transcripts_root: str, log: Path) -> None:
+    """Upload the run index as versioned + current, then verify size."""
+    if not index_path.is_file():
+        raise BatchError(f"index missing, refusing to upload: {index_path}")
+    base = transcripts_root.rstrip("/")
+    stamp = utcnow().replace(":", "")
+    dests = [f"{base}/_index-{stamp}.json", f"{base}/_index.json"]
+    for dest in dests:
+        proc = run(["gcloud", "storage", "cp", str(index_path), dest], log=log)
+        if proc.returncode != 0:
+            raise BatchError(f"index upload failed: {dest}")
+        listing = run(["gcloud", "storage", "ls", "-l", dest])
+        if listing.returncode != 0:
+            raise BatchError(f"index not visible in GCS: {dest}")
+        try:
+            remote_size = int(listing.stdout.split(None, 1)[0])
+        except (ValueError, IndexError):
+            raise BatchError(f"cannot read remote index size: {dest}")
+        if remote_size != index_path.stat().st_size:
+            raise BatchError(f"index size mismatch at {dest}")
+
+
 def commit_checkpoint(repo: Path, message: str, no_push: bool,
-                      log: Path, retries: int = 3) -> None:
+                      log: Path, retries: int = 3,
+                      index_path: Path | None = None) -> None:
     ensure_git_identity(repo)
+    index_rel = "outputs/abc_index.json"
+    if index_path is not None:
+        try:
+            index_rel = str(index_path.resolve().relative_to(repo.resolve()))
+        except ValueError:
+            pass
     # IMPORTANT: never `git add -A` -- it would commit the ABC text (§15.1).
     proc = run(["git", "-C", str(repo), "add", "--",
-                "outputs/abc_index.json", "scripts", "docs"], log=log)
+                index_rel, "scripts", "docs"], log=log)
     if proc.returncode != 0:
         raise BatchError("git add failed")
     staged = run(["git", "-C", str(repo), "diff", "--cached", "--quiet"])
@@ -418,9 +659,9 @@ def commit_checkpoint(repo: Path, message: str, no_push: bool,
         if proc.returncode != 0:
             raise BatchError("git commit failed")
     tracked = run(["git", "-C", str(repo), "ls-files", "--error-unmatch",
-                   "outputs/abc_index.json"])
+                   index_rel])
     if tracked.returncode != 0:
-        raise BatchError("outputs/abc_index.json is not tracked")
+        raise BatchError(f"{index_rel} is not tracked")
     if no_push:
         print("  (--no-push: commit kept local, not verified against origin)")
         return
@@ -466,8 +707,28 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--repo", type=Path, default=REPO_ROOT)
     ap.add_argument("--work-dir", type=Path, default=Path("/content/work"))
     ap.add_argument("--manifest", type=Path, default=None)
+    ap.add_argument("--manifest-sha256", default=None,
+                    help="refuse to run if the manifest file hash differs")
     ap.add_argument("--outputs", type=Path, default=None)
     ap.add_argument("--index", type=Path, default=None)
+    ap.add_argument("--device", choices=["cpu", "cuda", "auto"], default="cuda",
+                    help="passed to transcribe.sh (default cuda)")
+    ap.add_argument("--per-track-timeout", type=float, default=1800.0,
+                    help="best-effort per-track alarm in seconds (0 = off)")
+    ap.add_argument("--on-collision", choices=["error", "suffix"],
+                    default="suffix", help="passed to transcribe.sh")
+    ap.add_argument("--archive-every-track", action="store_true",
+                    help="archive/upload each complete track instead of one "
+                         "per-shard tar.gz")
+    ap.add_argument("--restore-from-gcs", action="store_true",
+                    help="restore missing local transcripts from per-track "
+                         "archives before transcoding (needs "
+                         "--archive-every-track)")
+    ap.add_argument("--gcs-index", action="store_true",
+                    help="restore/upload the run index at "
+                         "<gcs-transcripts>/_index.json")
+    ap.add_argument("--no-commit", action="store_true",
+                    help="do not touch git; use GCS as the durable index")
     ap.add_argument("--gcs-root", default=DEFAULT_ROOT)
     ap.add_argument("--gcs-transcripts", default=DEFAULT_TRANSCRIPTS)
     ap.add_argument("--no-archive", action="store_true",
@@ -492,6 +753,17 @@ def main(argv: list[str] | None = None) -> int:
         raise BatchError("no manifest; pass --manifest")
     if not (args.amr_dir / "transcribe.sh").is_file():
         raise BatchError(f"transcribe.sh not found in {args.amr_dir}")
+    if args.restore_from_gcs and not args.archive_every_track:
+        raise BatchError("--restore-from-gcs requires --archive-every-track")
+    if args.no_archive and args.archive_every_track:
+        raise BatchError("--no-archive and --archive-every-track conflict")
+
+    verify_manifest_sha256(manifest_path, args.manifest_sha256)
+    log_dir = args.work_dir / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    if args.gcs_index:
+        restore_index(index_path, args.gcs_transcripts,
+                      log_dir / "index_sync.log")
 
     rows = load_manifest(manifest_path)
     albums = group_albums(rows)
@@ -515,10 +787,13 @@ def main(argv: list[str] | None = None) -> int:
             print("  (nothing pending)")
         return 0
 
+    if shutil.which("abc2midi") is None:
+        raise BatchError(
+            "abc2midi is not installed; run `apt-get install -y abcmidi` "
+            "before the QC gate")
+
     started = time.monotonic()
     budget_s = args.max_minutes * 60 if args.max_minutes else 0.0
-    log_dir = args.work_dir / "logs"
-    log_dir.mkdir(parents=True, exist_ok=True)
 
     for key in pending:
         artist, album = key.split("/", 1)
@@ -545,8 +820,17 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {len(download_failures)} track(s) skipped; continuing "
                   f"with {len(available)}/{len(tracks)}")
 
+        if args.restore_from_gcs:
+            restored = restore_shard(out_dir, tracks, args.gcs_transcripts,
+                                     artist, album, log)
+            if restored:
+                print(f"  restored {restored} transcript(s) from GCS")
+
         t0 = time.monotonic()
-        rc = run_transcribe(album_dir, out_dir, remaining, args.amr_dir, log)
+        rc = run_transcribe(album_dir, out_dir, remaining, args.amr_dir, log,
+                            device=args.device,
+                            on_collision=args.on_collision,
+                            per_track_timeout=args.per_track_timeout)
         gpu_s = time.monotonic() - t0
         statuses = qc_album(out_dir, tracks)
         n_ok = sum(v == "ok" for v in statuses.values())
@@ -557,8 +841,10 @@ def main(argv: list[str] | None = None) -> int:
         if not statuses:
             raise BatchError(f"{key}: no track output; see {log}")
 
-        # 1) raw artifacts land in GCS as ONE archive (hard stop on mismatch).
+        # 1) raw artifacts land in GCS. Per-track archives bound the loss
+        # window to one track; the old per-shard archive remains available.
         raw_gcs = None
+        raw_archive = False
         if args.no_archive:
             raw_uri = f"{args.gcs_transcripts.rstrip('/')}/{artist}/{album}"
             proc = run(["gcloud", "storage", "rsync", "-r", str(out_dir), raw_uri],
@@ -568,6 +854,21 @@ def main(argv: list[str] | None = None) -> int:
             verify_upload(out_dir, raw_uri)
             raw_gcs = raw_uri
             print(f"  raw tree verified: {raw_uri}")
+        elif args.archive_every_track:
+            raw_gcs = f"{args.gcs_transcripts.rstrip('/')}/{artist}/{album}"
+            archived = 0
+            for row in tracks:
+                stem = Path(row["file"]).stem
+                track_dir = out_dir / stem
+                if not track_complete(track_dir):
+                    continue
+                archive_track(out_dir, track_dir, args.gcs_transcripts,
+                              artist, album, args.work_dir / "archives", log)
+                archived += 1
+            raw_archive = True
+            print(f"  {archived} track archive(s) verified under {raw_gcs}")
+            if archived == 0:
+                raise BatchError(f"{key}: no complete track could be archived")
         else:
             archive = args.work_dir / "archives" / artist / f"{album}.tar.gz"
             make_archive(out_dir, archive, log)
@@ -585,20 +886,30 @@ def main(argv: list[str] | None = None) -> int:
 
         # 2) pack + index, then the packed JSON lands in GCS
         pack_album(args.repo, outputs, manifest_path, index_path,
-                   artist, album, log, raw_gcs)
+                   artist, album, log, raw_gcs, raw_archive=raw_archive,
+                   raw_root=args.work_dir / "out")
         packed = outputs / artist / "abc" / f"{album}.json"
         upload_packed(packed, artist, album, args.gcs_transcripts, log)
-        print(f"  packed JSON verified in GCS")
+        print("  packed JSON verified in GCS")
 
-        # 3) commit only the index/scripts/docs; ABC text stays out of git
+        # 3) durable index: GCS first, git optional.
         index = load_index(index_path)
+        if args.gcs_index:
+            upload_index(index_path, args.gcs_transcripts, log)
+            print("  index uploaded to GCS")
         counts = f"{n_ok} ok, {n_flagged} flagged, {n_failed} failed"
         if download_failures:
             counts += f", {len(download_failures)} skipped"
         message = (f"abc({artist}/{album}): {n_ok + n_flagged} tracks "
                    f"({counts})")
-        commit_checkpoint(args.repo, message, args.no_push, log)
-        print(f"  committed: {message}")
+        if args.no_commit:
+            print(f"  commit skipped (--no-commit): {message}")
+            if not args.gcs_index:
+                print("  WARNING: index is local only; pass --gcs-index")
+        else:
+            commit_checkpoint(args.repo, message, args.no_push, log,
+                              index_path=index_path)
+            print(f"  committed: {message}")
 
         if budget_s and time.monotonic() - started >= budget_s:
             print("time budget reached; stopping cleanly after a complete album")
