@@ -3,24 +3,32 @@
 
 One album is the checkpoint. For each pending album:
 
-1. download its MP3s from GCS (skip-if-present). A single bad track is
-   logged, recorded, and skipped; the rest of the album still runs and the
-   album is packed as ``partial``,
-2. run ``transcribe.sh --device cuda --full`` into ``work/out/<artist>/<album>``,
-3. run the §9 QC gate per track (ok / flagged / failed),
-4. archive the raw tree and **verify it landed** in GCS,
-5. pack ``outputs/<artist>/abc/<album>.json`` + ``outputs/abc_index.json``,
-   upload the packed JSON to GCS and **verify it landed**,
-6. commit ``outputs/abc_index.json`` + ``scripts/`` + ``docs/`` and push,
-   verifying the commit is not ahead of origin.
+1. download its audio from GCS (skip-if-present, verify the manifest SHA-256).
+   A single bad track is logged, recorded, and skipped; the rest of the album
+   still runs and the album is packed as ``partial``,
+2. restore missing transcripts from per-track remote archives (optional),
+3. run ``transcribe.sh --device cuda --full`` into ``work/out/<artist>/<album>``,
+4. run the §9 QC gate per track (ok / flagged / failed),
+5. pack ``outputs/<artist>/abc/<album>.json`` + the local index.
 
-Hard rule: a failed upload or a commit that did not land aborts the session
-before the next album starts. Download failures only abort when they look
-systemic (auth/permission/disk), when no track in the album is usable, or
-when more than ``--max-download-failures`` tracks fail. ABC text is never
-``git add``-ed (§15.1 open).
+**Two modes.**
+
+*Split (recommended for the 495-track run):* pass ``--skip-backup``. This
+process only downloads, transcribes, QCs and packs locally. It never writes to
+GCS and never touches git. A separate ``scripts/yt500_backup.py --watch`` worker
+archives complete tracks, uploads them, verifies size+md5 and maintains the
+remote index — concurrently.
+
+*Combined (legacy, small runs):* without ``--skip-backup`` this process also
+archives, uploads, verifies, updates the GCS index and optionally commits. A
+failed upload aborts before the next album.
+
+Download failures only abort when they look systemic (auth/permission/disk),
+when no track in the album is usable, or when more than
+``--max-download-failures`` tracks fail. ABC text is never ``git add``-ed.
 
 Usage:
+    python3 scripts/abc_batch.py --skip-backup --manifest ... --device cuda
     python3 scripts/abc_batch.py --artist ELISSA --max-minutes 170
     python3 scripts/abc_batch.py --list
     python3 scripts/abc_batch.py --dry-run --artist FADL_SHAKER
@@ -729,6 +737,11 @@ def main(argv: list[str] | None = None) -> int:
                          "<gcs-transcripts>/_index.json")
     ap.add_argument("--no-commit", action="store_true",
                     help="do not touch git; use GCS as the durable index")
+    ap.add_argument("--skip-backup", action="store_true",
+                    help="transcribe + QC + pack locally only: no archive, "
+                         "no GCS upload, no git commit. Run "
+                         "scripts/yt500_backup.py alongside this process; it "
+                         "owns every write.")
     ap.add_argument("--gcs-root", default=DEFAULT_ROOT)
     ap.add_argument("--gcs-transcripts", default=DEFAULT_TRANSCRIPTS)
     ap.add_argument("--no-archive", action="store_true",
@@ -753,10 +766,18 @@ def main(argv: list[str] | None = None) -> int:
         raise BatchError("no manifest; pass --manifest")
     if not (args.amr_dir / "transcribe.sh").is_file():
         raise BatchError(f"transcribe.sh not found in {args.amr_dir}")
-    if args.restore_from_gcs and not args.archive_every_track:
-        raise BatchError("--restore-from-gcs requires --archive-every-track")
+    if args.restore_from_gcs and not (args.archive_every_track
+                                      or args.skip_backup):
+        raise BatchError(
+            "--restore-from-gcs needs per-track archives; pair it with "
+            "--archive-every-track, or with --skip-backup when a separate "
+            "backup worker owns the archives")
     if args.no_archive and args.archive_every_track:
         raise BatchError("--no-archive and --archive-every-track conflict")
+    if args.skip_backup and (args.archive_every_track or args.no_archive):
+        raise BatchError(
+            "--skip-backup conflicts with --archive-every-track/--no-archive; "
+            "the backup worker archives, this process transcribes")
 
     verify_manifest_sha256(manifest_path, args.manifest_sha256)
     log_dir = args.work_dir / "logs"
@@ -841,21 +862,22 @@ def main(argv: list[str] | None = None) -> int:
         if not statuses:
             raise BatchError(f"{key}: no track output; see {log}")
 
-        # 1) raw artifacts land in GCS. Per-track archives bound the loss
-        # window to one track; the old per-shard archive remains available.
-        raw_gcs = None
-        raw_archive = False
-        if args.no_archive:
-            raw_uri = f"{args.gcs_transcripts.rstrip('/')}/{artist}/{album}"
-            proc = run(["gcloud", "storage", "rsync", "-r", str(out_dir), raw_uri],
+        # 1) Raw artifacts land in GCS. Per-track archives bound the loss
+        # window to one track. In --skip-backup mode the separate backup
+        # worker owns this step; this process only records the intended URI.
+        raw_gcs = f"{args.gcs_transcripts.rstrip('/')}/{artist}/{album}"
+        raw_archive = True
+        if args.skip_backup:
+            print(f"  backup deferred to yt500_backup.py: {raw_gcs}/<stem>.tar.gz")
+        elif args.no_archive:
+            proc = run(["gcloud", "storage", "rsync", "-r", str(out_dir), raw_gcs],
                        log=log)
             if proc.returncode != 0:
                 raise BatchError(f"raw rsync failed for {key}; aborting session")
-            verify_upload(out_dir, raw_uri)
-            raw_gcs = raw_uri
-            print(f"  raw tree verified: {raw_uri}")
+            verify_upload(out_dir, raw_gcs)
+            raw_archive = False
+            print(f"  raw tree verified: {raw_gcs}")
         elif args.archive_every_track:
-            raw_gcs = f"{args.gcs_transcripts.rstrip('/')}/{artist}/{album}"
             archived = 0
             for row in tracks:
                 stem = Path(row["file"]).stem
@@ -865,7 +887,6 @@ def main(argv: list[str] | None = None) -> int:
                 archive_track(out_dir, track_dir, args.gcs_transcripts,
                               artist, album, args.work_dir / "archives", log)
                 archived += 1
-            raw_archive = True
             print(f"  {archived} track archive(s) verified under {raw_gcs}")
             if archived == 0:
                 raise BatchError(f"{key}: no complete track could be archived")
@@ -881,35 +902,42 @@ def main(argv: list[str] | None = None) -> int:
                                  f"aborting session")
             verify_archive(archive, raw_uri)
             raw_gcs = raw_uri
+            raw_archive = False
             print(f"  raw archive verified ({archive.stat().st_size/1e6:.1f} MB): "
                   f"{raw_uri}")
 
-        # 2) pack + index, then the packed JSON lands in GCS
+        # 2) pack + index locally; the backup worker uploads the packed JSON
         pack_album(args.repo, outputs, manifest_path, index_path,
                    artist, album, log, raw_gcs, raw_archive=raw_archive,
                    raw_root=args.work_dir / "out")
-        packed = outputs / artist / "abc" / f"{album}.json"
-        upload_packed(packed, artist, album, args.gcs_transcripts, log)
-        print("  packed JSON verified in GCS")
 
-        # 3) durable index: GCS first, git optional.
-        index = load_index(index_path)
-        if args.gcs_index:
-            upload_index(index_path, args.gcs_transcripts, log)
-            print("  index uploaded to GCS")
-        counts = f"{n_ok} ok, {n_flagged} flagged, {n_failed} failed"
-        if download_failures:
-            counts += f", {len(download_failures)} skipped"
-        message = (f"abc({artist}/{album}): {n_ok + n_flagged} tracks "
-                   f"({counts})")
-        if args.no_commit:
-            print(f"  commit skipped (--no-commit): {message}")
-            if not args.gcs_index:
-                print("  WARNING: index is local only; pass --gcs-index")
+        if args.skip_backup:
+            counts = f"{n_ok} ok, {n_flagged} flagged, {n_failed} failed"
+            if download_failures:
+                counts += f", {len(download_failures)} skipped"
+            print(f"  packed locally only: abc({artist}/{album}) {counts}")
         else:
-            commit_checkpoint(args.repo, message, args.no_push, log,
-                              index_path=index_path)
-            print(f"  committed: {message}")
+            packed = outputs / artist / "abc" / f"{album}.json"
+            upload_packed(packed, artist, album, args.gcs_transcripts, log)
+            print("  packed JSON verified in GCS")
+
+            # 3) durable index: GCS first, git optional.
+            if args.gcs_index:
+                upload_index(index_path, args.gcs_transcripts, log)
+                print("  index uploaded to GCS")
+            counts = f"{n_ok} ok, {n_flagged} flagged, {n_failed} failed"
+            if download_failures:
+                counts += f", {len(download_failures)} skipped"
+            message = (f"abc({artist}/{album}): {n_ok + n_flagged} tracks "
+                       f"({counts})")
+            if args.no_commit:
+                print(f"  commit skipped (--no-commit): {message}")
+                if not args.gcs_index:
+                    print("  WARNING: index is local only; pass --gcs-index")
+            else:
+                commit_checkpoint(args.repo, message, args.no_push, log,
+                                  index_path=index_path)
+                print(f"  committed: {message}")
 
         if budget_s and time.monotonic() - started >= budget_s:
             print("time budget reached; stopping cleanly after a complete album")
