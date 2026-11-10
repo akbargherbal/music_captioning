@@ -373,8 +373,11 @@ def sync_once(rows: list[dict], outputs: Path, index_path: Path, work_dir: Path,
                 counts[action] += 1
             remote_index["albums"][key] = entry
             counts["shards"] += 1
-        elif packed.is_file() or entry is not None:
-            pending_shards.append(key)
+        elif (remote_index.get("albums", {}).get(key, {}).get("status")
+              in TERMINAL_SHARD_STATES):
+            # Already archived by an earlier session; the local outputs tree
+            # may be gone after a VM recycle.
+            counts["shards"] += 1
         else:
             pending_shards.append(key)
 
@@ -409,10 +412,18 @@ def complete(rows: list[dict], outputs: Path, index_path: Path,
     backup = read_json(backup_index) or {"albums": {}}
     for key, tracks in groups.items():
         entry = local_index.get("albums", {}).get(key)
-        if entry is None or entry.get("status") not in TERMINAL_SHARD_STATES:
+        backed = backup.get("albums", {}).get(key)
+        local_terminal = (entry is not None
+                          and entry.get("status") in TERMINAL_SHARD_STATES)
+        remote_terminal = (backed is not None
+                           and backed.get("status") in TERMINAL_SHARD_STATES)
+        if not (local_terminal or remote_terminal):
             return False
-        if key not in backup.get("albums", {}):
-            return False
+        if remote_terminal:
+            # The remote index is only written after every archive for the
+            # shard was uploaded and verified, so a resumed VM with an empty
+            # outputs/ tree does not need the local packed JSON to agree.
+            continue
         packed = outputs / tracks[0]["artist"] / "abc" / f"{tracks[0]['album']}.json"
         if not packed.is_file():
             return False

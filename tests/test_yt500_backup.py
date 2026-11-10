@@ -311,3 +311,19 @@ def test_skip_backup_rejects_archive_flags(tmp_path):
             "--amr-dir", str(tmp_path),
             "--work-dir", str(tmp_path / "work"),
         ])
+
+
+def test_complete_accepts_shards_already_archived_remotely(tmp_path):
+    # After a VM recycle, outputs/ and work/ are empty but GCS still holds the
+    # shard archives and _index.json. --stop-when-complete must not hang.
+    outputs = tmp_path / "outputs"
+    work = tmp_path / "work"
+    row = _row(1, "v1")
+    _write_manifest(outputs / "YT500" / "manifest.jsonl", [row])
+    backup_index = work / "backup" / "abc_index.json"
+    backup_index.parent.mkdir(parents=True, exist_ok=True)
+    backup_index.write_text(json.dumps({"version": 1, "albums": {
+        "YT500/shard-01": {"status": "done"}}}))
+
+    assert backup.complete(
+        [row], outputs, outputs / "YT500" / "abc_index.json", backup_index)
