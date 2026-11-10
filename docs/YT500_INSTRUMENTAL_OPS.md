@@ -20,11 +20,21 @@ the shared read-only state view (`--status`).
 
 ## Decisions taken (2026-11-10)
 
-The §0.1 answers: **L4 24 GB**, **full parity**, **`0.85` lower bound**
-(`1.25` upper), **never wait for the bulk to finish**, final prefix
-`DATASET/YT500_INSTRUMENTAL`, final package only at 489/489, and **§6.4
-(`plumbing/regen_short_takes.py`) is not implemented in this repo** — it lives
-on the A100 side. This repo only watches, captions and polishes.
+> **Scope, final: captions and polish only. This repo never runs SheetSage2
+> and never transcribes anything.** The ABC scores already exist on GCS
+> (`gs://akbar-december-2024-backup/TRANSCRIPTS/YT500/`) and are the *input* to
+> generation, not an output here. `yt500_learn.py --phase transcribe`,
+> `transcribe.sh` and `work/transcripts/` are therefore unused, the pilot's
+> transcript gates do not apply, and `yt500_assemble.py`'s "489 transcripts"
+> requirement is not part of this run. The deliverable is
+> `caption_album.json` + `captions.jsonl` — 489 polished captions — under
+> `GENERATION/YT500_INSTRUMENTAL/work/`.
+
+The other §0.1 answers: **L4 24 GB**, **`0.85` lower bound** (`1.25` upper),
+**never wait for the bulk to finish**, prefix `DATASET/YT500_INSTRUMENTAL`
+(final package only at 489/489), and **§6.4
+(`plumbing/regen_short_takes.py`) belongs to the A100 repo**. This repo only
+watches, captions and polishes.
 
 "Never wait" is the operational consequence: the watcher processes accepted
 takes as they land and a regenerated take (new seed, new `end_utc`) simply
@@ -38,12 +48,12 @@ cd /content/music_captioning
 
 # pilot (plan §8) — 4 accepted takes: short / median / long / newest
 python3 scripts/yt500_sync.py --once --limit 4
-python3 scripts/yt500_learn.py --once --phase both --verify-schema
+python3 scripts/yt500_learn.py --once --phase caption --verify-schema
 python3 scripts/yt500_assemble.py --dry-run
 
 # bulk
 python3 scripts/yt500_sync.py --once
-python3 scripts/yt500_learn.py --once --phase both
+python3 scripts/yt500_learn.py --once --phase caption
 python3 scripts/yt500_publish.py --once
 
 # the three workers, detached (plan §9.2)
@@ -51,7 +61,7 @@ setsid nohup python3 -u scripts/yt500_publish.py --watch --interval 60 \
   > logs/yt500_publish.out 2>&1 < /dev/null &
 setsid nohup python3 -u scripts/yt500_sync.py --watch --interval 60 \
   > logs/yt500_sync.out 2>&1 < /dev/null &
-setsid nohup python3 -u scripts/yt500_learn.py --watch --phase both \
+setsid nohup python3 -u scripts/yt500_learn.py --watch --phase caption \
   --min-batch 12 --flush-minutes 20 --interval 60 \
   > logs/yt500_learn.out 2>&1 < /dev/null &
 
@@ -86,7 +96,8 @@ state is one listing and one copy for the run in flight — 35–55 s over 4 run
 
 ### `yt500_learn.py`
 
-- `--phase caption|transcribe|both` (default `both`), always serial.
+- `--phase caption|transcribe|both` (default `both`); **this run uses
+  `caption` only**.
 - `--min-batch 12 --flush-minutes 20` — a phase starts when 12 tracks are
   pending, or 20 minutes after the last pass whatever the count.
 - `--max-batch 48` — transcription tracks per invocation (0 = all).

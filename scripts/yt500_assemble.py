@@ -79,7 +79,8 @@ def render(report: dict) -> str:
     return "\n".join(lines)
 
 
-def assemble_command(args: argparse.Namespace, work_dir: Path) -> list[str]:
+def assemble_command(args: argparse.Namespace, work_dir: Path,
+                     out_dir: Path) -> list[str]:
     return [
         sys.executable, str(BUILD_DATASET), "assemble",
         "--run-manifest", str(dataset.manifest_path(work_dir)),
@@ -87,7 +88,7 @@ def assemble_command(args: argparse.Namespace, work_dir: Path) -> list[str]:
         "--captions", str(dataset.captions_dir(work_dir)),
         "--abc-ref", str(args.abc_ref),
         "--transcripts", str(dataset.transcripts_dir(work_dir)),
-        "--out", str(dataset.package_dir(work_dir)),
+        "--out", str(out_dir),
         "--run-id", "YT500_INSTRUMENTAL",
         "--source-uri", args.source_uri,
         "--dataset-name", args.dataset_name,
@@ -110,12 +111,26 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--dry-run", action="store_true",
                     help="print the readiness report and stop")
     ap.add_argument("--force", action="store_true",
-                    help="build even when the corpus is incomplete (never use "
-                         "this for the published package)")
+                    help="build even when the corpus is incomplete. The "
+                         "result goes to work/package_debug and never to the "
+                         "published package path, so a partial build cannot "
+                         "be mistaken for the final dataset")
+    ap.add_argument("--out", type=Path, default=None,
+                    help="package directory (default work/package, or "
+                         "work/package_debug with --force)")
     ap.add_argument("--timeout-minutes", type=float, default=120.0)
     args = ap.parse_args(argv)
 
     work_dir = Path(args.work_dir)
+    if args.out is not None:
+        out_dir = Path(args.out)
+    elif args.force:
+        # A partial build must never land where the publisher rsyncs the
+        # final package from.
+        out_dir = Path(work_dir) / "package_debug"
+    else:
+        out_dir = dataset.package_dir(work_dir)
+
     report = readiness(work_dir)
     print(render(report))
 
@@ -134,8 +149,9 @@ def main(argv: list[str] | None = None) -> int:
             "(`plumbing/yt500_generation_corpus.py --fetch`).")
 
     status = {"role": "assemble", "utc": gcsio.utcnow(),
-              "report": report, "package": str(dataset.package_dir(work_dir))}
-    cmd = assemble_command(args, work_dir)
+              "report": report, "package": str(out_dir),
+              "debug_build": bool(args.force)}
+    cmd = assemble_command(args, work_dir, out_dir)
     print(f"$ {' '.join(cmd)}", flush=True)
     log = work_dir / "logs" / "assemble.log"
     log.parent.mkdir(parents=True, exist_ok=True)
@@ -152,7 +168,7 @@ def main(argv: list[str] | None = None) -> int:
             rc = 124
 
     status["returncode"] = rc
-    status["success"] = (dataset.package_dir(work_dir) / "_SUCCESS").is_file()
+    status["success"] = (out_dir / "_SUCCESS").is_file()
     gcsio.write_json_atomic(dataset.status_path(work_dir, "assemble"), status)
     if rc != 0:
         print(f"assemble failed (rc={rc}); see {log}", file=sys.stderr)
@@ -160,8 +176,11 @@ def main(argv: list[str] | None = None) -> int:
     if not status["success"]:
         print(f"assemble wrote no _SUCCESS; see {log}", file=sys.stderr)
         return 1
-    print(f"package  : {dataset.package_dir(work_dir)}")
-    print("next     : python3 scripts/yt500_publish.py --once")
+    print(f"package  : {out_dir}")
+    if args.force:
+        print("debug    : built with --force; it is not the published package")
+    else:
+        print("next     : python3 scripts/yt500_publish.py --once")
     return 0
 
 

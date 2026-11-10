@@ -16,6 +16,12 @@ outputs/elisa.json
 # Audio cache for batch runs (re-downloadable from GCS)
 work/
 
+# Local scratch handed to a Colab session (prompts, notes, throwaway files)
+local_workspace/
+
+# Per-role worker logs (VM-local; re-creatable)
+logs/
+
 # Build artifacts
 llama.cpp/
 llama.cpp-text/
