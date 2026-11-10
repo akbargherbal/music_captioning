@@ -238,6 +238,8 @@ def run_tracks(
     existing: dict | None = None,
     retry_only_failed: bool = False,
     echo: Callable[[str], None] | None = None,
+    progress: Callable[[list[dict], list[dict], list[dict]], None] | None = None,
+    progress_every: int = 5,
 ) -> tuple[list[dict], list[dict], list[dict]]:
     """Caption tracks one by one, isolating per-track failures.
 
@@ -250,6 +252,11 @@ def run_tracks(
     Neither case discards the album. With ``retry_only_failed``, tracks that
     already succeeded in ``existing`` are kept and only previously-failed
     tracks are re-run.
+
+    ``progress(results, failed, skipped)`` is called every ``progress_every``
+    newly captioned tracks so the caller can checkpoint to disk. Nothing is
+    persisted per track otherwise, and a long pass (hundreds of tracks) would
+    lose every finished caption if the VM is reaped mid-pass.
 
     Returns ``(results, failed, skipped)``.
     """
@@ -280,6 +287,9 @@ def run_tracks(
         if echo:
             echo(f"{filename}: {result.get('caption_seconds', 0):.1f}s")
         results.append(result)
+        if (progress is not None and progress_every > 0
+                and len(results) % progress_every == 0):
+            progress(results, failed, skipped)
     return results, failed, skipped
 
 

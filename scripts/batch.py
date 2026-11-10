@@ -248,6 +248,8 @@ def caption_album(
     max_track_seconds: float = 0.0,
     min_bitrate_kbps: float = 0.0,
     experimental_suno: bool = False,
+    checkpoint: Callable[[dict, str], None] | None = None,
+    checkpoint_every: int = 5,
 ) -> dict:
     """Phase 1: caption **every** track of the album, keeping the raw text.
 
@@ -314,53 +316,68 @@ def caption_album(
             track_obj["suno_experimental"] = True
         return track_obj
 
+    def build_album(track_results: list[dict], failed: list[dict],
+                    skipped: list[dict]) -> dict:
+        """The album as it stands; also used for mid-pass checkpoints."""
+        if failed:
+            status = "partial"
+        elif skipped and not track_results:
+            status = "skipped"
+        else:
+            status = "ok"
+        total_audio = sum(t["duration_s"] for t in track_results)
+        total_caption = sum(t["caption_seconds"] for t in track_results)
+        merged = merge_tags([
+            {cat: t[cat] for cat in CATEGORIES} for t in track_results
+        ])
+        obj = {
+            "artist": artist,
+            "album": album,
+            "source_dir": entry["source_dir"],
+            "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "status": status,
+            "track_count": len(track_results),
+            "failed_count": len(failed),
+            "skipped_count": len(skipped),
+            "total_audio_seconds": round(total_audio, 1),
+            "total_caption_seconds": round(total_caption, 1),
+            "instruments": merged["instruments"],
+            "vocals": merged["vocals"],
+            "production": merged["production"],
+            "tags_experimental": TAGS_EXPERIMENTAL,
+            "caption_pipeline_version": CAPTION_PIPELINE_VERSION,
+            "caption_stage": CAPTION_STAGE_CAPTIONED,
+            "tracks": track_results,
+            "failed_tracks": failed,
+            "skipped_tracks": skipped,
+        }
+        if experimental_suno:
+            obj["suno_prompt"] = to_suno(merged)
+            obj["suno_experimental"] = True
+        return obj
+
+    def on_progress(track_results: list[dict], failed: list[dict],
+                    skipped: list[dict]) -> None:
+        # Persist the raw captions as they arrive: a reaped VM then costs at
+        # most ``checkpoint_every`` tracks, and run_tracks() skips whatever is
+        # already in the album on the next pass.
+        if checkpoint is not None and track_results:
+            checkpoint(build_album(track_results, failed, skipped),
+                       CAPTION_STAGE_CAPTIONED)
+
     track_results, failed, skipped = run_tracks(
         entry["tracks"], caption_one,
         existing=existing, retry_only_failed=retry_only_failed,
         echo=lambda m: print(f"    {m}", flush=True),
+        progress=on_progress,
+        progress_every=checkpoint_every,
     )
 
     if not track_results and failed:
         first = f"; first error: {failed[0]['error']}" if failed else ""
         raise RuntimeError(f"no tracks captioned ({len(failed)} failed){first}")
 
-    if failed:
-        status = "partial"
-    elif skipped and not track_results:
-        status = "skipped"
-    else:
-        status = "ok"
-
-    total_audio = sum(t["duration_s"] for t in track_results)
-    total_caption = sum(t["caption_seconds"] for t in track_results)
-    merged = merge_tags([
-        {cat: t[cat] for cat in CATEGORIES} for t in track_results
-    ])
-    album_obj = {
-        "artist": artist,
-        "album": album,
-        "source_dir": entry["source_dir"],
-        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "status": status,
-        "track_count": len(track_results),
-        "failed_count": len(failed),
-        "skipped_count": len(skipped),
-        "total_audio_seconds": round(total_audio, 1),
-        "total_caption_seconds": round(total_caption, 1),
-        "instruments": merged["instruments"],
-        "vocals": merged["vocals"],
-        "production": merged["production"],
-        "tags_experimental": TAGS_EXPERIMENTAL,
-        "caption_pipeline_version": CAPTION_PIPELINE_VERSION,
-        "caption_stage": CAPTION_STAGE_CAPTIONED,
-        "tracks": track_results,
-        "failed_tracks": failed,
-        "skipped_tracks": skipped,
-    }
-    if experimental_suno:
-        album_obj["suno_prompt"] = to_suno(merged)
-        album_obj["suno_experimental"] = True
-    return album_obj
+    return build_album(track_results, failed, skipped)
 
 
 DONE_REWRITE_STATES = frozenset({"ok", "fallback", "single_chunk"})
@@ -373,7 +390,9 @@ def rewrite_done(track: dict) -> bool:
 
 
 def polish_album(album_obj: dict, rewriter, *,
-                 only_pending: bool = False) -> dict:
+                 only_pending: bool = False,
+                 progress=None,
+                 progress_every: int = 25) -> dict:
     """Phase 2: rewrite every multi-chunk track with the small model.
 
     Runs **after** every caption in the album exists (the captioner is unloaded
@@ -472,6 +491,14 @@ def polish_album(album_obj: dict, rewriter, *,
             track["rewrite_status"] = "fallback"
             summary["fallback"] = int(summary["fallback"]) + 1
 
+        # Persist polished text as it lands too: a reaped VM then costs the
+        # tracks since the last checkpoint, not the whole polish phase.
+        if progress is not None and progress_every > 0:
+            done = int(summary["ok"]) + int(summary["fallback"]) \
+                + int(summary["failed"]) + int(summary["error"])
+            if done and done % progress_every == 0:
+                progress(album_obj, CAPTION_STAGE_CAPTIONED)
+
     # Path-independent enforcement. ``single_chunk``, a rejected rewrite and the
     # timestamp guard's own fallback all reuse raw chunk text, which may carry a
     # time that is only relative to that ~90 s window. The model guard cannot
@@ -523,6 +550,7 @@ def process_album(
     rewrite: bool = True,
     only_pending_polish: bool = False,
     checkpoint: Callable[[dict, str], None] | None = None,
+    checkpoint_every: int = 5,
     before_polish: Callable[[], None] | None = None,
 ) -> dict:
     """Caption **all** tracks, then polish **all** tracks, then write the album.
@@ -544,6 +572,8 @@ def process_album(
         max_track_seconds=max_track_seconds,
         min_bitrate_kbps=min_bitrate_kbps,
         experimental_suno=experimental_suno,
+        checkpoint=checkpoint,
+        checkpoint_every=checkpoint_every,
     )
 
     if checkpoint is not None:
@@ -556,7 +586,8 @@ def process_album(
         if callable(unload):
             unload()
         album_obj = polish_album(album_obj, rewriter,
-                                 only_pending=only_pending_polish)
+                                 only_pending=only_pending_polish,
+                                 progress=checkpoint)
         unload = getattr(rewriter, "unload", None)
         if callable(unload):
             unload()

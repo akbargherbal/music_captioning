@@ -326,3 +326,19 @@ def test_group_local_tracks_flat(tmp_path: Path):
     (album / "song.mp3").write_bytes(b"x")
     albums = group_local_tracks(album)
     assert set(albums) == {"Single/Single"}
+
+
+def test_run_tracks_reports_progress_periodically():
+    """A long pass must reach disk mid-flight, not only at the end."""
+    from src.resume import run_tracks
+
+    tracks = [{"filename": f"t{i}.mp3", "uri": f"/audio/{i}.mp3"}
+              for i in range(7)]
+    seen: list[int] = []
+    run_tracks(
+        tracks,
+        lambda name, uri: {"file": name, "caption_seconds": 0.1},
+        progress=lambda results, failed, skipped: seen.append(len(results)),
+        progress_every=3,
+    )
+    assert seen == [3, 6]
