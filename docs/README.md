@@ -15,6 +15,7 @@ Start here if you are new to the project.
 | [Transcription results](TRANSCRIPTION_RESULTS.md) | Measured transcription results and known failures. |
 | [Resume transcription](RESUME_TRANSCRIPTION.md) | How to resume transcription work on a fresh runtime. |
 | [Dataset run](DATASET_RUN.md) | Building a caption + ABC dataset for one generated run: commands, measured timings, upload verification. |
+| [YT500 instrumental dataset](YT500_INSTRUMENTAL_DATASET.md) | Plan/runbook for captioning + ABC-transcribing the 489 YT500 instrumentals while they generate: context, open decisions, acceptance gate, split workers, regen, assembly. |
 
 For the project overview and full command reference, see the
 [README](../README.md).
