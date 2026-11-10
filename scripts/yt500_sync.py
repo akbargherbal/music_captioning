@@ -38,12 +38,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import yt500_dataset as dataset  # noqa: E402
 import yt500_gcs as gcsio  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RUN_GLOB = "*_yt500inst*"
-ARTIST = "arabmaqamrock"
-ALBUM = "YT500_INSTRUMENTAL"
 MARKER_OK = "Exit status: 0"
 
 #: Reasons that make a take unusable. ``pending`` is *not* here: an unfinished
@@ -436,6 +435,8 @@ def build_manifest(*, corpus: dict, scan: dict, selection: dict,
     pending_names = [n for n in corpus["names"]
                      if n not in {t["name"] for t in selection["accepted"]}
                      and n not in rejected_names]
+    takes_accepted = sum(1 for t in scan["takes"] if t["accepted"])
+    takes_pending = sum(1 for t in scan["takes"] if t["pending"])
     counts = {
         "corpus_total": total,
         "accepted": len(selection["accepted"]),
@@ -443,8 +444,9 @@ def build_manifest(*, corpus: dict, scan: dict, selection: dict,
         "rejected": len(selection["rejected"]),
         "pending": len(pending_names),
         "takes_scanned": len(scan["takes"]),
-        "takes_accepted": sum(1 for t in scan["takes"] if t["accepted"]),
-        "selected": len(selection["accepted"]),
+        "takes_accepted": takes_accepted,
+        "takes_rejected": len(scan["takes"]) - takes_accepted - takes_pending,
+        "takes_pending": takes_pending,
         "superseded_takes": selection["superseded_takes"],
         "runs": len(scan["source_runs"]),
     }
@@ -458,8 +460,9 @@ def build_manifest(*, corpus: dict, scan: dict, selection: dict,
         "take_selection": {
             "rule": "one accepted take per name, latest end_utc",
             "takes_scanned": len(scan["takes"]),
-            "takes_accepted": counts["takes_accepted"],
-            "takes_rejected": len(scan["takes"]) - counts["takes_accepted"],
+            "takes_accepted": takes_accepted,
+            "takes_rejected": counts["takes_rejected"],
+            "takes_pending": takes_pending,
             "superseded_takes": selection["superseded_takes"],
             "limit": limit or None,
         },
@@ -477,14 +480,21 @@ def build_manifest(*, corpus: dict, scan: dict, selection: dict,
 # --------------------------------------------------------------------------- #
 # downloads + restore
 # --------------------------------------------------------------------------- #
-def local_audio(work_dir: Path, name: str) -> Path:
-    return Path(work_dir) / "audio" / name
-
-
-def album_path(work_dir: Path) -> Path:
-    from src.resume import album_output_path
-
-    return album_output_path(Path(work_dir) / "captions", ARTIST, ALBUM)
+def record_rejections(work_dir: Path, rejected: list[dict]) -> None:
+    """Remember every name that was ever rejected, to report regen recovery."""
+    path = dataset.rejected_history_path(work_dir)
+    history = gcsio.read_json(path, {}) or {}
+    if not isinstance(history, dict):
+        history = {}
+    changed = False
+    for row in rejected:
+        name = row.get("name")
+        if name and name not in history:
+            history[name] = {"first_rejected_utc": gcsio.utcnow(),
+                             "reasons": row.get("reasons") or []}
+            changed = True
+    if changed:
+        gcsio.write_json_atomic(path, history)
 
 
 def download_accepted(client, *, work_dir: Path, accepted: list[dict],
@@ -492,7 +502,7 @@ def download_accepted(client, *, work_dir: Path, accepted: list[dict],
     """Fetch accepted MP3s that are not local yet. Atomic, skip-if-present."""
     downloaded, present, failed = [], 0, []
     for row in accepted:
-        dest = local_audio(work_dir, row["file"])
+        dest = dataset.audio_dir(work_dir) / row["file"]
         if dest.is_file() and dest.stat().st_size > 0:
             present += 1
             continue
@@ -523,7 +533,7 @@ def restore_state(client, *, gcs_work: str, work_dir: Path) -> dict:
         return restored
 
     base = gcs_work.rstrip("/")
-    album_local = album_path(work_dir)
+    album_local = dataset.album_path(work_dir)
     if not album_local.is_file():
         remote = f"{base}/caption_album.json"
         if client.exists(remote):
@@ -586,13 +596,14 @@ def sync_once(client, *, args, corpus: dict, loop: int) -> dict:
         check_systemic_abc(scan)
 
     # sync is the single writer of these three files.
-    gcsio.write_json_atomic(work_dir / "manifest.json", manifest)
-    gcsio.write_json_atomic(work_dir / "rejected.json", {
+    gcsio.write_json_atomic(dataset.manifest_path(work_dir), manifest)
+    gcsio.write_json_atomic(dataset.rejected_path(work_dir), {
         "version": 1,
         "generated_at": gcsio.utcnow(),
         "count": len(selection["rejected"]),
         "rejected": selection["rejected"],
     })
+    record_rejections(work_dir, selection["rejected"])
 
     restored = restore_state(client, gcs_work=args.gcs_work,
                              work_dir=work_dir)
@@ -615,7 +626,7 @@ def sync_once(client, *, args, corpus: dict, loop: int) -> dict:
         "download_failures": downloads["failed"],
         "restored": restored,
     }
-    gcsio.write_json_atomic(work_dir / "status_sync.json", status)
+    gcsio.write_json_atomic(dataset.status_path(work_dir, "sync"), status)
 
     counts = manifest["counts"]
     print(f"  [{status['utc']}] loop {loop}: "
