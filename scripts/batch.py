@@ -363,26 +363,46 @@ def caption_album(
     return album_obj
 
 
-def polish_album(album_obj: dict, rewriter) -> dict:
+DONE_REWRITE_STATES = frozenset({"ok", "fallback", "single_chunk"})
+
+
+def rewrite_done(track: dict) -> bool:
+    """True when a track already carries a final polished caption."""
+    return (track.get("rewrite_status") in DONE_REWRITE_STATES
+            and bool((track.get("caption") or "").strip()))
+
+
+def polish_album(album_obj: dict, rewriter, *,
+                 only_pending: bool = False) -> dict:
     """Phase 2: rewrite every multi-chunk track with the small model.
 
     Runs **after** every caption in the album exists (the captioner is unloaded
     by the caller). Single-chunk tracks are already one coherent description and
     are left untouched. A rejected rewrite falls back to ``caption_raw`` and
     records the reason; the raw chunk text is never removed.
+
+    With ``only_pending`` (an incremental pass over a growing album) a track
+    that already reached ``ok``/``fallback``/``single_chunk`` with a non-empty
+    caption is kept and counted as ``reused``. Re-running the rewriter for 300+
+    unchanged tracks costs 15-25 minutes per pass and produces the same text.
     """
     from src.rewrite import REWRITE_PROMPT_VERSION, rewrite_caption
 
     tracks = album_obj.get("tracks") or []
     if rewriter is None:
+        untouched = 0
         for track in tracks:
+            if only_pending and rewrite_done(track):
+                untouched += 1
+                continue
             track["caption"] = track.get("caption_raw", "")
             track["rewrite_status"] = "disabled"
         album_obj["caption_stage"] = CAPTION_STAGE_CAPTIONED
         album_obj["rewrite"] = {
             "model": None,
             "prompt_version": REWRITE_PROMPT_VERSION,
-            "disabled": len(tracks),
+            "disabled": len(tracks) - untouched,
+            "reused": untouched,
         }
         return album_obj
 
@@ -393,9 +413,20 @@ def polish_album(album_obj: dict, rewriter) -> dict:
         "fallback": 0,
         "error": 0,
         "single_chunk": 0,
+        "reused": 0,
     }
     rewrite_seconds = 0.0
+    tried = 0
+    errored = 0
     for track in tracks:
+        if only_pending and rewrite_done(track):
+            # Keep the stored result and keep the album-level distribution
+            # describing the whole album, not just this pass.
+            summary["reused"] = int(summary["reused"]) + 1
+            summary[track["rewrite_status"]] = (
+                int(summary[track["rewrite_status"]]) + 1)
+            continue
+
         # Reused track dicts may carry results/reasons from an earlier polish;
         # clear them so a successful rewrite does not keep stale rejection text.
         for key in ("rewrite_reasons", "rewrite_model", "rewrite_prompt_version"):
@@ -414,6 +445,7 @@ def polish_album(album_obj: dict, rewriter) -> dict:
         )
         elapsed = time.time() - started
         rewrite_seconds += elapsed
+        tried += 1
         track["caption"] = result.text
         track["rewrite_seconds"] = round(elapsed, 1)
         track["rewrite_model"] = result.rewriter
@@ -428,14 +460,14 @@ def polish_album(album_obj: dict, rewriter) -> dict:
             # leave the album at 'captioned' so the next run retries only this.
             track["rewrite_status"] = "error"
             summary["error"] = int(summary["error"]) + 1
+            errored += 1
         else:
             track["rewrite_status"] = "fallback"
             summary["fallback"] = int(summary["fallback"]) + 1
 
-    attempted = int(summary["ok"]) + int(summary["fallback"]) + int(summary["error"])
-    if attempted and int(summary["ok"]) == 0 and int(summary["error"]) == attempted:
-        # Every rewrite errored: do not mark the album done, and do not lose the
-        # captioning work already on disk.
+    if tried and errored == tried:
+        # Every rewrite this pass errored: do not mark the album done, and do
+        # not lose the captioning work already on disk.
         album_obj["caption_stage"] = CAPTION_STAGE_CAPTIONED
         summary["status"] = "failed"
     else:
@@ -458,6 +490,7 @@ def process_album(
     experimental_suno: bool = False,
     rewriter=None,
     rewrite: bool = True,
+    only_pending_polish: bool = False,
     checkpoint: Callable[[dict, str], None] | None = None,
     before_polish: Callable[[], None] | None = None,
 ) -> dict:
@@ -470,7 +503,8 @@ def process_album(
     is recorded under ``failed_tracks`` and skipped; a track over
     ``max_track_seconds`` or below ``min_bitrate_kbps`` is recorded under
     ``skipped_tracks``. Only if *every* non-skipped track fails does the album
-    count as failed.
+    count as failed. ``only_pending_polish`` keeps tracks that already have a
+    final caption, so an incremental pass rewrites only the new ones.
     """
     album_obj = caption_album(
         captioner, entry, workdir,
@@ -490,12 +524,14 @@ def process_album(
         unload = getattr(captioner, "unload", None)
         if callable(unload):
             unload()
-        album_obj = polish_album(album_obj, rewriter)
+        album_obj = polish_album(album_obj, rewriter,
+                                 only_pending=only_pending_polish)
         unload = getattr(rewriter, "unload", None)
         if callable(unload):
             unload()
     else:
-        album_obj = polish_album(album_obj, None)
+        album_obj = polish_album(album_obj, None,
+                                 only_pending=only_pending_polish)
 
     atomic_write_json(
         album_output_path(outputs, entry["artist"], entry["album"]), album_obj

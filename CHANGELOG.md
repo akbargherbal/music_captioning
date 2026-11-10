@@ -2,7 +2,46 @@
 
 ## [Unreleased]
 
+### Added
+
+- `scripts/yt500_sync.py`: watcher for the YT500 instrumental generation
+  bucket. It is the only process that reads `runs/*_yt500inst*` and downloads
+  audio; it never loads a model. Every take is gated (§3.1 of
+  `docs/YT500_INSTRUMENTAL_DATASET.md`): `abc_sha256` equals the frozen corpus
+  hash, `_time.txt` says `Exit status: 0`, the MP3 and sidecar exist, and
+  `0.85 <= wav_duration_s / nominal_seconds <= 1.25`. One accepted take per
+  name (latest `end_utc`), so a regenerated take with a new seed is picked up
+  on the next poll without waiting for the full corpus. Writes `manifest.json`,
+  `rejected.json` and `status_sync.json`; restores `caption_album.json` and
+  `work/transcripts/` after a VM loss. A take inside a run that has not
+  finished is *pending*, not rejected. One `gcloud storage cp` per run copies
+  the sidecars and markers (the duration gate never downloads audio), and a
+  finalised run is copied once.
+- `scripts/yt500_gcs.py`: the shared GCS layer for the watcher and the
+  publisher — metadata listing, atomic downloads (`part` + fsync + rename),
+  size+MD5 verified uploads, `rsync` without `--delete`, a directory
+  comparison for the final package, and a per-role `flock`.
+- `tests/test_yt500_sync.py` and `tests/test_yt500_incremental.py`: CPU-only
+  coverage of the gate (0.84 and 1.26 rejected, 0.85/1.25 accepted), marker and
+  sidecar requirements, pending-vs-rejected for an unfinished run, latest-take
+  selection, one sync pass against an in-memory bucket, and an incremental
+  polish pass that re-polishes zero stems.
+
 ### Changed
+
+- `scripts/build_dataset.py caption`: an album with `failed_tracks` is no
+  longer treated as done, so a failed track is retried instead of being
+  skipped forever (`already_polished()`).
+- `scripts/build_dataset.py caption`: on an incremental pass only pending
+  tracks are polished (`--repolish` restores the old rewrite-everything
+  behaviour), and the captioner is not loaded at all when no track needs
+  captioning. `rewrite.reused` counts the tracks kept from the previous pass.
+- `scripts/build_dataset.py caption`: `--max-track-seconds` now defaults to `0`
+  (no cap). A growing corpus must not leave a track uncounted, which would stop
+  the track count from ever settling.
+- `requirements.txt`: add `pyarrow` (needed by `build_dataset.py assemble`,
+  previously missing).
+
 
 - **Deterministic term extraction is now explicitly experimental.** The
   comma-joined `suno_prompt` is no longer a default output; it is opt-in via

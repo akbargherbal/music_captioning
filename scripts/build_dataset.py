@@ -37,8 +37,6 @@ import datetime as dt
 import hashlib
 import json
 import os
-import shutil
-import subprocess
 import sys
 from pathlib import Path
 
@@ -116,10 +114,24 @@ def stem_for(track: dict) -> str:
 # --------------------------------------------------------------------------- #
 # phase 1: caption + polish
 # --------------------------------------------------------------------------- #
+def already_polished(data: dict, track_count: int) -> bool:
+    """True when a stored album can be reused as-is.
+
+    A failed track must force a retry: the caption phase isolates failures, so
+    an album with ``failed_tracks`` can have the current stage and the right
+    number of tracks while still missing a caption.
+    """
+    from src.resume import CAPTION_STAGE_POLISHED, is_current_caption_output
+
+    return (is_current_caption_output(data)
+            and data.get("caption_stage") == CAPTION_STAGE_POLISHED
+            and len(data.get("tracks") or []) == track_count
+            and not data.get("failed_tracks"))
+
+
 def caption_phase(args: argparse.Namespace) -> int:
     from src.captioner_hf import HFCaptioner
     from src.resume import (
-        CAPTION_STAGE_POLISHED,
         album_output_path,
         atomic_write_json as resume_atomic_write,
         is_current_caption_output,
@@ -143,16 +155,27 @@ def caption_phase(args: argparse.Namespace) -> int:
     existing = None
     if out_path.is_file() and not args.force:
         data = json.loads(out_path.read_text(encoding="utf-8"))
-        if (is_current_caption_output(data)
-                and data.get("caption_stage") == CAPTION_STAGE_POLISHED
-                and len(data.get("tracks") or []) == len(entry["tracks"])):
+        if already_polished(data, len(entry["tracks"])):
             print(f"already polished: {out_path} ({len(data['tracks'])} tracks)")
             return 0
         if is_current_caption_output(data) and data.get("tracks"):
             print(f"resuming {out_path}: reusing stored captions")
             existing = data
 
-    captioner = HFCaptioner(model_dir=Path(args.hf_model))
+    captioner = None
+    prior_files = {t.get("file") for t in (existing or {}).get("tracks") or []}
+    failed_files = {f.get("file") for f in
+                    (existing or {}).get("failed_tracks") or []}
+    pending = [t for t in entry["tracks"]
+               if t["filename"] not in prior_files
+               or t["filename"] in failed_files]
+    if pending:
+        captioner = HFCaptioner(model_dir=Path(args.hf_model))
+    else:
+        # Everything is already captioned: do not load 6.4 GB of weights just
+        # to polish, and never touch the GPU on a no-op pass.
+        print(f"  no track needs captioning ({len(entry['tracks'])} stored); "
+              "skipping the captioner load")
     rewriter = None
     if not args.no_rewrite:
         from src.rewriter_llama import LlamaCppRewriter
@@ -178,6 +201,7 @@ def caption_phase(args: argparse.Namespace) -> int:
         min_bitrate_kbps=args.min_bitrate_kbps,
         rewriter=rewriter,
         rewrite=not args.no_rewrite,
+        only_pending_polish=bool(existing) and not args.repolish,
         checkpoint=checkpoint,
     )
     resume_atomic_write(out_path, obj)
@@ -550,8 +574,14 @@ def main(argv: list[str] | None = None) -> int:
     cap.add_argument("--llamacpp-server", type=Path,
                      default=DEFAULT_LLAMACPP_SERVER)
     cap.add_argument("--no-rewrite", action="store_true")
+    cap.add_argument("--repolish", action="store_true",
+                     help="re-run the rewrite model for every track; the "
+                          "default on an incremental pass is to polish only the "
+                          "tracks that are still pending")
     cap.add_argument("--force", action="store_true")
-    cap.add_argument("--max-track-seconds", type=float, default=900.0)
+    cap.add_argument("--max-track-seconds", type=float, default=0.0,
+                     help="skip longer tracks (0 = no cap; the default, so an "
+                          "incremental corpus never leaves a track un-counted)")
     cap.add_argument("--min-bitrate-kbps", type=float, default=0.0)
 
     asm = sub.add_parser("assemble", help="join captions + ABC into a package")

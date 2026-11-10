@@ -6,4 +6,5 @@ bitsandbytes>=0.50         # 4-bit (nf4) quantization
 accelerate>=1.10           # device_map loading
 librosa>=0.11              # audio loading (16 kHz mono)
 soundfile>=0.13
+pyarrow>=17                # tracks.parquet in scripts/build_dataset.py assemble
 pytest>=8.0
