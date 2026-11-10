@@ -127,6 +127,9 @@ def caption_command(args: argparse.Namespace, work_dir: Path) -> list[str]:
         # can always settle and an incremental pass is well defined.
         "--max-track-seconds", "0",
         "--min-bitrate-kbps", "0",
+        # One pass = one album write + one polish phase + one upload. Cap it so
+        # those land every ~20-30 min instead of once per multi-hour drain.
+        "--max-tracks", str(getattr(args, "caption_batch", 0)),
     ]
     if args.hf_model:
         cmd += ["--hf-model", str(args.hf_model)]
@@ -350,6 +353,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--hf-model", type=Path, default=None)
     ap.add_argument("--rewrite-gguf", type=Path, default=None)
     ap.add_argument("--llamacpp-server", type=Path, default=None)
+    ap.add_argument("--caption-batch", type=int, default=40,
+                    help="max new tracks per caption pass (0 = drain the "
+                         "album). Smaller = more frequent polish + upload, at "
+                         "the cost of one captioner load per pass")
     ap.add_argument("--repolish", action="store_true",
                     help="debug: re-polish every track instead of the pending")
     ap.add_argument("--no-rewrite", action="store_true",

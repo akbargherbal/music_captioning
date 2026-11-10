@@ -187,6 +187,15 @@ def caption_phase(args: argparse.Namespace) -> int:
             print(f"resuming {out_path}: reusing stored captions")
             existing = data
 
+    if args.max_tracks and args.max_tracks > 0:
+        # Bound the pass: the album is written and polished per pass, so a
+        # 279-track drain leaves hours with no final caption and no upload.
+        stored = {t.get("file") for t in (existing or {}).get("tracks") or []}
+        todo = [t for t in entry["tracks"] if t["filename"] not in stored]
+        entry["tracks"] = todo[: args.max_tracks]
+        print(f"  bounded pass: {len(entry['tracks'])} of {len(todo)} pending "
+              f"tracks (--max-tracks {args.max_tracks})", flush=True)
+
     captioner = None
     prior_files = {t.get("file") for t in (existing or {}).get("tracks") or []}
     failed_files = {f.get("file") for f in
@@ -634,6 +643,11 @@ def main(argv: list[str] | None = None) -> int:
                           "default on an incremental pass is to polish only the "
                           "tracks that are still pending")
     cap.add_argument("--force", action="store_true")
+    cap.add_argument("--max-tracks", type=int, default=0,
+                     help="caption at most N not-yet-stored tracks this pass "
+                          "(0 = drain the album). Bounds one pass so polish and "
+                          "the GCS checkpoint land every N tracks instead of "
+                          "hours apart.")
     cap.add_argument("--max-track-seconds", type=float, default=0.0,
                      help="skip longer tracks (0 = no cap; the default, so an "
                           "incremental corpus never leaves a track un-counted)")
