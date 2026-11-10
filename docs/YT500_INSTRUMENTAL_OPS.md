@@ -168,13 +168,22 @@ state is one listing and one copy for the run in flight — 35–55 s over 4 run
    GCS) so the album cannot caption two takes of the same name. The album is
    manifest-independent here only in the sense that `assemble` iterates the
    manifest, so a stale album entry is never emitted.
-7. **A caption crash re-captions the whole in-flight pass.** The album is
-   written after the caption phase completes (that is where the raw-caption
-   checkpoint lives), so a native crash at track 180 of 185 loses that pass's
-   captioning; the next pass redoes it. The streaming run is not affected
-   (a pass is a handful of new takes), but for a large backlog run it in
-   tranches with `yt500_sync.py --limit` rather than all at once, so a crash
-   costs minutes, not hours.
+7. **A crash costs minutes, not a pass.** A caption pass is bounded
+   (`yt500_learn.py --caption-batch 40` → `build_dataset.py --max-tracks`), the
+   album is checkpointed **every 5 tracks** mid-pass and every 25 polished
+   tracks, and every write carries stored tracks forward. `run_tracks` skips
+   anything already in the album, so a reaped VM loses at most the tracks since
+   the last checkpoint. `plumbing/snapshot_work.sh` additionally copies the
+   album to GCS every 2 min and commits it to git every 15 min (and on every
+   `polished` flip); `plumbing/resume_yt500.sh` picks the freshest of local(git),
+   GCS `caption_album.json` and GCS `backup/latest.json` on resume. See
+   `docs/RESUME_CAPTIONS.md`.
+8. **`rewrite_status` can be `failed`.** When the polish guard rejects an output
+   (for example a time reference the 2 retries could not remove), the raw
+   caption is kept, the status is `failed`, and the track is retried on a later
+   polish pass. `caption_pre_cleanup` holds the pre-scrub text and
+   `timestamp_cleanup: failed` marks a scrub that did not fully clean. Timestamps
+   never reach a published `caption`; see `src/rewrite.py`.
 
 ## Reference numbers (2026-11-10, live bucket)
 
