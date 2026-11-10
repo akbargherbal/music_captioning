@@ -24,12 +24,17 @@ starts only the roles that are not already running. It:
 2. clones `../arabmaqamrock` and runs
    `plumbing/yt500_generation_corpus.py --fetch` **only** when the corpus index
    is missing (that is the only thing this run uses that repo for);
-3. downloads the captioner weights only if absent (~6.4 GB);
-4. restores `models/Qwen3-4B-Instruct-2507-Q8_0.gguf` from GCS
+3. **picks the freshest album** of the three copies — git, GCS canonical, GCS
+   `backup/latest.json` — by track count (generated_at breaks a tie). `sync`
+   only restores the album when the local file is *missing*, so without this a
+   fresh clone would keep a git copy up to 15 min stale and re-caption those
+   tracks. It logs `album: took N tracks from <source>`;
+4. downloads the captioner weights only if absent (~6.4 GB);
+5. restores `models/Qwen3-4B-Instruct-2507-Q8_0.gguf` from GCS
    (`music_captioning/gguf/`), falling back to Hugging Face;
-5. stages `llama-server` from `music_captioning/binaries/sm89-l4/` (L4) or
+6. stages `llama-server` from `music_captioning/binaries/sm89-l4/` (L4) or
    `sm75-t4/` (T4) — a ~1 min download, not a build;
-6. starts `yt500_publish`, `yt500_sync`, `yt500_learn` (each under
+7. starts `yt500_publish`, `yt500_sync`, `yt500_learn` (each under
    `supervise.py`) plus the snapshot loop, and prints `--status`.
 
 Time to the first new caption on a cold VM: ~5–8 min, dominated by the weight

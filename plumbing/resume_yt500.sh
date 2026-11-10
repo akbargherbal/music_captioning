@@ -69,7 +69,60 @@ fi
   || { say "FATAL: llama-server unavailable"; exit 1; }
 say "weights + backend ok"
 
-# --- 3. workers (never start a second copy of a role) -----------------------
+# --- 3. use the freshest album of {local (git), GCS canonical, GCS backup} ---
+# sync only restores the album when the local one is MISSING, so a fresh clone
+# would otherwise keep a git copy up to 15 min stale and re-caption those
+# tracks. Pick the copy with the most tracks (generated_at breaks a tie).
+ALBUM="work/yt500/captions/arabmaqamrock/YT500_INSTRUMENTAL.json"
+if ! pgrep -f "yt500_learn.py --watch" >/dev/null 2>&1; then
+  python3 - "$ALBUM" <<'PY' || say "album freshness check skipped"
+import json, subprocess, sys
+from pathlib import Path
+
+local = Path(sys.argv[1])
+GCS = ("gs://akbar-december-2024-backup/GENERATION/YT500_INSTRUMENTAL/work/",
+       "caption_album.json", "backup/latest.json")
+
+def rank(data):
+    return (len(data.get("tracks") or []), data.get("generated_at") or "")
+
+best, best_src = None, "none"
+if local.is_file():
+    try:
+        best, best_src = json.loads(local.read_text()), "local(git)"
+    except json.JSONDecodeError:
+        pass
+
+for rel in GCS[1:]:
+    try:
+        raw = subprocess.run(["gcloud", "storage", "cat", GCS[0] + rel],
+                             capture_output=True, text=True, check=True).stdout
+        data = json.loads(raw)
+    except Exception:
+        continue
+    if best is None or rank(data) > rank(best):
+        best, best_src = data, rel
+
+if best is None:
+    print("no album anywhere yet")
+    sys.exit(0)
+if best_src != "local(git)":
+    local.parent.mkdir(parents=True, exist_ok=True)
+    tmp = local.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(best, ensure_ascii=False, indent=2) + "\n",
+                   encoding="utf-8")
+    tmp.replace(local)
+    mirror = Path("work/yt500/caption_album.json")
+    mirror.write_text(local.read_text(encoding="utf-8"), encoding="utf-8")
+    print(f"album: took {len(best['tracks'])} tracks from {best_src} "
+          f"(stage={best.get('caption_stage')})")
+else:
+    print(f"album: local(git) is freshest ({len(best['tracks'])} tracks, "
+          f"stage={best.get('caption_stage')})")
+PY
+fi
+
+# --- 4. workers (never start a second copy of a role) -----------------------
 start() {  # start <name> <pgrep pattern> <command...>
   local name="$1" pattern="$2"; shift 2
   if running "$pattern"; then say "$name already running"; return; fi
