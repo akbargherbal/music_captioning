@@ -28,8 +28,13 @@ def test_build_conversation_text_then_audio(tmp_path: Path):
     ]
 
 
-def test_prompt_matches_model_card():
-    assert PROMPT == "*Task* Describe this audio in detail"
+def test_prompt_starts_with_the_model_card_task_line():
+    # The model card's task line is unchanged; the no-timestamps instruction is
+    # appended after it (2026-11-10: chunk-relative times were leaking into the
+    # merged caption). See docs/YT500_INSTRUMENTAL_OPS.md.
+    assert PROMPT.startswith("*Task* Describe this audio in detail")
+    assert "Do not mention timestamps" in PROMPT
+    assert "general sequencing words" in PROMPT
 
 
 def test_missing_audio_raises_before_model_load(tmp_path: Path):

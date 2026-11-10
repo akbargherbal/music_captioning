@@ -34,7 +34,7 @@ from .tags import extract_tags
 
 # Bump when the instruction or the input layout changes: the rewrite output is
 # part of the caption, so stale results must not be reused (see resume.py).
-REWRITE_PROMPT_VERSION = 1
+REWRITE_PROMPT_VERSION = 2
 
 # Fixed instruction. Kept short on purpose: the user message is only the text.
 REWRITE_SYSTEM_PROMPT = (
@@ -43,8 +43,34 @@ REWRITE_SYSTEM_PROMPT = (
     "clean, natural description of the track: keep every distinct detail, "
     "remove the repetition and padding, and add nothing that is not in the "
     "text. Output only the rewritten description, with no headings, lists, "
-    "or commentary."
+    "or commentary. "
+    "Never include timestamps or time references in the output. If the input "
+    "chunk captions contain any, drop the exact time and express the ordering "
+    "with general language (\"early on\", \"soon after\", \"later\", \"toward "
+    "the end\") while keeping the order of events the same."
 )
+
+# Time references must never reach the final caption. Chunk captions answer a
+# ~90 s window, so a timestamp in them is chunk-relative and becomes a lie once
+# the chunks are merged into one track description. The patterns are
+# deliberately broad: a false positive costs one rewrite retry, a false
+# negative publishes a wrong claim.
+TIMESTAMP_PATTERNS = (
+    re.compile(r"\b\d{1,2}:\d{2}(?::\d{2})?\b"),
+    re.compile(
+        r"\b\d+(?:\.\d+)?\s*-?\s*"
+        r"(?:s|sec|secs|seconds?|min|mins|minutes?)\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\b(?:first|last|final)\s+(?:few\s+)?(?:seconds?|minutes?)\b",
+        re.IGNORECASE,
+    ),
+)
+
+# Two extra attempts after the first: the guard must not accept a wrong caption,
+# but one retry often loses the time reference without changing the content.
+TIMESTAMP_RETRIES = 2
 
 # Sanity bounds for a rewrite. A 200-300 word source should land well inside.
 MIN_WORDS = 50
@@ -92,6 +118,14 @@ class RewriteResult:
     @property
     def ok(self) -> bool:
         return self.status == "ok"
+
+
+def timestamp_hits(text: str) -> list[str]:
+    """Every time reference found in ``text``, in order (empty = clean)."""
+    hits: list[str] = []
+    for pattern in TIMESTAMP_PATTERNS:
+        hits.extend(match.group(0) for match in pattern.finditer(text or ""))
+    return hits
 
 
 def build_source_text(sections: Sequence[str]) -> str:
@@ -155,6 +189,11 @@ def check_rewrite(sections: Sequence[str], output: str) -> list[str]:
     if _COMMENTARY.search(text):
         reasons.append("commentary instead of the description")
 
+    hits = timestamp_hits(text)
+    if hits:
+        listed = ", ".join(dict.fromkeys(hits))
+        reasons.append(f"timestamp in output: {listed}")
+
     invented = invented_terms(source, text)
     if invented:
         listed = ", ".join(f"{term} ({cat})" for cat, term in invented)
@@ -201,20 +240,41 @@ def rewrite_caption(
         )
 
     name = getattr(rewriter, "name", type(rewriter).__name__)
-    try:
-        output = rewriter.rewrite(build_messages(source))
-    except Exception as exc:  # keep one bad track from killing a batch
+    attempts = 0
+    while True:
+        attempts += 1
+        try:
+            output = rewriter.rewrite(build_messages(source))
+        except Exception as exc:  # keep one bad track from killing a batch
+            return RewriteResult(
+                fallback_text,
+                "fallback",
+                (f"rewriter error: {type(exc).__name__}: {exc}",),
+                source_words,
+                len(fallback_text.split()),
+                name,
+            )
+
+        output = (output or "").strip()
+        reasons = check_rewrite(sections, output)
+        timed = any(r.startswith("timestamp in output") for r in reasons)
+        # Only the timestamp guard retries: it is the one failure this session
+        # refuses to publish, and a retry is cheap next to re-captioning.
+        if not timed or attempts > TIMESTAMP_RETRIES:
+            break
+
+    if timed:
+        # Still timed after the retries: never report this as "ok". Keep the
+        # raw caption (it is stored anyway) and flag the entry for review.
         return RewriteResult(
             fallback_text,
-            "fallback",
-            (f"rewriter error: {type(exc).__name__}: {exc}",),
+            "failed",
+            tuple(reasons) + (f"timestamp guard: gave up after {attempts} "
+                              "attempts",),
             source_words,
-            len(fallback_text.split()),
+            len(output.split()),
             name,
         )
-
-    output = (output or "").strip()
-    reasons = check_rewrite(sections, output)
     if reasons:
         return RewriteResult(
             fallback_text, "fallback", tuple(reasons), source_words,

@@ -31,7 +31,13 @@ from .captioner import (
 from .merge import merge_section_captions
 from .tags import extract_tags, merge_tags, to_suno
 
-PROMPT = "*Task* Describe this audio in detail"
+PROMPT = (
+    "*Task* Describe this audio in detail\n\n"
+    "Do not mention timestamps, time markers, or durations (e.g. \"at 0:23\", "
+    "\"after 30 seconds\", \"in the first minute\"). To describe when something "
+    "happens, use general sequencing words such as \"opens with\", \"then\", "
+    "\"later\", \"gradually\", \"eventually\", \"closes with\"."
+)
 # ~90 s keeps a 4.5-minute track at three windows (~8.5 GiB on a T4); 120 s is
 # the hard cap, well under the measured ~190 s OOM ceiling.
 DEFAULT_CHUNK_SECONDS = 90.0

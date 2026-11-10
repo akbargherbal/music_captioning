@@ -412,6 +412,7 @@ def polish_album(album_obj: dict, rewriter, *,
         "ok": 0,
         "fallback": 0,
         "error": 0,
+        "failed": 0,
         "single_chunk": 0,
         "reused": 0,
     }
@@ -455,6 +456,12 @@ def polish_album(album_obj: dict, rewriter, *,
         if result.ok:
             track["rewrite_status"] = "ok"
             summary["ok"] = int(summary["ok"]) + 1
+        elif result.status == "failed":
+            # A guard violation (e.g. a time reference the retries could not
+            # remove): keep the raw caption, never publish it as "ok", and
+            # leave it out of DONE_REWRITE_STATES so a later pass retries it.
+            track["rewrite_status"] = "failed"
+            summary["failed"] = int(summary["failed"]) + 1
         elif any(r.startswith("rewriter error:") for r in result.reasons):
             # The model itself failed (load/OOM); keep the raw caption and
             # leave the album at 'captioned' so the next run retries only this.
