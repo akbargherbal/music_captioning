@@ -18,6 +18,7 @@ What that means section by section:
 
 | Section | Status |
 |---|---|
+| §0.1 #1, "L4 24 GB" | No longer load-bearing. The 24 GB existed for caption **+** SheetSage2 on one box; the captioner peaks at 8.0 GiB and the rewriter runs in a separate phase. **A T4 is sufficient** (~56 s/track, ~7.6 h for 489) and needs no compile for `llama-server`, since `sm75-t4` is published. An L4 stays ~2× faster (~29 s/track, ~3.9 h). |
 | §1, §2, §5 ("full parity" / reference ABC / transcription) | Transcription is dropped. The deliverable is the caption album. |
 | §6.5 `--phase transcribe` | Implemented, but **never invoked**. Everything runs with `--phase caption`. |
 | §6.7, §8 transcript gates | Not applicable. The pilot gates on captions only. |
