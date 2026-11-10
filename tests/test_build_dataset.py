@@ -165,3 +165,209 @@ def test_assemble_records_missing_transcript_as_null(tree: dict) -> None:
         (tree["out"] / "tracks.jsonl").read_text(encoding="utf-8").splitlines()[0])
     assert row["abc_transcription_path"] is None
     assert row["abc_transcription_flags"] == []
+
+
+# --------------------------------------------------------------------------- #
+# multi-run corpus (§6.3)
+# --------------------------------------------------------------------------- #
+def _multi_run_tree(tmp_path: Path, count: int) -> dict:
+    """A watcher-style queue: one accepted take per name, spanning two runs.
+
+    The manifest is ``{accepted: [...]}`` (no ``tracks``, no ``run_dir``), the
+    shape ``yt500_sync.py`` writes.
+    """
+    audio_dir = tmp_path / "audio"
+    audio_dir.mkdir()
+    abc_ref = tmp_path / "abc_ref"
+    abc_ref.mkdir()
+    transcripts = tmp_path / "transcripts"
+    transcripts.mkdir()
+    captions = tmp_path / "captions" / "arabmaqamrock"
+    captions.mkdir(parents=True)
+    runs = ["20261110-083615_yt500inst", "20261110-120000_yt500inst-regen"]
+
+    accepted, tracks = [], []
+    for i in range(count):
+        name = f"yt500-{i:04d}-vid{i}"
+        run = runs[i % 2]
+        stem = f"{name}_{1000 + i}"
+        (audio_dir / f"{stem}.mp3").write_bytes(f"mp3-{i}".encode())
+        (abc_ref / f"{name}.abc").write_text(ABC, encoding="utf-8")
+        tracks.append({
+            "file": f"{stem}.mp3",
+            "duration_s": 250.0 + i,
+            "bitrate_kbps": 192,
+            "chunk_count": 2,
+            "caption_seconds": 25.0,
+            "instruments": ["oud"],
+            "vocals": [],
+            "production": ["reverb"],
+            "chunk_captions": ["a", "b"],
+            "caption_raw": f"raw {i}",
+            "caption": f"polished {i}",
+            "rewrite_status": "ok",
+            "rewrite_model": "gguf:test",
+            "tags_experimental": True,
+        })
+        accepted.append({
+            "name": name,
+            "run_id": run,
+            "seed": 1000 + i,
+            "take": 0,
+            "file": f"{stem}.mp3",
+            "stem": stem,
+            "gs_uri": f"gs://bucket/runs/{run}/{stem}.mp3",
+            "abc_sha256": _sha(ABC.encode()),
+            "wav_duration_s": 250.0 + i,
+            "nominal_seconds": 252.0 + i,
+            "take_ratio": (250.0 + i) / (252.0 + i),
+            "end_utc": "2026-11-10T08:38:44Z",
+            "title": f"TITLE {i}",
+            "source_artist": "Elissa",
+            "country": "Lebanon",
+            "tier": "Tier 1",
+            "source_rank": i + 1,
+            "source_duration_s": 258.0,
+            "source_abc_sha256": _sha(b"source"),
+            "generation_status": "ready",
+        })
+
+    # Two transcripts only: qc_track shells out to abc2midi, which is not a
+    # Python dependency; row count must not depend on it.
+    for row in accepted[:2]:
+        tdir = transcripts / row["stem"]
+        tdir.mkdir(parents=True)
+        (tdir / "score.abc").write_text(ABC, encoding="utf-8")
+        (tdir / "key.lab").write_text("0.0 240.0 C\n", encoding="utf-8")
+        (tdir / "chord.lab").write_text("0.0 240.0 C\n", encoding="utf-8")
+        (tdir / "beat.lab").write_text(
+            "\n".join(f"{i * 0.5:.3f} 1" for i in range(480)) + "\n",
+            encoding="utf-8")
+        (tdir / "meta.json").write_text(json.dumps({
+            "status": "ok", "duration_s": 240.0,
+            "model": "m-a-p/SheetSage2", "model_revision": "deadbeef",
+            "seconds": 40.0,
+        }), encoding="utf-8")
+
+    album_dir = captions
+    (album_dir / "YT500_INSTRUMENTAL.json").write_text(json.dumps({
+        "artist": "arabmaqamrock",
+        "album": "YT500_INSTRUMENTAL",
+        "status": "ok",
+        "caption_stage": "polished",
+        "tracks": tracks,
+    }), encoding="utf-8")
+
+    run_manifest = tmp_path / "manifest.json"
+    run_manifest.write_text(json.dumps({
+        "version": 1,
+        "corpus_total": count,
+        "counts": {"corpus_total": count, "accepted": count, "rejected": 1},
+        "source_runs": [{"run_id": r, "takes": count // 2} for r in runs],
+        "rejected": [{"name": "yt500-9999-short", "reasons": ["short_take"]}],
+        "take_selection": {"rule": "latest end_utc", "superseded_takes": 3},
+        "accepted": accepted,
+    }), encoding="utf-8")
+
+    return {
+        "audio": audio_dir,
+        "abc_ref": abc_ref,
+        "transcripts": transcripts,
+        "captions": tmp_path / "captions",
+        "run_manifest": run_manifest,
+        "out": tmp_path / "package",
+        "tmp": tmp_path,
+    }
+
+
+def _run_multi(tree: dict) -> int:
+    return bd.main([
+        "assemble",
+        "--run-manifest", str(tree["run_manifest"]),
+        "--audio-dir", str(tree["audio"]),
+        "--captions", str(tree["captions"]),
+        "--abc-ref", str(tree["abc_ref"]),
+        "--transcripts", str(tree["transcripts"]),
+        "--out", str(tree["out"]),
+        "--run-id", "YT500_INSTRUMENTAL",
+        "--source-uri", "gs://bucket/runs",
+        "--dataset-name", "YT500 Instrumental 489",
+        "--dataset-version", "v0.1",
+    ])
+
+
+def test_assemble_multi_run_uses_per_track_run_id_and_gs_uri(
+        tmp_path: Path) -> None:
+    tree = _multi_run_tree(tmp_path, 4)
+    assert _run_multi(tree) == 0
+    rows = [json.loads(line) for line in
+            (tree["out"] / "tracks.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert len(rows) == 4
+    assert {r["run_id"] for r in rows} == {
+        "20261110-083615_yt500inst", "20261110-120000_yt500inst-regen"}
+    for row in rows:
+        assert row["track_id"] == f"{row['run_id']}/{Path(row['audio_file']).stem}"
+        assert row["gs_uri"] == (
+            f"gs://bucket/runs/{row['run_id']}/{row['audio_file']}")
+    per_track = json.loads(
+        (tree["out"] / "captions" / f"{rows[0]['track_id'].split('/')[1]}.json")
+        .read_text(encoding="utf-8"))
+    assert per_track["run_id"] == rows[0]["run_id"]
+    assert per_track["track_id"] == rows[0]["track_id"]
+
+
+def test_assemble_multi_run_adds_the_corpus_columns(tmp_path: Path) -> None:
+    tree = _multi_run_tree(tmp_path, 2)
+    assert _run_multi(tree) == 0
+    row = json.loads(
+        (tree["out"] / "tracks.jsonl").read_text(encoding="utf-8").splitlines()[0])
+    assert row["title"] == "TITLE 0"
+    assert row["source_artist"] == "Elissa"
+    assert row["country"] == "Lebanon"
+    assert row["tier"] == "Tier 1"
+    assert row["source_rank"] == 1
+    assert row["source_duration_s"] == 258.0
+    assert row["generation_status"] == "ready"
+    assert row["take_ratio"] == pytest.approx(250.0 / 252.0, abs=1e-6)
+    assert row["instrumental"] is True
+
+
+def test_assemble_multi_run_manifest_records_the_runs_and_rejects(
+        tmp_path: Path) -> None:
+    tree = _multi_run_tree(tmp_path, 4)
+    assert _run_multi(tree) == 0
+    manifest = json.loads(
+        (tree["out"] / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["counts"]["tracks"] == 4
+    assert len(manifest["run_ids"]) == 2
+    assert len(manifest["source_runs"]) == 2
+    assert manifest["rejected"][0]["name"] == "yt500-9999-short"
+    assert manifest["take_selection"]["superseded_takes"] == 3
+    assert manifest["dataset"] == "YT500 Instrumental 489"
+    card = (tree["out"] / "DATASET_CARD.md").read_text(encoding="utf-8")
+    assert "one or more generated-instrumental" in card
+
+
+def test_single_run_schema_keeps_the_reference_columns(tree: dict) -> None:
+    assert _run(tree) == 0
+    row = json.loads(
+        (tree["out"] / "tracks.jsonl").read_text(encoding="utf-8").splitlines()[0])
+    for column in bd.CORPUS_COLUMNS:
+        assert column not in row
+
+
+def test_assemble_writes_489_rows(tmp_path: Path) -> None:
+    tree = _multi_run_tree(tmp_path, 489)
+    assert _run_multi(tree) == 0
+    out = tree["out"]
+    lines = (out / "tracks.jsonl").read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 489
+    import pyarrow.parquet as pq
+
+    assert pq.read_table(out / "tracks.parquet").num_rows == 489
+    manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["counts"]["tracks"] == 489
+    assert (out / "_SUCCESS").is_file()
+    for entry in manifest["files"]:
+        blob = (out / entry["path"]).read_bytes()
+        assert _sha(blob) == entry["sha256"]

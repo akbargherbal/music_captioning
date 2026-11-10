@@ -62,6 +62,9 @@ CORPUS_COLUMNS = (
     "title", "source_artist", "country", "tier", "source_rank",
     "duration_s", "source_abc_sha256", "generation_status",
 )
+#: The corpus index calls the source length ``duration_s``; in a dataset row
+#: that name is taken by the rendered audio, so the source keeps a prefix.
+CORPUS_RENAMES = {"duration_s": "source_duration_s"}
 
 
 # --------------------------------------------------------------------------- #
@@ -421,9 +424,7 @@ def public_take(take: dict) -> dict:
     for key in CORPUS_COLUMNS:
         value = corpus.get(key)
         if value is not None:
-            row[key] = value
-    if corpus.get("source_abc_sha256") is not None:
-        row["source_abc_sha256"] = corpus["source_abc_sha256"]
+            row[CORPUS_RENAMES.get(key, key)] = value
     return row
 
 

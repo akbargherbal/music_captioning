@@ -41,6 +41,18 @@
   the track count from ever settling.
 - `requirements.txt`: add `pyarrow` (needed by `build_dataset.py assemble`,
   previously missing).
+- `scripts/build_dataset.py assemble`: a package can now span several
+  generation runs. Each row takes its own `run_id` and `gs_uri` from the take
+  (falling back to `--run-id` / `--source-uri`), `track_id` is
+  `<run_id>/<stem>`, and the corpus columns (`title`, `source_artist`,
+  `country`, `tier`, `source_rank`, `source_duration_s`, `source_abc_sha256`,
+  `generation_status`, `take_ratio`, `take`) are added when the manifest
+  carries them — so the single-run `fadhl_shaker_instrumental_18` schema is
+  unchanged. `manifest.json` gains `source_runs`, `run_ids`, `rejected`,
+  `take_selection` and `corpus`. The dataset card says "one or more runs".
+  `--instrumental/--no-instrumental` overrides the run-id inference.
+- `load_run_manifest` accepts the watcher's `{accepted: [...]}` queue as well as
+  a single run's `{tracks: [...]}`.
 
 
 - **Deterministic term extraction is now explicitly experimental.** The

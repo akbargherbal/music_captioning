@@ -50,6 +50,15 @@ DEFAULT_LLAMACPP_SERVER = (
     REPO_ROOT / "llama.cpp-text" / "build" / "bin" / "llama-server"
 )
 
+#: Optional per-track columns carried by a corpus index / take-selection
+#: manifest. A single-run manifest has none of them, so the reference
+#: ``fadhl_shaker_instrumental_18`` schema stays byte-compatible.
+CORPUS_COLUMNS = (
+    "title", "source_artist", "country", "tier", "source_rank",
+    "source_duration_s", "source_abc_sha256", "generation_status",
+    "take_ratio", "take",
+)
+
 
 # --------------------------------------------------------------------------- #
 # helpers
@@ -84,18 +93,34 @@ def atomic_write_text(path: Path, text: str) -> None:
 
 
 def load_run_manifest(path: Path) -> dict:
+    """Load a run manifest, accepting the watcher's ``accepted`` list too.
+
+    A single-run manifest carries ``tracks`` and a ``run_dir``; the multi-run
+    queue written by ``yt500_sync.py`` carries ``accepted`` (one take per
+    corpus name) and each entry names its own ``run_id``.
+    """
     data = json.loads(Path(path).read_text(encoding="utf-8"))
-    if not isinstance(data.get("tracks"), list) or not data["tracks"]:
-        raise SystemExit(f"{path}: no tracks in run manifest")
+    tracks = data.get("tracks")
+    if not isinstance(tracks, list) or not tracks:
+        tracks = data.get("accepted")
+    if not isinstance(tracks, list) or not tracks:
+        raise SystemExit(f"{path}: no tracks/accepted in run manifest")
+    data["tracks"] = tracks
     return data
 
 
 def run_id_from_manifest(manifest: dict) -> str:
     run_dir = manifest.get("run_dir") or ""
     name = Path(run_dir).name
-    if not name:
-        raise SystemExit("run manifest has no run_dir; pass --run-id")
-    return name
+    if name:
+        return name
+    explicit = manifest.get("run_id")
+    if explicit:
+        return str(explicit)
+    if manifest.get("accepted"):
+        # One queue can span runs; the per-track run_id is the real one.
+        return "multiple"
+    raise SystemExit("run manifest has no run_dir; pass --run-id")
 
 
 def audio_files(audio_dir: Path) -> list[Path]:
@@ -244,7 +269,14 @@ def assemble_phase(args: argparse.Namespace) -> int:
     out = Path(args.out)
     for sub in ("abc", "abc_transcription", "captions"):
         (out / sub).mkdir(parents=True, exist_ok=True)
-    instrumental_run = "instrumental" in run_id.lower()
+
+    def instrumental_for(run: str) -> bool:
+        # An explicit flag wins; otherwise a run label that says so decides
+        # (`fadhl_shaker_instrumental_18`, `20261110-083615_yt500inst`).
+        if args.instrumental is not None:
+            return bool(args.instrumental)
+        label = str(run).lower()
+        return "instrumental" in label or "inst" in label
 
     rows: list[dict] = []
     files: list[dict] = []
@@ -312,14 +344,18 @@ def assemble_phase(args: argparse.Namespace) -> int:
             }
 
         audio_sha = sha256_file(audio_path)
+        # A queue can span runs: the take knows which run produced it.
+        row_run_id = track.get("run_id") or run_id
+        gs_uri = (track.get("gs_uri")
+                  or f"{args.source_uri.rstrip('/')}/{audio_name}")
         caption_json = {
-            "track_id": f"{run_id}/{stem}",
-            "run_id": run_id,
+            "track_id": f"{row_run_id}/{stem}",
+            "run_id": row_run_id,
             "name": track["name"],
             "seed": track.get("seed"),
             "audio": {
                 "file": audio_name,
-                "gs_uri": f"{args.source_uri.rstrip('/')}/{audio_name}",
+                "gs_uri": gs_uri,
                 "sha256": audio_sha,
                 "bytes": audio_path.stat().st_size,
                 "duration_s": cap.get("duration_s"),
@@ -357,9 +393,9 @@ def assemble_phase(args: argparse.Namespace) -> int:
         files.append({"path": str(cap_dest.relative_to(out)),
                       "sha256": sha256_file(cap_dest),
                       "bytes": cap_dest.stat().st_size})
-        rows.append({
+        row = {
             "track_id": caption_json["track_id"],
-            "run_id": run_id,
+            "run_id": row_run_id,
             "name": track["name"],
             "seed": track.get("seed"),
             "gs_uri": caption_json["audio"]["gs_uri"],
@@ -377,7 +413,7 @@ def assemble_phase(args: argparse.Namespace) -> int:
             "abc_transcription_coverage": (abc_tr["qc"]["coverage"]
                                            if abc_tr else None),
             "abc_transcription_flags": (abc_tr["qc"]["flags"] if abc_tr else []),
-            "instrumental": instrumental_run,
+            "instrumental": instrumental_for(row_run_id),
             "caption": caption_json["caption"]["text"],
             "caption_raw": caption_json["caption"]["caption_raw"],
             "caption_chunk_count": caption_json["caption"]["chunk_count"],
@@ -388,7 +424,14 @@ def assemble_phase(args: argparse.Namespace) -> int:
             "tags_experimental": caption_json["caption"]["tags_experimental"],
             "rewrite_status": caption_json["caption"]["rewrite_status"],
             "rewrite_model": caption_json["caption"]["rewrite_model"],
-        })
+        }
+        # Corpus columns are optional: a single-run manifest does not carry
+        # them, and the reference package must keep its exact schema.
+        for key in CORPUS_COLUMNS:
+            value = track.get(key)
+            if value is not None:
+                row[key] = value
+        rows.append(row)
 
     if not rows:
         raise SystemExit("no complete track rows; nothing to write")
@@ -416,6 +459,7 @@ def assemble_phase(args: argparse.Namespace) -> int:
     from src.resume import CAPTION_PIPELINE_VERSION
     from src.rewrite import REWRITE_PROMPT_VERSION
 
+    instrumental_run = any(r["instrumental"] for r in rows)
     statuses = {}
     for row in rows:
         statuses[row["rewrite_status"]] = statuses.get(row["rewrite_status"], 0) + 1
@@ -432,6 +476,11 @@ def assemble_phase(args: argparse.Namespace) -> int:
         "source_run_uri": args.source_uri.rstrip("/"),
         "instrumental_run": instrumental_run,
         "source_run_manifest": str(Path(args.run_manifest).name),
+        "source_runs": manifest.get("source_runs") or [run_id],
+        "run_ids": sorted({str(r["run_id"]) for r in rows}),
+        "rejected": manifest.get("rejected") or [],
+        "take_selection": manifest.get("take_selection") or {},
+        "corpus": manifest.get("corpus") or {},
         "counts": {
             "tracks": len(rows),
             "manifest_tracks": len(manifest["tracks"]),
@@ -470,7 +519,13 @@ def write_parquet(path: Path, rows: list[dict]) -> None:
     import pyarrow as pa
     import pyarrow.parquet as pq
 
-    columns = list(rows[0].keys())
+    # Optional corpus columns are not on every row; keep the union in
+    # first-seen order so a mixed manifest still writes every column.
+    columns: list[str] = []
+    for row in rows:
+        for key in row:
+            if key not in columns:
+                columns.append(key)
     arrays = {c: pa.array([r.get(c) for r in rows]) for c in columns}
     pq.write_table(pa.table(arrays), path, compression="zstd")
 
@@ -483,13 +538,13 @@ def render_card(manifest: dict, rows: list[dict]) -> str:
         f"# {manifest['dataset']} — {manifest['dataset_version']}",
         "",
         f"**Generated:** {manifest['generated_at']}  ",
-        f"**Run:** `{manifest['run_id']}`  ",
+        f"**Runs:** `{'`, `'.join(manifest.get('run_ids') or [manifest['run_id']])}`  ",
         f"**Source:** `{manifest['source_run_uri']}`",
         "",
         "## What this is",
         "",
-        "Captions and symbolic scores for one generated-instrumental run. Every",
-        "track is the rendered MP3 from the run, paired with (a) a prose caption",
+        "Captions and symbolic scores for one or more generated-instrumental",
+        "runs. Every track is a rendered MP3, paired with (a) a prose caption",
         "of the rendered audio and (b) two ABC files: the reference score used to",
         "generate the track, and an independent SheetSage2 transcription of the",
         "audio. Audio is referenced by GCS URI + SHA-256, not shipped.",
@@ -499,7 +554,7 @@ def render_card(manifest: dict, rows: list[dict]) -> str:
         "| Item | Count |",
         "|---|---:|",
         f"| Tracks | {counts['tracks']} |",
-        f"| Tracks in source run | {counts['manifest_tracks']} |",
+        f"| Tracks in source run(s) | {counts['manifest_tracks']} |",
         f"| With caption | {counts['with_caption']} |",
         f"| With reference ABC | {counts['with_abc_reference']} |",
         f"| With ABC transcription | {counts['with_abc_transcription']} |",
@@ -596,6 +651,11 @@ def main(argv: list[str] | None = None) -> int:
                      help="GCS prefix that holds the run's audio files")
     asm.add_argument("--dataset-name", default="Fadl Shaker Instrumental 18")
     asm.add_argument("--dataset-version", default="v0.1")
+    asm.add_argument("--instrumental", action=argparse.BooleanOptionalAction,
+                     default=None,
+                     help="whether the rows are instrumentals; default: infer "
+                          "from the run id (as the card's QC wording depends "
+                          "on it)")
 
     args = ap.parse_args(argv)
     if args.command == "caption":
