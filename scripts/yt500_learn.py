@@ -221,6 +221,20 @@ def verify_album(work_dir: Path) -> list[str]:
 # --------------------------------------------------------------------------- #
 # one pass
 # --------------------------------------------------------------------------- #
+def progress_count(phase: str, work_dir: Path) -> int:
+    """Monotonic counter of work actually stored for a phase.
+
+    ``pending`` is not usable for this: the watcher adds takes while a pass
+    runs, so a pass that captioned 16 tracks looks like "no progress" (or
+    worse, a regression) and would block the phase for the whole session.
+    """
+    if phase == "caption":
+        album = dataset.load_album(work_dir) or {}
+        return len(album.get("tracks") or [])
+    state = dataset.transcript_state(work_dir, dataset.read_manifest(work_dir))
+    return len(state["done"])
+
+
 def learn_pass(args: argparse.Namespace, work_dir: Path, state: dict,
                blocked: set[str]) -> list[str]:
     """Run at most one bounded batch per due phase. Returns the phases run."""
@@ -247,6 +261,7 @@ def learn_pass(args: argparse.Namespace, work_dir: Path, state: dict,
             # every new take beats several.
             print(f"  {phase}: {len(pending)} pending", flush=True)
         started = time.time()
+        before_count = progress_count(phase, work_dir)
         if phase == "caption":
             rc = run_cmd(caption_command(args, work_dir),
                          Path(work_dir) / "logs" / "learn_caption.log",
@@ -275,8 +290,7 @@ def learn_pass(args: argparse.Namespace, work_dir: Path, state: dict,
         save_state(work_dir, state)
         ran.append(phase)
 
-        after = pending_for(phase, work_dir)
-        if len(after) >= len(pending):
+        if progress_count(phase, work_dir) <= before_count:
             print(f"  {phase}: no progress this pass; not retrying it in this "
                   "session", file=sys.stderr, flush=True)
             blocked.add(phase)
