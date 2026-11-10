@@ -28,6 +28,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
 import time
 from pathlib import Path
@@ -63,7 +64,15 @@ def record(work_dir: Path, entry: dict) -> None:
 def upload_file(client: gcsio.Gcs, work_dir: Path, local: Path, remote: str,
                 ledger: dict[str, dict], *, dry_run: bool,
                 reverify: bool) -> str:
-    """Upload one file if its content changed. Returns uploaded/skipped."""
+    """Upload one file if its content changed. Returns uploaded/skipped.
+
+    The bytes are staged into a private copy first: ``manifest.json``,
+    ``status_*.json`` and the album are rewritten by their own worker while this
+    runs, and verifying a hash of a file that changed mid-upload aborts the
+    whole pass ("md5 mismatch", 2026-11-10) for a difference that is not
+    corruption. Staging makes hash, upload and verification agree on one
+    snapshot; the next pass picks up whatever changed meanwhile.
+    """
     digest = gcsio.sha256_file(local)
     prior = ledger.get(remote)
     if prior and prior.get("sha256") == digest and not reverify:
@@ -71,7 +80,13 @@ def upload_file(client: gcsio.Gcs, work_dir: Path, local: Path, remote: str,
     if dry_run:
         print(f"  WOULD upload {remote}")
         return "dry-run"
-    client.upload(local, remote, verify=True)
+    stage_dir = work_dir / "publish" / "staging"
+    stage_dir.mkdir(parents=True, exist_ok=True)
+    staged = stage_dir / local.name
+    with local.open("rb") as src, staged.open("wb") as dst:
+        shutil.copyfileobj(src, dst)
+    digest = gcsio.sha256_file(staged)
+    client.upload(staged, remote, verify=True)
     entry = {"kind": "file", "remote": remote, "sha256": digest,
              "bytes": local.stat().st_size, "action": "uploaded"}
     record(work_dir, entry)
