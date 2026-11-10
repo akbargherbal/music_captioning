@@ -1,8 +1,35 @@
 # YT500 instrumental — streaming captions + ABC dataset
 
-**Status:** proposal · **Date:** 2026-11-10 · **Owner:** akbar
+**Status:** implemented, captions only (see the scope amendment) · **Date:** 2026-11-10 · **Owner:** akbar
 **Generation side:** `arabmaqamrock/docs/plans/yt500-instrumental-generation.md`
 **Reference package:** `gs://akbar-december-2024-backup/DATASET/fadhl_shaker_instrumental_18/`
+
+## Scope amendment (2026-11-10, supersedes every transcription statement below)
+
+**This pipeline produces captions and polish only. It never runs SheetSage2 and
+never transcribes anything.**
+
+The ABC scores already exist on GCS
+(`gs://akbar-december-2024-backup/TRANSCRIPTS/YT500/`) and are the **input** to
+generation. They are not an output of this pipeline, and the instrumentals on
+the A100 are rendered from them.
+
+What that means section by section:
+
+| Section | Status |
+|---|---|
+| §1, §2, §5 ("full parity" / reference ABC / transcription) | Transcription is dropped. The deliverable is the caption album. |
+| §6.5 `--phase transcribe` | Implemented, but **never invoked**. Everything runs with `--phase caption`. |
+| §6.7, §8 transcript gates | Not applicable. The pilot gates on captions only. |
+| §7.4 transcription environment | **Skip entirely** — no `setup_transcribe.sh`, no abcmidi. |
+| §9.2 `--phase both` | Use `--phase caption`. |
+| §9.4 captions-only profile | This is now the *only* profile, not a T4 fallback. |
+| §10 ETA table | The caption row applies: ~29 s/track, ~4 h for 489 on an L4. |
+| §11 `--status` example | `pending trs` counts every local MP3 (no transcripts exist), so it equals the local audio count. Ignore the `transcribed` / `pending trs` lines. |
+| §12 final assembly, §16 checklist | Deferred. `yt500_assemble.py` needs 489 `ok` transcripts, so it is not part of this run. |
+
+The implemented interface (flags, contracts, the behaviours this plan left open)
+is in [YT500_INSTRUMENTAL_OPS.md](YT500_INSTRUMENTAL_OPS.md).
 
 ## 0. What this is (read this first)
 
@@ -33,7 +60,9 @@ Recommended answers are first. A short reply such as "1A, 2A, 3A, 4A" is enough.
 | 5 | Final prefix? | **A. `DATASET/YT500_INSTRUMENTAL`** (version inside `manifest.json`). **B. `DATASET/YT500_INSTRUMENTAL_489`** (count in the name). |
 | 6 | Publish policy? | **A. Work state under `GENERATION/.../work/`; final package only at 489/489** (no partial dataset). **B. Assemble/upload a preview package periodically** (more visibility, more hashing/upload work). |
 
-**Answered 2026-11-10: 1A, 2A, 3A, 4A-with-a-caveat, 5A, 6A, §6.4 deferred.**
+**Answered 2026-11-10: 1A, 2 → captions only (amended, see the scope amendment
+above; option 2B without the "later pass" commitment), 3A, 4A-with-a-caveat,
+5A, 6A, §6.4 deferred.**
 
 - **4** was answered as "never wait": the watcher queues accepted takes as they
   land and a regenerated take simply wins the `end_utc` selection on the next
@@ -254,6 +283,11 @@ the dataset depends on it. The reference package was built from
 - write `manifest.json`, `rejected.json`, `status_sync.json`;
 - `--watch/--once`, `--min-ratio/--max-ratio`, `--limit`, `--interval`.
 
+`--limit N` truncates the queue in `manifest.json` to N accepted takes (the
+full count stays in `counts.accepted`). It exists for the 4-track pilot and is
+**pilot-only**: a later pass without `--limit` rewrites the manifest, but until
+then the caption album cannot exceed N tracks.
+
 It reads the corpus index (`outputs/YT500/generation/index.json`) for
 `nominal_seconds` and metadata.
 
@@ -405,17 +439,11 @@ from a CPU VM:
 ./plumbing/fetch_llamacpp_text.sh --build --publish --cuda-arch 89
 ```
 
-### 7.4 Transcription environment
+### 7.4 Transcription environment — **SKIPPED (see the scope amendment)**
 
-```bash
-cd /content/arabmaqamrock
-./plumbing/setup_transcribe.sh --cuda --warm
-sudo apt-get update && sudo apt-get install -y abcmidi
-./transcribe.sh --doctor
-```
-
-Expect Python 3.11, torch 2.8.x+cu126, `cuda: True`, `abc2midi` present.
-On a T4 use `--dtype fp32` (or `auto`); bf16 is for L4/A100.
+Do not run any of this. No `setup_transcribe.sh`, no `abcmidi`, no
+`transcribe.sh`, no transcribe venv. The ABC scores already exist on GCS and
+this pipeline only captions.
 
 ### 7.5 Disk / auth
 
@@ -425,7 +453,7 @@ df -h /content
 gcloud storage ls gs://akbar-december-2024-backup/ >/dev/null && echo GCS_OK
 ```
 
-Budget: ~11 GB models + ~8 GB transcribe venv + ~3 GB audio + temp ≈ 25–30 GB.
+Budget: ~11 GB models (no transcribe venv) + ~3 GB audio + temp ≈ 15–20 GB.
 
 ## 8. Pilot and gates
 
@@ -435,24 +463,24 @@ Pick 4 accepted tracks spanning runs and lengths (short < 220 s, median
 ```bash
 cd /content/music_captioning
 python3 scripts/yt500_sync.py --once --limit 4
-python3 scripts/yt500_learn.py --once --phase both --verify-schema
-python3 scripts/yt500_assemble.py --dry-run
+python3 scripts/yt500_learn.py --once --phase caption --verify-schema
+python3 scripts/yt500_publish.py --once --settle-seconds 0
 ```
 
 Gates:
 
 - [ ] 4/4 captions non-empty; `rewrite_status` `ok` (or `single_chunk`).
-- [ ] 4/4 transcripts `status: ok`, `abc2midi` parse ok, coverage reported;
-      `vocal_sparse` on an instrumental is expected.
-- [ ] Row keys are a superset of the reference row's; `abc_reference_sha256`
-      equals the corpus `instrumental_abc_sha256`.
+- [ ] `--verify-schema` prints `schema  : ok`.
+- [ ] ~~4/4 transcripts~~ — not applicable, see the scope amendment.
+- [ ] `manifest.json` accepted rows all carry `abc_sha256` from the frozen
+      corpus (checked by the watcher's hard stop).
 - [ ] **Truncation gate:** the known short take appears in `rejected.json` with
       `reason: short_take`, is **not** in `manifest.json`, and was **not**
       downloaded or captioned.
-- [ ] Peak VRAM: caption < 11 GiB, transcribe < 6 GiB; no OOM.
-- [ ] **Resume gate:** delete local album/transcripts, keep GCS; re-run
-      `--once`. The watcher restores them; the GPU worker does **zero** model
-      work (log says skipped/reused).
+- [ ] Peak VRAM: caption < 11 GiB; no OOM.
+- [ ] **Resume gate:** after the pilot publish has put the album in GCS,
+      delete only the local album; re-run `--once`. The watcher restores it and
+      the GPU worker does **zero** model work (no `caption:` line in the log).
 - [ ] **Streaming gate:** wait for one new MP3; the next sync adds only that
       stem; the next learn pass processes only it.
 - [ ] Listen to 2 tracks; confirm the description matches the audio and does
@@ -467,11 +495,12 @@ If a gate fails, do not start the bulk.
 ```bash
 cd /content/music_captioning
 python3 scripts/yt500_sync.py --once            # downloads accepted audio
-python3 scripts/yt500_learn.py --once --phase both
+python3 scripts/yt500_learn.py --once --phase caption
 python3 scripts/yt500_publish.py --once
 ```
 
-Expect ~2.5 h on an L4 (59 min captions + 88 min transcription for 122).
+Expect ~1 h of captioning on an L4 for 122 tracks (~29 s/track); the
+transcription half of the original estimate does not apply.
 
 ### 9.2 Start the three independent workers
 
@@ -481,21 +510,26 @@ Start the publisher first (it waits), then the watcher, then the GPU worker:
 cd /content/music_captioning
 mkdir -p logs
 
-setsid nohup python3 -u scripts/yt500_publish.py --watch \
-  --interval 60 > logs/yt500_publish.out 2>&1 < /dev/null &
+setsid nohup python3 -u scripts/supervise.py \
+  --script scripts/yt500_publish.py --log logs/yt500_publish.out -- \
+  --watch --interval 60 > logs/yt500_publish.sup.out 2>&1 < /dev/null &
 
-setsid nohup python3 -u scripts/yt500_sync.py --watch \
-  --interval 60 --min-ratio 0.85 --max-ratio 1.25 \
-  > logs/yt500_sync.out 2>&1 < /dev/null &
+setsid nohup python3 -u scripts/supervise.py \
+  --script scripts/yt500_sync.py --log logs/yt500_sync.out -- \
+  --watch --interval 60 --min-ratio 0.85 --max-ratio 1.25 \
+  > logs/yt500_sync.sup.out 2>&1 < /dev/null &
 
-setsid nohup python3 -u scripts/yt500_learn.py --watch \
-  --phase both --min-batch 12 --interval 60 --flush-minutes 20 \
-  > logs/yt500_learn.out 2>&1 < /dev/null &
+setsid nohup python3 -u scripts/supervise.py \
+  --script scripts/yt500_learn.py --log logs/yt500_learn.out -- \
+  --watch --phase caption --min-batch 12 --interval 60 --flush-minutes 20 \
+  > logs/yt500_learn.sup.out 2>&1 < /dev/null &
 
 disown || true
 ```
 
-Each worker is independently restartable. The watcher never blocks the GPU; the
+Each worker is independently restartable, and `supervise.py` restarts one that
+is killed from outside Python (host OOM, native crash, session reaper). Do not
+pass `--stop-when-complete`: a regen take can still arrive after 489/489. The watcher never blocks the GPU; the
 publisher never blocks either. The GPU worker never calls GCS.
 
 One immediate liveness check:
@@ -624,11 +658,13 @@ DATASET/YT500_INSTRUMENTAL/
   abc_transcription/<stem>.abc
 ```
 
-## 12. Final assembly, upload and verification
+## 12. Final assembly, upload and verification — **DEFERRED**
 
-`yt500_assemble.py` runs this automatically once the manifest has 489 accepted
-names, 489 captions and 489 `ok` transcripts; the publisher uploads the package.
-The commands below are the operator fallback.
+Not part of the captioning run: `yt500_assemble.py` requires 489 `ok`
+transcripts and this pipeline produces none (see the scope amendment). The
+commands below stay as the operator fallback for whenever the transcription
+side of the package is resolved. Never use `--force` here — a debug build goes
+to `work/package_debug/` so a partial package cannot reach the final prefix.
 
 ```bash
 cd /content/music_captioning
