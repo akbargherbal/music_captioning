@@ -120,11 +120,21 @@ class RewriteResult:
         return self.status == "ok"
 
 
+# "80s", "90s", "2000s" describe an era, not a position in the track. They match
+# the broad duration pattern above, and rejecting prose for saying "a classic 80s
+# drum machine" discarded 10 sound rewrites (and flagged 3 clean captions), so a
+# decade is explicitly not a time reference.
+_DECADE = re.compile(r"(?:(?:19|20)\d0|[5-9]0)s", re.IGNORECASE)
+
+
 def timestamp_hits(text: str) -> list[str]:
     """Every time reference found in ``text``, in order (empty = clean)."""
     hits: list[str] = []
     for pattern in TIMESTAMP_PATTERNS:
-        hits.extend(match.group(0) for match in pattern.finditer(text or ""))
+        for match in pattern.finditer(text or ""):
+            if _DECADE.fullmatch(match.group(0).strip()):
+                continue  # an era, not a timestamp
+            hits.append(match.group(0))
     return hits
 
 

@@ -278,3 +278,15 @@ def test_polish_album_scrubs_a_fallback_caption():
     assert timestamp_hits(track["caption"]) == []
     assert track["timestamp_cleanup"] == "ok"
     assert track["caption_pre_cleanup"] == body
+
+
+def test_decades_are_not_timestamps():
+    """'a classic 80s drum machine' is an era, not a position in the track."""
+    from src.rewrite import timestamp_hits
+
+    for text in ("a classic 80s drum machine", "sounds from the 90s",
+                 "a 2000s-era synth", "1980s gated snare"):
+        assert timestamp_hits(text) == [], text
+    # real references still fire
+    assert timestamp_hits("at 1:40 it shifts") == ["1:40"]
+    assert timestamp_hits("after 30 seconds") == ["30 seconds"]
