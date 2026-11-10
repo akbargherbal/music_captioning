@@ -388,3 +388,10 @@ def test_midpass_checkpoint_never_drops_stored_tracks(tmp_path, monkeypatch):
 
     assert writes, "no mid-pass checkpoint"
     assert min(writes) >= 2, "a checkpoint dropped the stored track"
+
+    # the final write must keep it too (a bounded pass never revisits it)
+    import json as _json
+    final = _json.loads((out_dir / "a" / "b.json").read_text())
+    files = {t["file"] for t in final["tracks"]}
+    assert "old.mp3" in files, "final album write dropped a stored track"
+    assert len(final["tracks"]) == 7

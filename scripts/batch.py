@@ -316,19 +316,28 @@ def caption_album(
             track_obj["suno_experimental"] = True
         return track_obj
 
+    # Tracks already stored by an earlier pass must survive both a mid-pass
+    # checkpoint and the final write: run_tracks() only re-appends the tracks
+    # it walks, and a bounded pass (--max-tracks) does not walk the stored ones
+    # at all, so a naive write would truncate the album.
+    prior_tracks = list((existing or {}).get("tracks") or [])
+
     def build_album(track_results: list[dict], failed: list[dict],
                     skipped: list[dict]) -> dict:
         """The album as it stands; also used for mid-pass checkpoints."""
+        seen = {t.get("file") for t in track_results}
+        carried = [t for t in prior_tracks if t.get("file") not in seen]
+        tracks_all = track_results + carried
         if failed:
             status = "partial"
-        elif skipped and not track_results:
+        elif skipped and not tracks_all:
             status = "skipped"
         else:
             status = "ok"
-        total_audio = sum(t["duration_s"] for t in track_results)
-        total_caption = sum(t["caption_seconds"] for t in track_results)
+        total_audio = sum(t["duration_s"] for t in tracks_all)
+        total_caption = sum(t["caption_seconds"] for t in tracks_all)
         merged = merge_tags([
-            {cat: t[cat] for cat in CATEGORIES} for t in track_results
+            {cat: t[cat] for cat in CATEGORIES} for t in tracks_all
         ])
         obj = {
             "artist": artist,
@@ -336,7 +345,7 @@ def caption_album(
             "source_dir": entry["source_dir"],
             "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "status": status,
-            "track_count": len(track_results),
+            "track_count": len(tracks_all),
             "failed_count": len(failed),
             "skipped_count": len(skipped),
             "total_audio_seconds": round(total_audio, 1),
@@ -347,7 +356,7 @@ def caption_album(
             "tags_experimental": TAGS_EXPERIMENTAL,
             "caption_pipeline_version": CAPTION_PIPELINE_VERSION,
             "caption_stage": CAPTION_STAGE_CAPTIONED,
-            "tracks": track_results,
+            "tracks": tracks_all,
             "failed_tracks": failed,
             "skipped_tracks": skipped,
         }
@@ -356,12 +365,6 @@ def caption_album(
             obj["suno_experimental"] = True
         return obj
 
-    # Tracks already stored by an earlier pass must survive a mid-pass
-    # checkpoint: run_tracks() re-appends them as it walks the queue, so early
-    # on they are not yet in ``track_results`` and a naive write would truncate
-    # the album (lost 17 of 22 stored tracks on 2026-11-10).
-    prior_tracks = list((existing or {}).get("tracks") or [])
-
     def on_progress(track_results: list[dict], failed: list[dict],
                     skipped: list[dict]) -> None:
         # Persist the raw captions as they arrive: a reaped VM then costs at
@@ -369,9 +372,7 @@ def caption_album(
         # already in the album on the next pass.
         if checkpoint is None or not track_results:
             return
-        seen = {t.get("file") for t in track_results}
-        carried = [t for t in prior_tracks if t.get("file") not in seen]
-        checkpoint(build_album(track_results + carried, failed, skipped),
+        checkpoint(build_album(track_results, failed, skipped),
                    CAPTION_STAGE_CAPTIONED)
 
     track_results, failed, skipped = run_tracks(
