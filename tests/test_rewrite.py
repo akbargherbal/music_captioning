@@ -226,3 +226,55 @@ def test_rewrite_demo_loads_chunk_captions(tmp_path):
     empty.write_text("{}", encoding="utf-8")
     with pytest.raises(SystemExit):
         load_sections(empty)
+
+
+def test_scrub_removes_a_time_reference():
+    from src.rewrite import scrub_timestamps, timestamp_hits
+
+    text = "A low pad hums while a beat emerges at 0:23, adding groove."
+    cleaned = scrub_timestamps(text)
+    assert "0:23" not in cleaned
+    assert cleaned.startswith("A low pad hums while a beat emerges later,")
+    assert timestamp_hits(cleaned) == []
+
+
+def test_scrub_sentence_initial_is_capitalised():
+    from src.rewrite import scrub_timestamps
+
+    assert scrub_timestamps("At 0:34, an oud joins.") == "Then, an oud joins."
+
+
+def test_scrub_leaves_clean_text_byte_identical():
+    from src.rewrite import scrub_timestamps
+
+    text = "Tempo 120 bpm in 4/4,  with a warm bass."
+    assert scrub_timestamps(text) == text
+
+
+def test_check_rewrite_rejects_a_timestamp():
+    from src.rewrite import check_rewrite
+
+    source = ["the track opens quietly and builds " + "word " * 60]
+    bad = "at 0:23 the drums enter " + "word " * 60
+    assert any("timestamp" in r for r in check_rewrite(source, bad))
+
+
+def test_polish_album_scrubs_a_fallback_caption():
+    """A rejected rewrite keeps raw text; the scrub still runs on it."""
+    from scripts.batch import polish_album
+    from src.rewrite import timestamp_hits
+
+    class Echo:
+        name = "echo"
+
+        def rewrite(self, messages):
+            return messages[-1]["content"]
+
+    body = "the beat enters at 0:23 and " + "groove " * 60
+    album = {"tracks": [{"file": "a.mp3", "caption_raw": body,
+                         "chunk_captions": [body, "a second section " * 10]}]}
+    out = polish_album(album, Echo())
+    track = out["tracks"][0]
+    assert timestamp_hits(track["caption"]) == []
+    assert track["timestamp_cleanup"] == "ok"
+    assert track["caption_pre_cleanup"] == body

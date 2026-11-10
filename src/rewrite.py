@@ -128,6 +128,62 @@ def timestamp_hits(text: str) -> list[str]:
     return hits
 
 
+# Deterministic, sentence-local rewording of a time reference. Each rule keeps
+# the clause around it and its position, and has a sentence-initial and a
+# mid-sentence form so "At 0:23, X" -> "Then, X" but "emerges at 0:23" ->
+# "emerges later" (never "emerges Then").
+_SCRUB_RULES = (
+    (re.compile(r"at the \d+(?:\.\d+)?[- ]?(?:second|sec|minute|min)s?"
+                r"[- ]?(?:mark)?", re.IGNORECASE), "Then", "later"),
+    (re.compile(r"around the \d+(?:\.\d+)?[- ]?(?:second|sec|minute|min)s?"
+                r"[- ]?(?:mark)?", re.IGNORECASE), "At one point",
+     "at one point"),
+    (re.compile(r"at \d{1,2}:\d{2}(?::\d{2})?(?:\s*mark)?", re.IGNORECASE),
+     "Then", "later"),
+    (re.compile(r"in the first (?:few )?(?:seconds?|minutes?)",
+                re.IGNORECASE), "Early on", "early on"),
+    # preposition-led forms first, or "in the last few seconds" becomes
+    # "in toward the end"
+    (re.compile(r"(?:in|for) the last (?:few )?(?:seconds?|minutes?)",
+                re.IGNORECASE), "Toward the end", "toward the end"),
+    (re.compile(r"(?:the )?last (?:few )?(?:seconds?|minutes?)",
+                re.IGNORECASE), "Toward the end", "toward the end"),
+    (re.compile(r"(?:the )?first (?:few )?(?:seconds?|minutes?)",
+                re.IGNORECASE), "Early on", "early on"),
+    (re.compile(r"\d{1,2}:\d{2}(?::\d{2})?\b"), "a point later",
+     "a point later"),
+    (re.compile(r"\d+(?:\.\d+)?[- ]?(?:second|sec|minute|min)s?\b",
+                re.IGNORECASE), "a moment", "a moment"),
+)
+
+
+def _scrub_sentence(sentence: str) -> str:
+    out = sentence
+    for pattern, at_start, mid_sentence in _SCRUB_RULES:
+        out = pattern.sub(
+            lambda m, a=at_start, b=mid_sentence: a if m.start() == 0 else b,
+            out,
+        )
+    return re.sub(r"\s{2,}", " ", out)
+
+
+def scrub_timestamps(text: str) -> str:
+    """Replace time references with general sequencing language.
+
+    Deterministic and sentence-local so it can run on every caption path
+    (rewritten, fallback, single-chunk), where the model guard cannot: it never
+    rewords anything but the time expression itself. ``text`` is returned
+    unchanged when it has no hit, so a clean caption keeps its exact bytes.
+    """
+    if not text or not timestamp_hits(text):
+        return text
+    sentences = [
+        _scrub_sentence(s) if timestamp_hits(s) else s
+        for s in split_sentences(text)
+    ]
+    return " ".join(s.strip() for s in sentences).strip()
+
+
 def build_source_text(sections: Sequence[str]) -> str:
     """Join chunk captions into the plain text handed to the model."""
     return "\n\n".join(s.strip() for s in sections if s and s.strip())

@@ -472,6 +472,30 @@ def polish_album(album_obj: dict, rewriter, *,
             track["rewrite_status"] = "fallback"
             summary["fallback"] = int(summary["fallback"]) + 1
 
+    # Path-independent enforcement. ``single_chunk``, a rejected rewrite and the
+    # timestamp guard's own fallback all reuse raw chunk text, which may carry a
+    # time that is only relative to that ~90 s window. The model guard cannot
+    # cover those paths, so scrub the final caption here: deterministic and
+    # sentence-local, the original kept in ``caption_pre_cleanup``.
+    from src.rewrite import scrub_timestamps, timestamp_hits
+
+    for track in tracks:
+        caption = track.get("caption") or ""
+        if not timestamp_hits(caption):
+            continue
+        cleaned = scrub_timestamps(caption)
+        if cleaned != caption:
+            track.setdefault("caption_pre_cleanup", caption)
+            track["caption"] = cleaned
+        if timestamp_hits(cleaned):
+            track["timestamp_cleanup"] = "failed"
+            track["rewrite_status"] = "failed"
+        else:
+            track["timestamp_cleanup"] = "ok"
+    for key in ("ok", "fallback", "error", "failed", "single_chunk"):
+        summary[key] = sum(1 for t in tracks
+                           if t.get("rewrite_status") == key)
+
     if tried and errored == tried:
         # Every rewrite this pass errored: do not mark the album done, and do
         # not lose the captioning work already on disk.
