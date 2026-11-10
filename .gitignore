@@ -13,8 +13,18 @@ audio/
 # Demo output (regenerate with scripts/demo.py --out)
 outputs/elisa.json
 
-# Audio cache for batch runs (re-downloadable from GCS)
-work/
+# Audio cache for batch runs (re-downloadable from GCS).
+# The caption artefacts under work/yt500/ ARE tracked: chunk_captions and
+# caption_raw are the expensive part of the pipeline, so committing them means a
+# better polish model only re-runs the cheap phase. Audio, logs, tmp and the
+# publish ledger stay out.
+work/*
+!work/yt500/
+work/yt500/*
+!work/yt500/captions/
+!work/yt500/captions/**
+!work/yt500/caption_album.json
+!work/yt500/captions.jsonl
 
 # Local scratch handed to a Colab session (prompts, notes, throwaway files)
 local_workspace/
