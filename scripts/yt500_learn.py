@@ -234,7 +234,13 @@ def learn_pass(args: argparse.Namespace, work_dir: Path, state: dict,
             continue
 
         batch = pending[: args.max_batch] if args.max_batch else pending
-        print(f"  {phase}: {len(batch)} of {len(pending)} pending", flush=True)
+        if phase == "transcribe":
+            print(f"  {phase}: {len(batch)} of {len(pending)} pending",
+                  flush=True)
+        else:
+            # build_dataset drains the whole album: one captioner load for
+            # every new take beats several.
+            print(f"  {phase}: {len(pending)} pending", flush=True)
         started = time.time()
         if phase == "caption":
             rc = run_cmd(caption_command(args, work_dir),
@@ -309,7 +315,9 @@ def main(argv: list[str] | None = None) -> int:
                          "(0 = always run); --flush-minutes overrides")
     ap.add_argument("--flush-minutes", type=float, default=20.0)
     ap.add_argument("--max-batch", type=int, default=48,
-                    help="tracks per invocation (0 = all pending)")
+                    help="transcription tracks per invocation (0 = all). "
+                         "Captioning always drains the album: one captioner "
+                         "load for every new take is cheaper than several")
     ap.add_argument("--timeout-minutes", type=float, default=0.0,
                     help="kill a phase subprocess after N minutes (0 = no cap)")
     ap.add_argument("--verify-schema", action="store_true",
@@ -345,12 +353,16 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         manifest = dataset.read_manifest(work_dir)
-        if not dataset.accepted_rows(manifest):
+        if not args.watch and not dataset.accepted_rows(manifest):
             raise SystemExit(
                 f"{dataset.manifest_path(work_dir)} has no accepted takes; "
                 "run scripts/yt500_sync.py first")
-        print(f"work     : {work_dir}")
-        print(f"accepted : {len(dataset.accepted_rows(manifest))}")
+        if dataset.accepted_rows(manifest):
+            print(f"work     : {work_dir}")
+            print(f"accepted : {len(dataset.accepted_rows(manifest))}")
+        else:
+            print(f"work     : {work_dir}")
+            print("accepted : 0 (waiting for the watcher)")
         print(f"phases   : {', '.join(args.phases)}")
         print(f"mode     : {'watch' if args.watch else 'once'}"
               f"{' verify-schema' if args.verify_schema else ''}")
@@ -360,6 +372,15 @@ def main(argv: list[str] | None = None) -> int:
         rounds = 0
         while True:
             rounds += 1
+            # §9.2 starts the watcher and this worker back to back, so the
+            # queue may not exist yet: wait instead of exiting.
+            if not dataset.accepted_rows(dataset.read_manifest(work_dir)):
+                if not args.watch:
+                    break
+                print("  waiting for the watcher to queue accepted takes",
+                      flush=True)
+                time.sleep(max(1.0, args.interval))
+                continue
             ran = learn_pass(args, work_dir, state, blocked)
             write_status(work_dir, ran)
 

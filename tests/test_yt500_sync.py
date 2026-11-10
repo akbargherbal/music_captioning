@@ -417,3 +417,24 @@ def test_abc_mismatch_is_a_hard_stop(tmp_path: Path) -> None:
                        loop=1)
     # Nothing was queued or downloaded.
     assert not (work / "audio").exists()
+
+
+def test_a_superseded_take_is_pruned_but_a_selected_one_is_kept(
+        tmp_path: Path) -> None:
+    work = tmp_path / "work"
+    audio = work / "audio"
+    audio.mkdir(parents=True)
+    (audio / "yt500-0001-good_111.mp3").write_bytes(b"kept")
+    (audio / "yt500-0001-good_999.mp3").write_bytes(b"superseded")
+    (audio / "yt500-0002-short_222.mp3").write_bytes(b"never accepted")
+    (audio / "yt500-0003-mid_333.mp3.part").write_bytes(b"half")
+
+    removed = sync.prune_superseded(work, [
+        {"name": "yt500-0001-good", "file": "yt500-0001-good_111.mp3"},
+        {"name": "yt500-0003-mid", "file": "yt500-0003-mid_333.mp3"},
+    ])
+
+    assert sorted(removed) == ["yt500-0001-good_999.mp3",
+                               "yt500-0002-short_222.mp3"]
+    assert sorted(p.name for p in audio.iterdir()) == [
+        "yt500-0001-good_111.mp3"]

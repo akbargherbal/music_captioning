@@ -68,6 +68,8 @@ python3 scripts/yt500_dataset.py --status
   exactly the pilot's request. `counts.accepted` still reports the full number,
   `counts.accepted_in_manifest` the queued slice.
 - `--download-limit N` — at most N new MP3s per pass (0 = all).
+- Superseded local takes are deleted from `work/audio` (never from GCS) so one
+  name never yields two captions.
 - `--allow-abc-mismatch` — see below.
 - `--idle-stop-minutes N` — exit `--watch` after N minutes without a new
   accepted take. Only meaningful once every name is accepted.
@@ -87,7 +89,10 @@ state is one listing and one copy for the run in flight — 35–55 s over 4 run
 - `--phase caption|transcribe|both` (default `both`), always serial.
 - `--min-batch 12 --flush-minutes 20` — a phase starts when 12 tracks are
   pending, or 20 minutes after the last pass whatever the count.
-- `--max-batch 48` — tracks per invocation (0 = all).
+- `--max-batch 48` — transcription tracks per invocation (0 = all).
+  Captioning always drains the whole album: one captioner load for every new
+  take is cheaper than several, and `build_dataset.py caption` checkpoints the
+  raw captions before it starts polishing.
 - `--verify-schema` — after captioning, check `caption_pipeline_version`,
   `caption_stage == polished`, the required per-track keys, no empty captions,
   no `failed_tracks`. Non-zero exit on a problem.
@@ -147,6 +152,18 @@ state is one listing and one copy for the run in flight — 35–55 s over 4 run
 5. **A no-op caption pass loads no weights.** If every track is already in the
    album, `build_dataset.py caption` prints that and does not construct the
    captioner; it only polishes what is pending.
+6. **A superseded local take is pruned.** When a regen take replaces an
+   accepted take, the watcher deletes the old MP3 from `work/audio` (never from
+   GCS) so the album cannot caption two takes of the same name. The album is
+   manifest-independent here only in the sense that `assemble` iterates the
+   manifest, so a stale album entry is never emitted.
+7. **A caption crash re-captions the whole in-flight pass.** The album is
+   written after the caption phase completes (that is where the raw-caption
+   checkpoint lives), so a native crash at track 180 of 185 loses that pass's
+   captioning; the next pass redoes it. The streaming run is not affected
+   (a pass is a handful of new takes), but for a large backlog run it in
+   tranches with `yt500_sync.py --limit` rather than all at once, so a crash
+   costs minutes, not hours.
 
 ## Reference numbers (2026-11-10, live bucket)
 

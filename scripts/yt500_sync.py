@@ -497,6 +497,32 @@ def record_rejections(work_dir: Path, rejected: list[dict]) -> None:
         gcsio.write_json_atomic(path, history)
 
 
+def prune_superseded(work_dir: Path, selected: list[dict]) -> list[str]:
+    """Delete local MP3s that are no longer the selected take for their name.
+
+    A regen take replaces the original in the manifest; without this the old
+    file would stay in ``work/audio`` and the album would caption both takes of
+    the same name. Audio is re-downloadable, so deleting the local copy is
+    safe -- the GCS take is never touched. The album self-heals on the next
+    caption pass, which enumerates this directory.
+    """
+    audio = dataset.audio_dir(work_dir)
+    if not audio.is_dir():
+        return []
+    keep = {row["file"] for row in selected}
+    removed: list[str] = []
+    for path in sorted(audio.iterdir()):
+        if not path.is_file() or path.suffix.lower() != ".mp3":
+            continue
+        if path.name in keep:
+            continue
+        path.unlink()
+        removed.append(path.name)
+    for stale in audio.glob("*.part"):
+        stale.unlink(missing_ok=True)
+    return removed
+
+
 def download_accepted(client, *, work_dir: Path, accepted: list[dict],
                       limit: int) -> dict:
     """Fetch accepted MP3s that are not local yet. Atomic, skip-if-present."""
@@ -607,6 +633,7 @@ def sync_once(client, *, args, corpus: dict, loop: int) -> dict:
 
     restored = restore_state(client, gcs_work=args.gcs_work,
                              work_dir=work_dir)
+    pruned = prune_superseded(work_dir, selection["accepted"])
     downloads = download_accepted(client, work_dir=work_dir,
                                   accepted=manifest["accepted"],
                                   limit=args.download_limit)
@@ -624,6 +651,7 @@ def sync_once(client, *, args, corpus: dict, loop: int) -> dict:
         "abc_mismatches": scan["abc_mismatches"],
         "downloaded": downloads["downloaded"],
         "download_failures": downloads["failed"],
+        "pruned": pruned,
         "restored": restored,
     }
     gcsio.write_json_atomic(dataset.status_path(work_dir, "sync"), status)
@@ -633,7 +661,7 @@ def sync_once(client, *, args, corpus: dict, loop: int) -> dict:
           f"accepted={counts['accepted']}/{counts['corpus_total']} "
           f"rejected={counts['rejected']} pending={counts['pending']} "
           f"downloaded={len(downloads['downloaded'])} "
-          f"local={downloads['present']} "
+          f"local={downloads['present']} pruned={len(pruned)} "
           f"restored={int(restored['album'])}album/"
           f"{len(restored['transcripts'])}trs", flush=True)
     for item in downloads["failed"]:
