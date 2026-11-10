@@ -193,6 +193,10 @@ Alternative backend (llama.cpp GGUF):
 
 ## Batch runs & resumability (Colab is ephemeral)
 
+- **Resuming the YT500 caption run: read `docs/RESUME_CAPTIONS.md` and run
+  `./plumbing/resume_yt500.sh`.** It restores weights/GGUF/`llama-server`
+  (all cached on GCS), starts only the roles that are not already running, and
+  the album comes back from GCS or git — no re-captioning.
 - GitHub is the durable store; local disk is not. `scripts/batch.py` must
   checkpoint after **every album**: atomic write of
   `outputs/<ARTIST>/<album>.json`, update `outputs/index.json`, then
