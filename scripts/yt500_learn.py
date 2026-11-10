@@ -118,6 +118,11 @@ def caption_command(args: argparse.Namespace, work_dir: Path) -> list[str]:
         "--run-manifest", str(dataset.manifest_path(work_dir)),
         "--out-dir", str(dataset.captions_dir(work_dir)),
         "--workdir", str(Path(work_dir) / "tmp"),
+        # The watcher's manifest spans generation runs and carries no run_id,
+        # so build_dataset would name the album "multiple". Name it exactly the
+        # way dataset.album_path() does, or mirror_outputs() finds no album.
+        "--artist", dataset.ARTIST,
+        "--album", dataset.ALBUM,
         # The corpus is supplied by the watcher: no skips, so the track count
         # can always settle and an incremental pass is well defined.
         "--max-track-seconds", "0",
