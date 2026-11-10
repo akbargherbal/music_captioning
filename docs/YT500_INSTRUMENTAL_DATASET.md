@@ -33,6 +33,17 @@ Recommended answers are first. A short reply such as "1A, 2A, 3A, 4A" is enough.
 | 5 | Final prefix? | **A. `DATASET/YT500_INSTRUMENTAL`** (version inside `manifest.json`). **B. `DATASET/YT500_INSTRUMENTAL_489`** (count in the name). |
 | 6 | Publish policy? | **A. Work state under `GENERATION/.../work/`; final package only at 489/489** (no partial dataset). **B. Assemble/upload a preview package periodically** (more visibility, more hashing/upload work). |
 
+**Answered 2026-11-10: 1A, 2A, 3A, 4A-with-a-caveat, 5A, 6A, §6.4 deferred.**
+
+- **4** was answered as "never wait": the watcher queues accepted takes as they
+  land and a regenerated take simply wins the `end_utc` selection on the next
+  poll, so nothing is blocked by an unfinished sibling and nothing has to be
+  restarted for a regen. The regen *render* still happens after 489/489 (4A).
+- **§6.4** (`plumbing/regen_short_takes.py`) is **not** part of this repo's
+  implementation: the A100 side owns it. This repo only watches, captions and
+  polishes. Implemented behaviour is in
+  [YT500_INSTRUMENTAL_OPS.md](YT500_INSTRUMENTAL_OPS.md).
+
 ### 0.2 How to use this document in this chat
 
 1. Read this file fully; it is self-contained.
