@@ -342,3 +342,49 @@ def test_old_existing_output_is_not_reused_with_retry_failed(
 
     assert calls == [str(Path(album_entry["tracks"][0]["uri"]))]
     assert album_obj["caption_pipeline_version"] == CAPTION_PIPELINE_VERSION
+
+
+def test_midpass_checkpoint_never_drops_stored_tracks(tmp_path, monkeypatch):
+    """A partial checkpoint must carry the album's earlier tracks forward."""
+    import src.captioner as captioner_mod
+    import src.captioner_hf as hf_mod
+    from scripts.batch import process_album
+
+    stored = {"file": "old.mp3", "caption": "a stored caption",
+              "caption_raw": "a stored caption",
+              "chunk_captions": ["a stored caption"],
+              "rewrite_status": "ok", "duration_s": 10.0,
+              "caption_seconds": 1.0, "instruments": [], "vocals": [],
+              "production": []}
+    album = {"artist": "a", "album": "b", "status": "ok", "track_count": 1,
+             "caption_pipeline_version": 3, "caption_stage": "polished",
+             "tracks": [stored], "failed_tracks": [], "skipped_tracks": [],
+             "instruments": [], "vocals": [], "production": []}
+
+    monkeypatch.setattr(captioner_mod, "audio_stream_info",
+                        lambda p: (60.0, 192))
+    monkeypatch.setattr(hf_mod, "caption_and_tag", lambda c, p, **kw: {
+        "chunk_captions": ["c"], "caption": "c", "instruments": [],
+        "vocals": [], "production": [], "suno_prompt": ""})
+
+    writes: list[int] = []
+    audio = tmp_path / "audio"
+    audio.mkdir()
+    entry = {"artist": "a", "album": "b", "source_dir": str(audio),
+             "tracks": []}
+    for i in range(6):
+        f = audio / f"new{i}.mp3"
+        f.write_bytes(b"x")
+        entry["tracks"].append({"filename": f.name, "uri": str(f)})
+
+    class Cap:
+        name = "fake"
+
+    out_dir = tmp_path / "captions"
+    process_album(Cap(), entry, tmp_path, out_dir, existing=album,
+                  retry_only_failed=True, rewrite=False,
+                  checkpoint=lambda obj, stage: writes.append(
+                      len(obj["tracks"])))
+
+    assert writes, "no mid-pass checkpoint"
+    assert min(writes) >= 2, "a checkpoint dropped the stored track"

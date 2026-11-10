@@ -356,14 +356,23 @@ def caption_album(
             obj["suno_experimental"] = True
         return obj
 
+    # Tracks already stored by an earlier pass must survive a mid-pass
+    # checkpoint: run_tracks() re-appends them as it walks the queue, so early
+    # on they are not yet in ``track_results`` and a naive write would truncate
+    # the album (lost 17 of 22 stored tracks on 2026-11-10).
+    prior_tracks = list((existing or {}).get("tracks") or [])
+
     def on_progress(track_results: list[dict], failed: list[dict],
                     skipped: list[dict]) -> None:
         # Persist the raw captions as they arrive: a reaped VM then costs at
         # most ``checkpoint_every`` tracks, and run_tracks() skips whatever is
         # already in the album on the next pass.
-        if checkpoint is not None and track_results:
-            checkpoint(build_album(track_results, failed, skipped),
-                       CAPTION_STAGE_CAPTIONED)
+        if checkpoint is None or not track_results:
+            return
+        seen = {t.get("file") for t in track_results}
+        carried = [t for t in prior_tracks if t.get("file") not in seen]
+        checkpoint(build_album(track_results + carried, failed, skipped),
+                   CAPTION_STAGE_CAPTIONED)
 
     track_results, failed, skipped = run_tracks(
         entry["tracks"], caption_one,
