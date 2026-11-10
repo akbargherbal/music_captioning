@@ -2,13 +2,13 @@
   "artist": "arabmaqamrock",
   "album": "YT500_INSTRUMENTAL",
   "source_dir": "/content/music_captioning/work/yt500/audio",
-  "generated_at": "2026-11-10T18:41:02",
+  "generated_at": "2026-11-10T18:42:56",
   "status": "ok",
-  "track_count": 297,
+  "track_count": 302,
   "failed_count": 0,
   "skipped_count": 0,
-  "total_audio_seconds": 82384.7,
-  "total_caption_seconds": 8188.6,
+  "total_audio_seconds": 83648.8,
+  "total_caption_seconds": 8302.0,
   "instruments": [
     "orchestral",
     "cello",
@@ -51,13 +51,17 @@
     "harp",
     "orchestra",
     "synth bass",
+    "shaker",
+    "bass guitar",
+    "cajon",
+    "keyboard",
+    "harmonium",
+    "mandolin",
     "electronic drums",
     "frame drum",
-    "bass guitar",
     "accordion",
     "synthesizer",
     "claps",
-    "keyboard",
     "drum kit",
     "timpani",
     "bouzouki",
@@ -66,15 +70,11 @@
     "doumbek",
     "organ",
     "kalimba",
-    "shaker",
-    "mandolin",
-    "cajon",
     "bongos",
     "congas",
     "marimba",
     "qanun",
     "toms",
-    "harmonium",
     "saz",
     "koto",
     "synth strings",
@@ -98,10 +98,10 @@
     "male voice",
     "female voice",
     "melisma",
+    "harmony",
     "duet",
     "vocal chops",
     "backing vocals",
-    "harmony",
     "sung",
     "female vocals",
     "whispered",
@@ -145,6 +145,7 @@
     "bright",
     "hook",
     "gated reverb",
+    "riff",
     "drone",
     "tremolo",
     "textured",
@@ -153,7 +154,6 @@
     "sampling",
     "tape",
     "reverse",
-    "riff",
     "dynamics",
     "overdriven",
     "arpeggio",
@@ -166,7 +166,7 @@
   ],
   "tags_experimental": true,
   "caption_pipeline_version": 3,
-  "caption_stage": "captioned",
+  "caption_stage": "polished",
   "tracks": [
     {
       "file": "yt500-0459-C-nday1PA8E_1617484514.mp3",
@@ -209,9 +209,12 @@
         "An energetic and dramatic fusion track blending classical and electronic elements. The piece is driven by a powerful, galloping cello melody and a driving electronic drum beat, creating a cinematic, almost epic feel. A soaring, operatic female vocal enters with long, sustained notes and emotional vibrato, adding a layer of grandeur. The arrangement features dynamic interplay between the prominent cello, a supportive piano, and the powerful vocal performance, culminating in a dramatic and intense musical statement."
       ],
       "caption_raw": "The track opens with a haunting, atmospheric intro featuring a lone, ethereal female vocal performing a wordless, melismatic melody with a distinct Middle Eastern or Balkan character, drenched in cavernous reverb. At 0:17, the piece erupts into a high-energy, cinematic orchestral arrangement. A driving, rhythmic ostinato played by a powerful cello and double bass section forms the core of the track, propelled by epic, booming percussion reminiscent of taiko drums. A virtuosic lead violin carries a dramatic, folk-inspired melody, weaving through the powerful string and percussion layers. The initial vocal motif re-emerges, now layered within the full, dynamic orchestral texture, enhancing the epic and dramatic mood. The track opens with a brief spoken word sample before launching into a driving rhythm section of punchy drums and a steady bassline. The cello carries the main melody with rapid, folk-inspired runs and expressive phrasing, supported by rhythmic piano chords. The arrangement builds in intensity, featuring dynamic shifts and impressive cello solos that showcase technical skill, creating a sound that blends classical crossover with the high-energy feel of gypsy folk or klezmer music. The piece is driven by a powerful, galloping cello melody and a driving electronic drum beat, creating a cinematic, almost epic feel. A soaring, operatic female vocal enters with long, sustained notes and emotional vibrato, adding a layer of grandeur. The arrangement features dynamic interplay between the prominent cello, a supportive piano, and the powerful vocal performance, culminating in a dramatic and intense musical statement.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "The track opens with a haunting, atmospheric intro featuring a lone, ethereal female vocal performing a wordless, melismatic melody with a distinct Middle Eastern or Balkan character, drenched in cavernous reverb. Soon after, the piece erupts into a high-energy, cinematic orchestral arrangement driven by a driving rhythmic ostinato from a powerful cello and double bass section, propelled by epic, booming percussion reminiscent of taiko drums. A virtuosic lead violin carries a dramatic, folk-inspired melody, weaving through the dense string and percussion layers. The initial vocal motif re-emerges, now layered within the full orchestral texture, enhancing the epic and dramatic mood. \n\nAn energetic instrumental piece features a fast-paced, virtuosic cello performance with rapid, folk-inspired runs and expressive phrasing, supported by rhythmic piano chords and a punchy drum rhythm. A brief spoken word sample precedes the main section, which builds in intensity through dynamic shifts and impressive cello solos, blending classical crossover with the high-energy feel of gypsy folk or klezmer music. \n\nThe arrangement culminates in a dramatic and intense musical statement, combining a powerful galloping cello melody with a driving electronic drum beat and a soaring, operatic female vocal that enters with long, sustained notes and emotional vibrato. The interplay between the cello, piano, and vocal performance creates a cinematic, almost epic sound.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 8.0,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0462-A8iLNJ8NYFU_2417859161.mp3",
@@ -253,9 +256,15 @@
         "An evocative and cinematic instrumental piece driven by a passionate, mournful cello or viola melody. The string instrument performs with expressive vibrato and slides, carrying a dramatic, Middle Eastern-inflected theme. It's accompanied by a rhythmic foundation of hand percussion, likely a darbuka or djembe, providing a steady, driving pulse. The arrangement is clean and spacious, with a touch of reverb that enhances the emotional weight of the strings. The piece begins with a brief, processed vocal sample before launching into its main thematic section."
       ],
       "caption_raw": "An energetic and dramatic instrumental piece driven by a powerful, emotive string section, likely featuring violins and cellos, playing a melody with a distinct Middle Eastern or Balkan flavor. The track opens with a brief, rhythmic hand drum pattern before the strings enter with a bold, sweeping theme. The arrangement builds in intensity, layering the strings over a driving percussive groove. A brief, more reflective bridge section offers a dynamic contrast before the main theme returns with heightened passion, culminating in an abrupt, impactful ending. The lead string instrument performs with a distinct Middle Eastern or Balkan flair, its lines full of expressive slides and vibrato. It's supported by a driving, rhythmic bed of hand percussion, likely a darbuka or similar drum, creating a propulsive and cinematic groove. The arrangement is dynamic, shifting between intense melodic statements and more rhythmic, chordal sections, maintaining a high-energy, epic feel throughout. The lead instrument is supported by a driving, rhythmic accompaniment from a hand drum, possibly a darbuka or riq. The track features a dynamic interplay between fiery, fast-paced melodic runs and more lyrical, sustained passages, all within a clear Middle Eastern or Turkish modal framework. The production is clean and direct, highlighting the raw, acoustic nature of the instruments. The string instrument performs with expressive vibrato and slides, carrying a dramatic, Middle Eastern-inflected theme. It's accompanied by a rhythmic foundation of hand percussion, likely a darbuka or djembe, providing a steady, driving pulse. The arrangement is clean and spacious, with a touch of reverb that enhances the emotional weight of the strings. The piece begins with a brief, processed vocal sample before launching into its main thematic section.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An energetic and dramatic instrumental piece driven by a powerful, emotive string section, likely featuring violins and cellos, playing a melody with a distinct Middle Eastern or Balkan flavor. The track opens with a brief, rhythmic hand drum pattern before the strings enter with a bold, sweeping theme. The arrangement builds in intensity, layering the strings over a driving percussive groove. A brief, more reflective bridge section offers a dynamic contrast before the main theme returns with heightened passion, culminating in an abrupt, impactful ending. The lead string instrument performs with a distinct Middle Eastern or Balkan flair, its lines full of expressive slides and vibrato. It's supported by a driving, rhythmic bed of hand percussion, likely a darbuka or similar drum, creating a propulsive and cinematic groove. The arrangement is dynamic, shifting between intense melodic statements and more rhythmic, chordal sections, maintaining a high-energy, epic feel throughout. The lead instrument is supported by a driving, rhythmic accompaniment from a hand drum, possibly a darbuka or riq. The track features a dynamic interplay between fiery, fast-paced melodic runs and more lyrical, sustained passages, all within a clear Middle Eastern or Turkish modal framework. The production is clean and direct, highlighting the raw, acoustic nature of the instruments. The string instrument performs with expressive vibrato and slides, carrying a dramatic, Middle Eastern-inflected theme. It's accompanied by a rhythmic foundation of hand percussion, likely a darbuka or djembe, providing a steady, driving pulse. The arrangement is clean and spacious, with a touch of reverb that enhances the emotional weight of the strings. The piece begins with a brief, processed vocal sample before launching into its main thematic section.",
+      "rewrite_status": "fallback",
+      "tags_experimental": true,
+      "rewrite_seconds": 4.8,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2,
+      "rewrite_reasons": [
+        "ending claim not supported by the final section"
+      ]
     },
     {
       "file": "yt500-0465-DuqhecuPtGo_805534258.mp3",
@@ -295,9 +304,12 @@
         "An energetic and dramatic instrumental piece driven by a virtuosic lead violin playing in a distinct Middle Eastern or Turkish style. The track opens with a brief, evocative oud melody before launching into a driving, upbeat rhythm section composed of a punchy darbuka, a solid bassline, and orchestral string pads. The lead violin delivers fast, intricate melodic lines full of expressive ornamentation and slides. The arrangement features dynamic shifts, including a brief, atmospheric oud interlude and a powerful, climactic section with soaring violin phrases. The piece concludes with a rapid, arpeggiated string run that builds tension before an abrupt, impactful stop."
       ],
       "caption_raw": "An evocative and cinematic piece beginning with a mournful, microtonal oud melody accompanied by a highly expressive and emotive violin, rich with vibrato and glissandos. The arrangement builds as a driving rhythm enters, carried by a darbuka and other hand percussion, establishing a steady, mid-tempo groove. The track then swells into a dramatic, full orchestral section where the strings take the lead with a powerful, sweeping theme, creating a grand, film-score-like atmosphere before coming to an abrupt stop. The track opens with a brief spoken word sample before launching into a dramatic, expressive violin solo full of rapid runs, heavy vibrato, and soaring melodic lines. A driving, rhythmic foundation is provided by energetic hand percussion, likely a darbuka or djembe, and a plucked string instrument, possibly an oud, which adds harmonic texture. The arrangement builds in intensity, with the violin delivering a powerful, memorable theme over the insistent, danceable percussion groove, creating a cinematic and dramatic Middle Eastern or Balkan soundscape. The track opens with a brief, evocative oud melody before launching into a driving, upbeat rhythm section composed of a punchy darbuka, a solid bassline, and orchestral string pads. The lead violin delivers fast, intricate melodic lines full of expressive ornamentation and slides. The arrangement features dynamic shifts, including a brief, atmospheric oud interlude and a powerful, climactic section with soaring violin phrases. The piece concludes with a rapid, arpeggiated string run that builds tension before an abrupt, impactful stop.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "The piece begins with a mournful, microtonal oud melody, accompanied by a highly expressive violin rich in vibrato and glissandos. A driving rhythm enters, propelled by a darbuka and hand percussion, establishing a steady, mid-tempo groove. The arrangement builds into a dramatic, full orchestral section where strings take the lead with a powerful, sweeping theme, creating a grand, film-score-like atmosphere before abruptly ending. Early on, a brief spoken word sample appears, followed by a passionate violin solo filled with rapid runs, heavy vibrato, and soaring melodic lines. The rhythmic foundation is maintained by energetic hand percussion—likely a darbuka or djembe—and a plucked string instrument, possibly an oud, which adds harmonic texture. The violin delivers a powerful, memorable theme over the insistent, danceable percussion groove, evoking a cinematic and dramatic Middle Eastern or Balkan soundscape. The track features dynamic shifts, including a brief atmospheric oud interlude and a climactic section with soaring violin phrases. It concludes with a rapid, arpeggiated string run that builds tension before an abrupt, impactful stop.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 4.8,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0466-ZaD72Sx-2RI_45212576.mp3",
@@ -331,9 +343,12 @@
         "An instrumental Middle Eastern fusion track driven by a prominent, synthesized ney or duduk-style lead. The melody, rich with microtonal ornamentation and expressive pitch bends, weaves through a steady, mid-tempo electronic beat composed of sampled hand drums like a darbuka and a simple synth bassline. The arrangement alternates between a catchy, melodic theme and more rhythmic, chordal sections, creating a hypnotic and atmospheric groove. The production is clean and modern, blending traditional melodic sensibilities with a contemporary electronic foundation."
       ],
       "caption_raw": "An energetic and driving instrumental track rooted in Middle Eastern and Balkan traditions. The piece is led by a virtuosic bowed string instrument, likely a violin or kemenche, which delivers a fast, highly ornamented melody with expressive slides and trills. It's supported by a tight, rhythmic foundation of hand percussion, possibly a darbuka or riq, providing a constant, propulsive groove. The arrangement follows a clear structure, alternating between a main melodic theme and more elaborate, improvisational-sounding passages, maintaining a high-energy, dance-like feel throughout. The melody, rich with microtonal ornamentation and expressive pitch bends, weaves through a steady, mid-tempo electronic beat composed of sampled hand drums like a darbuka and a simple synth bassline. The arrangement alternates between a catchy, melodic theme and more rhythmic, chordal sections, creating a hypnotic and atmospheric groove. The production is clean and modern, blending traditional melodic sensibilities with a contemporary electronic foundation.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An energetic instrumental track fuses Middle Eastern and Balkan traditions, centered around a virtuosic bowed string instrument—such as a violin or kemenche—that delivers a fast, ornamented melody with expressive slides and trills. This melodic line is supported by a steady, propulsive rhythm from hand percussion, likely darbuka or riq, creating a driving, dance-like groove. The arrangement alternates between a clear main melodic theme and more elaborate, improvisational passages, maintaining a high-energy feel throughout. In another version, the lead is a synthesized ney or duduk-style instrument, featuring rich microtonal ornamentation and expressive pitch bends, moving over a mid-tempo electronic beat built from sampled hand drums and a simple synth bassline. The structure alternates between a catchy melodic theme and rhythmic, chordal sections, producing a hypnotic, atmospheric groove. The production is clean and modern, blending traditional melodic sensibilities with a contemporary electronic foundation.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 4.1,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0467-Z0w8_vx1iYQ_2123833686.mp3",
@@ -372,9 +387,12 @@
         "An emotive and dramatic instrumental piece blending classical and hip-hop elements. The track opens with a poignant, expressive violin melody soaring over a clean, arpeggiated nylon-string guitar. This cinematic introduction gives way to a steady, mid-tempo hip-hop beat with a crisp snare and a solid kick drum. The violin and guitar continue their melodic interplay over the beat, creating a powerful fusion of styles. The arrangement briefly breaks down to a more reflective section highlighting the guitar and violin before the full beat returns, driving the piece to its conclusion."
       ],
       "caption_raw": "An emotive and dramatic instrumental piece blending classical and Middle Eastern styles. The track opens with a passionate, melancholic violin melody soaring over a nylon-string acoustic guitar playing intricate arpeggios. The arrangement builds until a modern, driving electronic beat with a solid kick and clap drops in, transforming the piece into an epic, cinematic world fusion track. The violin continues its expressive lead role throughout, carrying the main theme with significant vibrato and emotional weight against the contemporary rhythmic foundation. A nylon-string acoustic guitar plays a melancholic, Spanish-style chord progression and melody. It's accompanied by an expressive, emotive violin that carries the main melodic theme with a slightly mournful tone. At the midpoint, a steady, mid-tempo hip-hop beat, composed of a clean kick, a sharp snare, and hi-hats, enters, transforming the track into a chillhop or lo-fi hip-hop groove while the guitar and violin continue their interplay. The track opens with a poignant, expressive violin melody soaring over a clean, arpeggiated nylon-string guitar. This cinematic introduction gives way to a steady, mid-tempo hip-hop beat with a crisp snare and a solid kick drum. The violin and guitar continue their melodic interplay over the beat, creating a powerful fusion of styles. The arrangement briefly breaks down to a more reflective section highlighting the guitar and violin before the full beat returns, driving the piece to its conclusion.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An emotive and dramatic instrumental piece blending classical and Middle Eastern influences, opening with a passionate, melancholic violin melody that soars over a clean, arpeggiated nylon-string acoustic guitar. The guitar plays intricate, Spanish-style chords and melody, while the violin carries the main theme with expressive vibrato and a slightly mournful tone. The arrangement builds, and soon after, a steady, mid-tempo hip-hop beat—featuring a crisp snare, solid kick, and hi-hats—enters, transforming the piece into a cinematic world fusion track. The violin and guitar continue their interplay over the beat, maintaining emotional depth and melodic tension. The track briefly breaks down to just the guitar and violin, offering a reflective moment before the full beat returns, driving the piece to a powerful conclusion.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.4,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0468-vVYepS8lWjM_369284659.mp3",
@@ -421,9 +439,18 @@
         "An energetic, instrumental world-fusion track driven by a driving darbuka rhythm and a prominent, plucked oud-like instrument playing a catchy, Middle Eastern-style melody. A synthesized flute or ney doubles the main melodic lines, adding a sharp, airy texture. The arrangement is built on looping, layered phrases, creating a hypnotic and danceable groove. The track maintains a consistent high energy throughout, concluding abruptly with a short, sharp percussion roll and a final chord."
       ],
       "caption_raw": "An energetic and cinematic world fusion track driven by a powerful, rhythmic string section. The piece opens with a brief spoken word intro before launching into a driving beat featuring a prominent, plucked oud-like instrument playing a catchy, repeating melodic motif. This is layered with a dynamic string ensemble performing fast, staccato passages and soaring melodic lines reminiscent of Middle Eastern or Balkan folk music. A steady, propulsive percussion track underpins the entire arrangement. Around the 1:40 mark, a powerful female vocal enters, singing in Arabic with a clear, melodic delivery that complements the epic, adventurous mood of the instrumental. The arrangement is built on a punchy, four-on-the-floor drum machine beat and a rhythmic synth bassline. A prominent, reedy synth lead, mimicking a clarinet or saxophone, plays a catchy, ornamented melody throughout. A clear, powerful female vocal enters, singing in a melodic style with noticeable reverb. The track features dynamic instrumental sections with fast-paced synth arpeggios and melodic solos, maintaining a high-energy, danceable feel from start to finish. A synthesized flute or ney doubles the main melodic lines, adding a sharp, airy texture. The arrangement is built on looping, layered phrases, creating a hypnotic and danceable groove. The track maintains a consistent high energy throughout, concluding abruptly with a short, sharp percussion roll and a final chord.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An energetic and cinematic world fusion track driven by a powerful, rhythmic string section. The piece opens with a brief spoken word intro before launching into a driving beat featuring a prominent, plucked oud-like instrument playing a catchy, repeating melodic motif. This is layered with a dynamic string ensemble performing fast, staccato passages and soaring melodic lines reminiscent of Middle Eastern or Balkan folk music. A steady, propulsive percussion track underpins the entire arrangement. Around the a point later mark, a powerful female vocal enters, singing in Arabic with a clear, melodic delivery that complements the epic, adventurous mood of the instrumental. The arrangement is built on a punchy, four-on-the-floor drum machine beat and a rhythmic synth bassline. A prominent, reedy synth lead, mimicking a clarinet or saxophone, plays a catchy, ornamented melody throughout. A clear, powerful female vocal enters, singing in a melodic style with noticeable reverb. The track features dynamic instrumental sections with fast-paced synth arpeggios and melodic solos, maintaining a high-energy, danceable feel from start to finish. A synthesized flute or ney doubles the main melodic lines, adding a sharp, airy texture. The arrangement is built on looping, layered phrases, creating a hypnotic and danceable groove. The track maintains a consistent high energy throughout, concluding abruptly with a short, sharp percussion roll and a final chord.",
+      "rewrite_status": "failed",
+      "tags_experimental": true,
+      "rewrite_seconds": 13.7,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2,
+      "rewrite_reasons": [
+        "timestamp in output: 1:40",
+        "timestamp guard: gave up after 3 attempts"
+      ],
+      "caption_pre_cleanup": "An energetic and cinematic world fusion track driven by a powerful, rhythmic string section. The piece opens with a brief spoken word intro before launching into a driving beat featuring a prominent, plucked oud-like instrument playing a catchy, repeating melodic motif. This is layered with a dynamic string ensemble performing fast, staccato passages and soaring melodic lines reminiscent of Middle Eastern or Balkan folk music. A steady, propulsive percussion track underpins the entire arrangement. Around the 1:40 mark, a powerful female vocal enters, singing in Arabic with a clear, melodic delivery that complements the epic, adventurous mood of the instrumental. The arrangement is built on a punchy, four-on-the-floor drum machine beat and a rhythmic synth bassline. A prominent, reedy synth lead, mimicking a clarinet or saxophone, plays a catchy, ornamented melody throughout. A clear, powerful female vocal enters, singing in a melodic style with noticeable reverb. The track features dynamic instrumental sections with fast-paced synth arpeggios and melodic solos, maintaining a high-energy, danceable feel from start to finish. A synthesized flute or ney doubles the main melodic lines, adding a sharp, airy texture. The arrangement is built on looping, layered phrases, creating a hypnotic and danceable groove. The track maintains a consistent high energy throughout, concluding abruptly with a short, sharp percussion roll and a final chord.",
+      "timestamp_cleanup": "ok"
     },
     {
       "file": "yt500-0471-3ZljEHI4RCo_2963743873.mp3",
@@ -459,9 +486,12 @@
         "An energetic and cinematic Middle Eastern instrumental piece driven by a driving darbuka rhythm and a lush string section. A ney flute takes the lead, delivering a passionate and highly ornamented melody full of expressive trills and slides. The arrangement begins with a bold, full-ensemble statement before transitioning into a more improvisational and emotive ney solo. The track then shifts into a percussive breakdown, highlighting the intricate hand-drum patterns, before the ney re-enters for a final melodic statement, eventually fading out to conclude the piece."
       ],
       "caption_raw": "A dramatic, cinematic piece beginning with a lush, tense orchestral string section playing a powerful, minor-key theme. This gives way to a driving, mid-tempo groove anchored by a djembe and other hand percussion. A reedy woodwind instrument, possibly a shehnai or zurna, enters with a highly expressive and virtuosic melody, characterized by microtonal bends and ornamentation typical of Middle Eastern or South Asian music. The track builds in intensity as the woodwind's improvisation becomes more elaborate over the steady, hypnotic percussion. A highly expressive ney flute takes the lead, delivering a passionate and virtuosic melody filled with intricate ornamentation and microtonal bends. It's supported by a lush string section providing harmonic pads and a pizzicato bassline that anchors the groove. The arrangement builds in intensity, with the ney and strings trading melodic phrases, creating a dynamic and captivating soundscape perfect for belly dancing or dramatic film scoring. A lush string section provides a rich harmonic bed, while a reedy woodwind instrument, possibly a ney or zurna, plays a fast, ornate, and virtuosic lead melody full of trills and rapid runs. The arrangement is dynamic, with the full ensemble creating a driving, dance-like feel, briefly giving way to a more focused melodic section before returning to the main powerful theme. A ney flute takes the lead, delivering a passionate and highly ornamented melody full of expressive trills and slides. The arrangement begins with a bold, full-ensemble statement before transitioning into a more improvisational and emotive ney solo. The track then shifts into a percussive breakdown, highlighting the intricate hand-drum patterns, before the ney re-enters for a final melodic statement, eventually fading out to conclude the piece.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "A dramatic, cinematic Middle Eastern instrumental piece begins with a bold, full-ensemble statement featuring a lush string section playing a powerful, minor-key theme. The rhythm section kicks in with a driving darbuka and hand percussion, establishing a syncopated, energetic groove. A reedy woodwind—possibly a ney or zurna—enters with a passionate, virtuosic melody filled with microtonal bends, trills, and rapid runs, delivering expressive ornamentation typical of Middle Eastern or South Asian music. The arrangement builds in intensity as the woodwind and strings trade melodic phrases, creating a dynamic and captivating soundscape. The track briefly shifts into a percussive breakdown, highlighting intricate hand-drum patterns, before the ney returns for a final melodic statement, concluding the piece with a fade-out.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.5,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0473-Htqn7tGvQsc_3785494426.mp3",
@@ -505,9 +535,12 @@
         "A smooth, laid-back instrumental track centered on a prominent, melodic fretless bass that slides gracefully through the main theme. A clean electric guitar provides a steady, relaxed chordal backing, complemented by a crisp, straightforward drum machine groove. The arrangement is spacious and clean, establishing a chill, neo-soul vibe. Around the 47-second mark, a lush, cinematic string section enters, adding a layer of emotional depth and expanding the soundscape before the track concludes with a brief, reflective bass and guitar interplay."
       ],
       "caption_raw": "An instrumental world fusion track beginning with a brief, processed spoken word sample before introducing a prominent oud playing a melancholic, traditional-sounding melody. A steady, mid-tempo groove is established by a blend of hand percussion, including darbuka and shakers, alongside a smooth, melodic fretless bass line. Lush, cinematic string pads swell in the background, adding emotional depth and texture. The arrangement is clean and spacious, allowing the oud's intricate melodic phrases to remain the central focus throughout the piece. A clean, melodic fretless bass line weaves through a steady, mid-tempo drum machine beat. A nylon-string acoustic guitar provides rhythmic chordal accompaniment and occasional melodic fills. The arrangement gradually builds with the introduction of lush, cinematic string pads and a poignant flute-like synth lead that carries the main melody in the second half. The overall mood is contemplative, smooth, and slightly exotic. A clean electric guitar provides a steady, relaxed chordal backing, complemented by a crisp, straightforward drum machine groove. The arrangement is spacious and clean, establishing a chill, neo-soul vibe. Around the 47-second mark, a lush, cinematic string section enters, adding a layer of emotional depth and expanding the soundscape before the track concludes with a brief, reflective bass and guitar interplay.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An instrumental world fusion track begins with a brief, processed spoken word sample, followed by a prominent oud playing a melancholic, traditional-sounding melody. A steady, mid-tempo groove is established through a blend of hand percussion—darbuka and shakers—and a smooth, melodic fretless bass line. Lush, cinematic string pads swell in the background, adding emotional depth and texture. The arrangement remains clean and spacious, allowing the oud's intricate melodic phrases to stay central.  \n\nA clean, melodic fretless bass weaves through a relaxed, groovy drum machine beat, supported by a nylon-string acoustic guitar that provides rhythmic chordal accompaniment and occasional melodic fills. The arrangement gradually builds with the entry of lush, cinematic string pads and a poignant flute-like synth lead that carries the main melody in the second half. The overall mood is contemplative, smooth, and slightly exotic.  \n\nThe track centers on a prominent, melodic fretless bass that slides gracefully through the main theme, complemented by a clean electric guitar offering steady, relaxed chordal backing and a crisp drum machine groove. The soundscape is spacious and chill, evoking a neo-soul vibe. Toward the end, a lush, cinematic string section enters, adding emotional depth and expanding the arrangement before concluding with a brief, reflective interplay between bass and guitar.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 5.6,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0476-h6g1nJLGds8_2631298341.mp3",
@@ -543,9 +576,15 @@
         "An intensely emotional and virtuosic instrumental piece led by a poignant violin and a soulful clarinet. The track opens with a dramatic, wailing violin solo, full of expressive vibrato and glissandos, setting a melancholic and cinematic tone. A mournful clarinet then enters, weaving a melody with characteristic microtonal ornamentation and slides, strongly evoking Middle Eastern or Balkan folk traditions. The arrangement is sparse, focusing on the powerful interplay between the two lead instruments, supported by a subtle, sustained string pad in the background. The piece builds in dynamic intensity before concluding with a brief, reflective melodic statement and an abrupt end."
       ],
       "caption_raw": "An intensely emotional and cinematic piece led by a solo bowed string instrument, likely a cello or viola, performing with profound expressiveness. The track opens with a mournful, wordless vocalise melody, rich with microtonal slides and ornamentation reminiscent of Middle Eastern or Balkan traditions. The solo instrument is soon joined by a full string ensemble, building a lush, dramatic soundscape. The arrangement swells in intensity, incorporating a driving, rhythmic section with percussive string hits before culminating in a virtuosic, high-register solo passage full of rapid, impassioned runs. The track opens with a brief, clear spoken word passage before the violin enters with a mournful, lyrical melody. The arrangement is sparse, focusing entirely on the solo instrument's dynamic and emotive range, which shifts between soaring, high-register passages and rhythmic, folk-inspired phrases. A brief, atmospheric interlude features a wordless, humming vocal melody, adding a layer of human texture before the main violin theme returns with renewed intensity. The track opens with a dramatic, wailing violin solo, full of expressive vibrato and glissandos, setting a melancholic and cinematic tone. A mournful clarinet then enters, weaving a melody with characteristic microtonal ornamentation and slides, strongly evoking Middle Eastern or Balkan folk traditions. The arrangement is sparse, focusing on the powerful interplay between the two lead instruments, supported by a subtle, sustained string pad in the background. The piece builds in dynamic intensity before concluding with a brief, reflective melodic statement and an abrupt end.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An intensely emotional and cinematic piece led by a solo bowed string instrument, likely a cello or viola, performing with profound expressiveness. The track opens with a mournful, wordless vocalise melody, rich with microtonal slides and ornamentation reminiscent of Middle Eastern or Balkan traditions. The solo instrument is soon joined by a full string ensemble, building a lush, dramatic soundscape. The arrangement swells in intensity, incorporating a driving, rhythmic section with percussive string hits before culminating in a virtuosic, high-register solo passage full of rapid, impassioned runs. The track opens with a brief, clear spoken word passage before the violin enters with a mournful, lyrical melody. The arrangement is sparse, focusing entirely on the solo instrument's dynamic and emotive range, which shifts between soaring, high-register passages and rhythmic, folk-inspired phrases. A brief, atmospheric interlude features a wordless, humming vocal melody, adding a layer of human texture before the main violin theme returns with renewed intensity. The track opens with a dramatic, wailing violin solo, full of expressive vibrato and glissandos, setting a melancholic and cinematic tone. A mournful clarinet then enters, weaving a melody with characteristic microtonal ornamentation and slides, strongly evoking Middle Eastern or Balkan folk traditions. The arrangement is sparse, focusing on the powerful interplay between the two lead instruments, supported by a subtle, sustained string pad in the background. The piece builds in dynamic intensity before concluding with a brief, reflective melodic statement and an abrupt end.",
+      "rewrite_status": "fallback",
+      "tags_experimental": true,
+      "rewrite_seconds": 4.9,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2,
+      "rewrite_reasons": [
+        "ending claim not supported by the final section"
+      ]
     },
     {
       "file": "yt500-0477-TZzTsGuyNZs_855141233.mp3",
@@ -579,9 +618,15 @@
         "An instrumental piece beginning with a delicate, arpeggiated nylon-string guitar melody, soon joined by a mournful, expressive cello playing a legato counter-melody. The arrangement builds as a driving, rhythmic bed of Middle Eastern hand percussion, including frame drums and darbukas, enters, establishing a steady, mid-tempo groove. The cello and guitar continue their melodic interplay over this rhythmic foundation, creating a soundscape that is both melancholic and intensely passionate, blending Western classical sensibilities with a distinct Arabic or Turkish folk character."
       ],
       "caption_raw": "An intense and dramatic instrumental piece driven by a passionate, virtuosic cello or viola performance. The track opens with a mournful, expressive solo string melody, rich with microtonal slides and ornamentation characteristic of Middle Eastern or Balkan music. A driving hand percussion rhythm, likely a darbuka or djembe, enters, propelling the piece forward with a steady, energetic groove. The string melody becomes more rhythmic and fiery, engaging in a dynamic interplay with the percussion. The arrangement builds as a driving, rhythmic bed of Middle Eastern hand percussion, including frame drums and darbukas, enters, establishing a steady, mid-tempo groove. The cello and guitar continue their melodic interplay over this rhythmic foundation, creating a soundscape that is both melancholic and intensely passionate, blending Western classical sensibilities with a distinct Arabic or Turkish folk character.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An intense and dramatic instrumental piece driven by a passionate, virtuosic cello or viola performance. The track opens with a mournful, expressive solo string melody, rich with microtonal slides and ornamentation characteristic of Middle Eastern or Balkan music. A driving hand percussion rhythm, likely a darbuka or djembe, enters, propelling the piece forward with a steady, energetic groove. The string melody becomes more rhythmic and fiery, engaging in a dynamic interplay with the percussion. The arrangement builds as a driving, rhythmic bed of Middle Eastern hand percussion, including frame drums and darbukas, enters, establishing a steady, mid-tempo groove. The cello and guitar continue their melodic interplay over this rhythmic foundation, creating a soundscape that is both melancholic and intensely passionate, blending Western classical sensibilities with a distinct Arabic or Turkish folk character.",
+      "rewrite_status": "fallback",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.9,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2,
+      "rewrite_reasons": [
+        "ending claim not supported by the final section"
+      ]
     },
     {
       "file": "yt500-0478-jZ-naNcSVXg_603989557.mp3",
@@ -621,9 +666,18 @@
         "An evocative instrumental piece blending traditional Middle Eastern sounds with modern electronic production. The track opens with a rhythmic oud ostinato and a spoken word sample before a driving, mid-tempo beat enters, combining a solid kick drum with the intricate patterns of a darbuka. A mournful, expressive violin carries the main melody, weaving through the oud's rhythmic framework. The arrangement builds with layered oud and violin parts, creating a rich, cinematic texture. A brief breakdown shifts the focus to a more atmospheric and improvisational oud solo, featuring emotive slides and melodic phrases, before the track concludes."
       ],
       "caption_raw": "An evocative and mournful oud solo opens the piece, its microtonal melodies rich with expressive slides and ornamentation, setting a dramatic, ancient tone. At 0:33, a driving, mid-tempo rhythm enters, carried by a crisp darbuka and other hand percussion. The oud then shifts into a structured, rhythmic role, weaving intricate melodic lines over the steady groove. The track is purely instrumental, blending traditional Middle Eastern tonalities with a clean, modern production quality, creating a soundscape that is both cinematic and deeply rhythmic. The track begins with a brief, processed vocal sample before the oud enters, establishing a contemplative and traditional mood. The arrangement is initially sparse, focusing entirely on the oud's expressive, melodic lines and rhythmic phrasing. A prominent oud enters, weaving intricate, fast-paced melodic lines and arpeggios over the insistent string arrangement. The foundation is a propulsive, steady rhythm provided by hand percussion, likely a darbuka or similar drum, creating a tense, epic, and adventurous atmosphere suitable for a film score or action sequence. The track opens with a rhythmic oud ostinato and a spoken word sample before a driving, mid-tempo beat enters, combining a solid kick drum with the intricate patterns of a darbuka. A mournful, expressive violin carries the main melody, weaving through the oud's rhythmic framework. The arrangement builds with layered oud and violin parts, creating a rich, cinematic texture. A brief breakdown shifts the focus to a more atmospheric and improvisational oud solo, featuring emotive slides and melodic phrases, before the track concludes.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An evocative and mournful oud solo opens the piece, its microtonal melodies rich with expressive slides and ornamentation, setting a dramatic, ancient tone. Then, a driving, mid-tempo rhythm enters, carried by a crisp darbuka and other hand percussion. The oud then shifts into a structured, rhythmic role, weaving intricate melodic lines over the steady groove. The track is purely instrumental, blending traditional Middle Eastern tonalities with a clean, modern production quality, creating a soundscape that is both cinematic and deeply rhythmic. The track begins with a brief, processed vocal sample before the oud enters, establishing a contemplative and traditional mood. The arrangement is initially sparse, focusing entirely on the oud's expressive, melodic lines and rhythmic phrasing. A prominent oud enters, weaving intricate, fast-paced melodic lines and arpeggios over the insistent string arrangement. The foundation is a propulsive, steady rhythm provided by hand percussion, likely a darbuka or similar drum, creating a tense, epic, and adventurous atmosphere suitable for a film score or action sequence. The track opens with a rhythmic oud ostinato and a spoken word sample before a driving, mid-tempo beat enters, combining a solid kick drum with the intricate patterns of a darbuka. A mournful, expressive violin carries the main melody, weaving through the oud's rhythmic framework. The arrangement builds with layered oud and violin parts, creating a rich, cinematic texture. A brief breakdown shifts the focus to a more atmospheric and improvisational oud solo, featuring emotive slides and melodic phrases, before the track concludes.",
+      "rewrite_status": "failed",
+      "tags_experimental": true,
+      "rewrite_seconds": 14.2,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2,
+      "rewrite_reasons": [
+        "timestamp in output: 1:36",
+        "timestamp guard: gave up after 3 attempts"
+      ],
+      "caption_pre_cleanup": "An evocative and mournful oud solo opens the piece, its microtonal melodies rich with expressive slides and ornamentation, setting a dramatic, ancient tone. At 0:33, a driving, mid-tempo rhythm enters, carried by a crisp darbuka and other hand percussion. The oud then shifts into a structured, rhythmic role, weaving intricate melodic lines over the steady groove. The track is purely instrumental, blending traditional Middle Eastern tonalities with a clean, modern production quality, creating a soundscape that is both cinematic and deeply rhythmic. The track begins with a brief, processed vocal sample before the oud enters, establishing a contemplative and traditional mood. The arrangement is initially sparse, focusing entirely on the oud's expressive, melodic lines and rhythmic phrasing. A prominent oud enters, weaving intricate, fast-paced melodic lines and arpeggios over the insistent string arrangement. The foundation is a propulsive, steady rhythm provided by hand percussion, likely a darbuka or similar drum, creating a tense, epic, and adventurous atmosphere suitable for a film score or action sequence. The track opens with a rhythmic oud ostinato and a spoken word sample before a driving, mid-tempo beat enters, combining a solid kick drum with the intricate patterns of a darbuka. A mournful, expressive violin carries the main melody, weaving through the oud's rhythmic framework. The arrangement builds with layered oud and violin parts, creating a rich, cinematic texture. A brief breakdown shifts the focus to a more atmospheric and improvisational oud solo, featuring emotive slides and melodic phrases, before the track concludes.",
+      "timestamp_cleanup": "ok"
     },
     {
       "file": "yt500-0479-4GEPGgBn7JM_3898110307.mp3",
@@ -657,9 +711,12 @@
         "An energetic and virtuosic instrumental piece driven by a percussive acoustic guitar playing a rhythmic, flamenco-inspired pattern. A passionate, expressive violin enters, delivering a fiery and intricate melody with a distinct Middle Eastern or Balkan flavor. The arrangement builds in intensity, with the violin employing fast runs, trills, and emotive phrasing over the driving guitar foundation. The track concludes with an abrupt cut to a brief, atmospheric synth pad that swells and then fades to silence."
       ],
       "caption_raw": "An instrumental piece beginning with a virtuosic and emotive solo oud performance, showcasing intricate melodies and rapid, ornamental runs characteristic of Middle Eastern music. The arrangement abruptly transitions into a high-energy, full-band section driven by a powerful, rhythmic violin lead and a driving darbuka rhythm. The oud shifts to a supporting role, providing harmonic texture beneath the intense violin and percussion. The track then returns to a more contemplative oud-led section before building back into the full, dynamic ensemble for a powerful conclusion. The track opens with a passionate violin melody, full of rapid runs and emotive vibrato, set against a driving rhythmic backdrop provided by a crisp darbuka and the harmonic strumming of an oud. The arrangement builds in intensity, with the violin's melodic lines becoming more complex and impassioned. A brief section highlights the oud's rhythmic and melodic role before the main violin theme returns with renewed vigor, showcasing impressive technical skill and a rich, traditional sound palette. A passionate, expressive violin enters, delivering a fiery and intricate melody with a distinct Middle Eastern or Balkan flavor. The arrangement builds in intensity, with the violin employing fast runs, trills, and emotive phrasing over the driving guitar foundation. The track concludes with an abrupt cut to a brief, atmospheric synth pad that swells and then fades to silence.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "The piece begins with a virtuosic and emotive solo oud performance, featuring intricate melodies and rapid, ornamental runs typical of Middle Eastern music. It abruptly transitions into a high-energy full-band section driven by a powerful, rhythmic violin lead and a driving darbuka rhythm, with the oud providing harmonic texture beneath. The arrangement returns to a more contemplative oud-led section before building back into a full, dynamic ensemble for a powerful conclusion. The violin delivers a fiery, expressive melody with rapid runs, trills, and emotive phrasing, set against a driving rhythmic foundation of darbuka and oud strumming, reflecting a distinct Middle Eastern or Balkan style. A brief section highlights the oud's rhythmic and melodic role before the main violin theme returns with renewed vigor, showcasing impressive technical skill and a rich traditional sound palette. The track concludes with an abrupt cut to a brief, atmospheric synth pad that swells and then fades to silence.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 4.0,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0480-6IApToG5dMM_2172152007.mp3",
@@ -699,9 +756,12 @@
         "The track opens with a highly virtuosic and emotive zurna solo, its piercing, reedy tone weaving intricate microtonal melodies over a driving, mid-tempo beat composed of a darbuka and other hand percussion. After this intense instrumental introduction, the arrangement shifts to support a powerful, soulful male vocal. His delivery is rich with melismatic ornamentation and a deep, melancholic tone characteristic of Arabic music. The production is spacious, with a prominent reverb applied to both the vocals and the zurna, creating an epic and atmospheric soundscape."
       ],
       "caption_raw": "An intensely emotional and virtuosic instrumental piece driven by a highly expressive lead violin. The track opens with a brief, cinematic string motif before a passionate violin enters, performing with heavy vibrato, dramatic slides, and microtonal ornamentation characteristic of Middle Eastern or Turkish music. The arrangement is sparse, focusing entirely on the violin's soaring, melancholic melody against a subtle, atmospheric string pad. The middle section transitions into a more improvisational, taqsim-like passage, showcasing the performer's technical skill with elaborate runs and emotive phrasing, before concluding. The track opens with a brief, processed male vocalization before launching into a passionate, virtuosic string melody full of intricate ornamentation and microtonal slides. A driving, rhythmic foundation is provided by hand percussion, likely a darbuka or similar drum, creating a powerful and cinematic groove. The arrangement is dynamic, building in intensity as the string melody soars with expressive, almost crying emotion. The track opens with a passionate, melismatic male vocal performance in Arabic, accompanied by a highly expressive and ornate duduk melody that weaves intricate, microtonal lines. The vocals and duduk are saturated in a spacious reverb, creating a vast, atmospheric soundscape. At the midpoint, a driving, mid-tempo electronic beat with a solid kick and clap drops in, transforming the track into an ethnic electronica or oriental house groove. The duduk continues its virtuosic improvisation over the steady rhythm, maintaining the song's powerful, melancholic, and epic mood throughout. After this intense instrumental introduction, the arrangement shifts to support a powerful, soulful male vocal. His delivery is rich with melismatic ornamentation and a deep, melancholic tone characteristic of Arabic music. The production is spacious, with a prominent reverb applied to both the vocals and the zurna, creating an epic and atmospheric soundscape.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "The track begins with a highly virtuosic and emotive zurna solo, featuring a piercing, reedy tone that weaves intricate microtonal melodies over a driving, mid-tempo beat composed of darbuka and other hand percussion. Early on, a brief cinematic string motif appears, followed by a passionate violin entry marked by heavy vibrato, dramatic slides, and microtonal ornamentation reminiscent of Middle Eastern or Turkish music. The arrangement remains sparse, with the violin's soaring, melancholic melody contrasted against a subtle atmospheric string pad. Soon after, the piece transitions into a more improvisational, taqsim-like passage, showcasing technical mastery through elaborate runs and emotive phrasing. A powerful, soulful male vocal enters, delivering melismatic ornamentation and a deep, melancholic tone characteristic of Arabic music. The vocals and zurna are saturated in spacious reverb, creating an epic and atmospheric soundscape. Midway, a driving electronic beat with a solid kick and clap emerges, transforming the track into an ethnic electronica or oriental house groove. The duduk and violin continue their virtuosic improvisation over the steady rhythm, maintaining the song's intense emotional and melancholic mood throughout. The overall piece is driven by a powerful, wailing bowed string instrument—possibly a violin or kemenche—performing in a distinct Middle Eastern or Turkish style, with a dynamic build in intensity as the melody soars with expressive, almost crying emotion.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 6.1,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0482-mN7SLGGhop0_2447643691.mp3",
@@ -743,9 +803,12 @@
         "An energetic and dramatic fusion track blending Middle Eastern and Balkan influences with modern electronic production. The piece is driven by a powerful, syncopated drum machine beat and a deep synth bassline. A virtuosic violin carries the main melodic theme with rapid, ornate phrasing, complemented by an oud-like plucked string instrument. A brief, melodic piano interlude introduces a moment of contrast before the track returns to its driving rhythm. A male vocalist enters with an emotional, melodic delivery in Arabic, his voice treated with a touch of reverb. The track builds in intensity with layered percussion and dynamic instrumental interplay, eventually breaking down into a contemplative piano and string-led outro that fades to silence."
       ],
       "caption_raw": "An intense, cinematic world fusion track driven by a powerful, rhythmic percussion ensemble of frame drums and darbukas. A mournful, expressive violin carries the main melodic theme with dramatic, microtonal phrasing, weaving through the mix alongside a plucked oud. A passionate male vocal enters with an emotional, melismatic delivery characteristic of Middle Eastern music, singing in a non-English language. The arrangement builds with atmospheric synth pads and a subtle bassline, creating a dramatic, epic soundscape that feels both ancient and modern. The piece is driven by a powerful, syncopated drum machine beat and a deep synth bassline. A virtuosic violin carries the main melodic theme with rapid, ornate phrasing, complemented by an oud-like plucked string instrument. A brief, melodic piano interlude introduces a moment of contrast before the track returns to its driving rhythm. A male vocalist enters with an emotional, melodic delivery in Arabic, his voice treated with a touch of reverb. The track builds in intensity with layered percussion and dynamic instrumental interplay, eventually breaking down into a contemplative piano and string-led outro that fades to silence.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An intense, cinematic fusion track blends Middle Eastern and Balkan influences with modern electronic production, driven by a powerful, syncopated drum machine beat and a deep synth bassline. A virtuosic violin carries the main melodic theme with rapid, ornate phrasing, weaving through the mix alongside a plucked oud-like string instrument. A mournful, expressive violin also contributes with dramatic, microtonal phrasing, adding emotional depth. A passionate male vocal enters with an emotional, melismatic delivery in Arabic, his voice treated with reverb, enhancing the sense of longing and cultural resonance. The arrangement builds with atmospheric synth pads and layered percussion, creating a dramatic, epic soundscape that feels both ancient and modern. A brief melodic piano interlude offers a moment of contrast before the track returns to its driving rhythm. The intensity peaks through dynamic instrumental interplay, followed by a contemplative outro featuring piano and strings that fade to silence.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.9,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0483-2HOc--v3YD0_2947079659.mp3",
@@ -787,9 +850,12 @@
         "An explosive, high-energy big band swing instrumental. The piece launches with a frantic, full-ensemble fanfare, driven by a powerful horn section of saxophones, trumpets, and trombones. A propulsive rhythm section, featuring a walking upright bass and swinging drums, lays down an unrelenting, fast-paced groove. The arrangement is dense with complex, interlocking horn lines, call-and-response patterns between the sections, and virtuosic saxophone solos that weave through the powerful brass stabs. The track maintains its breakneck tempo and celebratory, almost chaotic energy throughout, culminating in a final, decisive orchestral hit."
       ],
       "caption_raw": "An intense and dramatic orchestral piece driven by a powerful, cinematic string section. The arrangement features soaring violin melodies, aggressive staccato cello and bass lines, and punctuated by forceful brass stabs and swells. The composition builds in layers, starting with a bold thematic statement and escalating in complexity and dynamic intensity, creating a sense of urgency and epic scale. The production is clean and spacious, with a concert hall reverb that enhances its grand, film-score quality. An explosive, high-energy big band swing instrumental. The track is driven by a powerful and tight horn section, featuring soaring trumpets and saxophones playing syncopated, punchy melodies in unison. A propulsive rhythm section underpins the arrangement with a brisk walking bassline and a dynamic swing drum groove, full of crisp cymbal work and energetic fills. The piece is structured with fanfare-like introductions, call-and-response sections between different horn parts, and short, virtuosic melodic runs. The overall mood is celebratory, vibrant, and relentlessly upbeat, reminiscent of classic swing-era dance music but with a clean, modern recording quality. The piece launches with a frantic, full-ensemble fanfare, driven by a powerful horn section of saxophones, trumpets, and trombones. A propulsive rhythm section, featuring a walking upright bass and swinging drums, lays down an unrelenting, fast-paced groove. The arrangement is dense with complex, interlocking horn lines, call-and-response patterns between the sections, and virtuosic saxophone solos that weave through the powerful brass stabs. The track maintains its breakneck tempo and celebratory, almost chaotic energy throughout, culminating in a final, decisive orchestral hit.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An intense and dramatic orchestral piece driven by a powerful, cinematic string section, featuring soaring violin melodies, aggressive staccato cello and bass lines, and punctuated by forceful brass stabs and swells. The composition builds in layers, beginning with a bold thematic statement and escalating in complexity and dynamic intensity, creating a sense of urgency and epic scale, all within a clean, spacious production enhanced by concert hall reverb for a grand, film-score feel.\n\nComplementing this is an explosive, high-energy big band swing instrumental, launched with a frantic, full-ensemble fanfare from a powerful horn section of saxophones, trumpets, and trombones. A propulsive rhythm section—featuring a walking upright bass and swinging drums—provides an unrelenting, fast-paced groove, supported by crisp cymbal work and energetic fills. The arrangement includes syncopated, punchy melodies played in unison by the horns, dense interlocking lines, call-and-response patterns between sections, and virtuosic saxophone solos that weave through powerful brass stabs. The mood remains celebratory, vibrant, and relentlessly upbeat, evoking classic swing-era dance music with a clean, modern recording quality. The piece maintains its breakneck tempo and chaotic energy throughout, culminating in a final, decisive orchestral hit.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 5.5,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0484-pYhm1rCC3b4_1265810231.mp3",
@@ -830,9 +896,12 @@
         "An intense, high-energy instrumental piece driven by a virtuosic and fiery violin performance. The track opens with a brief spoken word sample before launching into a relentless, fast-paced violin melody full of rapid runs, expressive vibrato, and dramatic slides. Underpinning the soaring violin is a driving, steady rhythm section composed of a punchy drum machine beat and a solid bassline, creating a powerful, cinematic feel. The arrangement is dynamic, shifting between full-throttle melodic statements and more rhythmic, syncopated sections, maintaining a constant sense of urgency and drama throughout."
       ],
       "caption_raw": "An intense, cinematic world fusion track driven by a powerful, rhythmic hand percussion groove, possibly featuring tabla or djembe. A dramatic, sweeping string section carries the main theme with a distinct Middle Eastern or Balkan melodic flavor. The centerpiece of the track is a highly expressive and virtuosic solo violin, which enters with a wailing, emotive melody full of intricate ornamentation and microtonal slides. The arrangement builds in intensity, layering the driving strings and percussion with the passionate solo violin to create a dramatic and epic soundscape. The piece opens with a brief spoken word sample before launching into a driving, cinematic rhythm section composed of a punchy electronic drum beat and a solid synth bassline. A fiery, fast-paced violin melody, reminiscent of gypsy or Balkan folk music, soars over the top with rapid-fire passages and expressive phrasing. The arrangement features dynamic shifts, including a more melodic bridge section and a powerful, rhythmic motif where the violin plays staccato, accented notes, creating a sense of urgency and drama. The production is clean and modern, highlighting the raw energy of the violin against the tight electronic backdrop. The track opens with a brief spoken word sample before launching into a relentless, fast-paced violin melody full of rapid runs, expressive vibrato, and dramatic slides. Underpinning the soaring violin is a driving, steady rhythm section composed of a punchy drum machine beat and a solid bassline, creating a powerful, cinematic feel. The arrangement is dynamic, shifting between full-throttle melodic statements and more rhythmic, syncopated sections, maintaining a constant sense of urgency and drama throughout.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An intense, cinematic world fusion track begins with a brief spoken word sample, followed by a driving rhythm section featuring a punchy electronic drum beat and a solid synth bassline. A powerful, virtuosic violin performance takes center stage, delivering a fiery, fast-paced melody full of rapid runs, expressive vibrato, and dramatic slides, evoking the spirit of gypsy or Balkan folk music. The violin's emotive, intricate lines are layered with a sweeping string section that carries a distinct Middle Eastern or Balkan melodic flavor. The arrangement builds dynamically, shifting between full-throttle melodic passages and rhythmic, syncopated sections where the violin plays staccato, accented notes, creating a sense of urgency and drama. A highly expressive solo violin enters with a wailing, ornate melody featuring microtonal slides, forming the centerpiece of the track. The piece culminates in a powerful, epic soundscape as the driving percussion—possibly tabla or djembe—interacts with the layered strings and violin, all within a clean, modern production that highlights the raw energy and emotional depth of the performance.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 4.7,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0490-E7jVDebUv_k_3251656355.mp3",
@@ -871,9 +940,12 @@
         "An instrumental world fusion track blending Middle Eastern and Balkan influences with a modern electronic beat. A highly expressive violin carries the main melody, full of intricate ornamentation and emotive slides, weaving through a driving rhythm provided by a darbuka and a steady electronic kick-snare pattern. An oud provides harmonic and rhythmic counterpoint with plucked chords and arpeggios. The arrangement features a brief, atmospheric bridge where the percussion drops out, highlighting the interplay between the oud and a sustained synth pad before the full, energetic ensemble returns for the finale."
       ],
       "caption_raw": "An emotive and dramatic instrumental piece driven by a passionate, expressive violin playing a melody with a distinct Middle Eastern or Balkan flavor. The track opens with a brief, processed spoken word sample before the violin enters, its lines full of vibrato and dynamic swells. It's accompanied by rhythmic hand percussion, likely a darbuka or similar drum, and the harmonic texture of an oud or a similar plucked string instrument. The arrangement builds in intensity, layering the instruments to create a rich, cinematic soundscape that feels both melancholic and powerful. The arrangement is built upon a steady, rhythmic foundation of hand percussion, likely a darbuka or djembe, and a subtle bassline. The track opens with a brief spoken word sample before the main melodic theme enters. The structure includes dynamic shifts, with a brief, more virtuosic violin passage and a contrasting interlude featuring an oud-like plucked string instrument. The overall mood is introspective and evocative, blending traditional melodic sensibilities with a contemporary rhythmic feel. A highly expressive violin carries the main melody, full of intricate ornamentation and emotive slides, weaving through a driving rhythm provided by a darbuka and a steady electronic kick-snare pattern. An oud provides harmonic and rhythmic counterpoint with plucked chords and arpeggios. The arrangement features a brief, atmospheric bridge where the percussion drops out, highlighting the interplay between the oud and a sustained synth pad before the full, energetic ensemble returns for the finale.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An emotive instrumental piece features a passionate, expressive violin playing a melancholic melody with a distinct Middle Eastern or Balkan flavor, rich in vibrato and dynamic swells. The track opens with a brief processed spoken word sample before the violin enters. It is supported by a steady rhythmic foundation of hand percussion—likely a darbuka or djembe—alongside a subtle bassline and harmonic counterpoint from an oud or similar plucked string instrument. The arrangement builds in intensity, layering instruments to create a rich, cinematic soundscape that balances melancholy and power. A brief, virtuosic violin passage follows, interrupted by a contrasting interlude featuring the oud in plucked chords and arpeggios. The piece includes a short atmospheric bridge where the percussion drops out, emphasizing the interplay between the oud and a sustained synth pad, before the full ensemble returns for a powerful, energetic finale.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.8,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0491-H4dbJ1hODh4_2443293624.mp3",
@@ -913,9 +985,12 @@
         "An energetic and virtuosic instrumental piece driven by a highly expressive ney flute. The flute performs rapid, intricate melodic runs and soulful, sustained notes with prominent ornamentation, characteristic of Middle Eastern or Turkish music. It is supported by a dynamic and driving percussion section, featuring the distinct sounds of a darbuka and other hand drums, which lays down a complex, propulsive rhythm. The track opens with a brief spoken word sample before launching into its high-energy, celebratory groove, maintaining a lively and festive mood throughout."
       ],
       "caption_raw": "The piece opens with a long, atmospheric introduction featuring a highly expressive and emotive bowed string instrument, likely a sarangi or esraj, performing a mournful, microtonal melody rich with glissando and microtonal slides. This solo section builds in intensity, culminating in a rapid ascending scale that transitions into the main theme. At the one-minute mark, a rhythmic foundation is established by a plucked string instrument, possibly an oud or a similar lute, playing a driving, rhythmic ostinato. The bowed string re-enters with a powerful, soaring melody, mirroring the intensity of the opening but with greater force, now accompanied by subtle hand percussion that adds to the driving, cinematic feel of the track. The oud performs complex, rapid-fire melodic runs and rhythmic phrases characteristic of Middle Eastern music. Around the halfway mark, a breathy ney flute enters, taking over the lead with an equally ornate and expressive melody, while the oud shifts to a supporting rhythmic and harmonic role. The track is lively, celebratory, and showcases high-level musicianship in a traditional Arabic or Turkish style. The track opens with a brief, processed vocal sample before launching into a fast-paced, hypnotic groove led by a virtuosic oud performance. The oud delivers rapid, intricate melodic phrases and ornamental flourishes over a tight, propulsive rhythm section composed of a darbuka and other hand percussion. A ney flute joins in, weaving equally virtuosic and expressive lines that trade phrases with the oud, adding another layer of melodic texture. The production is clean and direct, emphasizing the acoustic nature of the instruments while maintaining a powerful, danceable energy throughout. The flute performs rapid, intricate melodic runs and soulful, sustained notes with prominent ornamentation, characteristic of Middle Eastern or Turkish music. It is supported by a dynamic and driving percussion section, featuring the distinct sounds of a darbuka and other hand drums, which lays down a complex, propulsive rhythm. The track opens with a brief spoken word sample before launching into its high-energy, celebratory groove, maintaining a lively and festive mood throughout.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "The piece begins with a long, atmospheric introduction featuring a highly expressive bowed string instrument—likely a sarangi or esraj—performing a mournful, microtonal melody rich with glissandi and microtonal slides. This solo section builds in intensity, culminating in a rapid ascending scale that transitions into the main theme. At the one-minute mark, a rhythmic foundation is established by a plucked string instrument, possibly an oud or similar lute, playing a driving, rhythmic ostinato. The bowed string re-enters with a powerful, soaring melody, mirroring the intensity of the opening but with greater force, now accompanied by subtle hand percussion that enhances the cinematic feel.\n\nAn energetic and virtuosic instrumental piece rooted in Middle Eastern traditions, opening with a brief spoken word sample before launching into a fast-paced, hypnotic groove. The oud delivers rapid, intricate melodic phrases and ornamental flourishes over a tight, propulsive rhythm section featuring a darbuka and other hand percussion. A ney flute joins in, weaving equally virtuosic and expressive lines that trade phrases with the oud, adding depth and melodic texture. The track maintains a lively, celebratory mood throughout, showcasing high-level musicianship in a traditional Arabic or Turkish style. The ney flute also performs rapid, intricate melodic runs and soulful, sustained notes with prominent ornamentation, supported by a dynamic and driving percussion section.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 6.0,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0494-z4ZqMv8MO40_523688967.mp3",
@@ -953,9 +1028,12 @@
         "An instrumental piece driven by a passionate and dramatic interplay between a nylon-string acoustic guitar and a full string section. The track opens with a rhythmic, Spanish-style guitar figure accompanied by a steady hand percussion groove, likely a cajón. A highly expressive and emotive violin enters with a soaring, melancholic melody rich with vibrato and dynamic swells. The arrangement builds in intensity, with the strings taking center stage for dramatic, almost frantic passages before returning to the core guitar and percussion theme. The overall mood is cinematic, passionate, and deeply emotional, blending elements of flamenco, classical, and world music."
       ],
       "caption_raw": "An instrumental piece beginning with a melancholic and cinematic mood, established by a plucked oud-like instrument playing a recurring arpeggiated motif. An expressive, emotive violin enters with a soaring, lyrical melody rich with vibrato. The track builds in intensity, transitioning into a dramatic, high-energy section driven by a powerful, driving percussion ensemble featuring darbuka and other hand drums. The violin and oud continue their passionate interplay over this propulsive rhythm, creating a powerful fusion of Middle Eastern melodicism and epic, cinematic orchestration. The track opens with a brief acoustic guitar and bass motif before launching into a full ensemble arrangement featuring a driving rhythm section of darbuka and other hand percussion. A prominent oud provides harmonic and rhythmic counterpoint to the soaring, emotive violin melodies, which are rich with microtonal ornamentation characteristic of Middle Eastern music. The arrangement builds in intensity, with the violin taking center stage for extended, fiery solos over the propulsive groove, creating a cinematic and powerful atmosphere. The track opens with a rhythmic, Spanish-style guitar figure accompanied by a steady hand percussion groove, likely a cajón. The arrangement builds in intensity, with the strings taking center stage for dramatic, almost frantic passages before returning to the core guitar and percussion theme. The overall mood is cinematic, passionate, and deeply emotional, blending elements of flamenco, classical, and world music.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An instrumental piece begins with a melancholic, cinematic mood, established by a plucked oud-like instrument playing a recurring arpeggiated motif. A soaring, emotive violin enters with a lyrical melody rich in vibrato and dynamic swells, creating a passionate interplay. The track builds in intensity, transitioning into a dramatic, high-energy section driven by a powerful percussion ensemble featuring darbuka and other hand drums. The violin and oud continue their dynamic exchange over the propulsive rhythm, blending Middle Eastern melodicism with epic, cinematic orchestration. A passionate, virtuosic violin performance takes center stage during extended, fiery solos, supported by a driving rhythm section of hand percussion and a prominent oud providing harmonic and rhythmic counterpoint with microtonal ornamentation. Early on, a brief acoustic guitar and bass motif appears, followed by a rhythmic Spanish-style guitar figure accompanied by a steady hand percussion groove, likely a cajón. The arrangement evolves with the strings taking center stage for dramatic, almost frantic passages before returning to the core guitar and percussion theme, resulting in a deeply emotional, cinematic atmosphere that fuses elements of flamenco, classical, and world music.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 4.9,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0496-qgDJbAQrrfc_1299137470.mp3",
@@ -996,9 +1074,12 @@
         "A gentle and whimsical instrumental piece driven by a clean, arpeggiated piano melody that evokes the feeling of a music box or a lullaby. A poignant cello enters, playing a lyrical and expressive counter-melody with noticeable vibrato. The arrangement is supported by a simple, steady bassline and a light, unobtrusive drum pattern. The track builds subtly, with the cello taking center stage for melodic statements before the piece transitions into a more reflective middle section and then returns to the main theme, ending abruptly."
       ],
       "caption_raw": "A delicate and cinematic instrumental piece begins with a clean, arpeggiated harp melody, creating a gentle, flowing texture. A mournful cello enters with a long, expressive melodic line, adding a layer of poignant emotion. The arrangement gradually builds as a full string section swells in, providing lush harmonic support and transforming the piece into a rich, orchestral soundscape. The overall mood is introspective, melancholic, and deeply emotional, suitable for a film score. A warm, expressive cello enters, playing a legato counter-melody that adds emotional depth. The arrangement gradually builds with the introduction of a subtle piano and a full, lush string section. A brief, processed male spoken word sample in Spanish is layered into the mix, adding a mysterious, narrative quality. The track maintains a steady, reflective mood throughout, suitable for a soundtrack or contemplative listening. A poignant cello enters, playing a lyrical and expressive counter-melody with noticeable vibrato. The arrangement is supported by a simple, steady bassline and a light, unobtrusive drum pattern. The track builds subtly, with the cello taking center stage for melodic statements before the piece transitions into a more reflective middle section and then returns to the main theme, ending abruptly.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "A delicate cinematic instrumental piece begins with a clean, arpeggiated harp melody, establishing a gentle, flowing texture. A mournful cello enters with a long, expressive melodic line, adding poignant emotion. The arrangement gradually builds as a full string section swells in, providing lush harmonic support and transforming the piece into a rich, orchestral soundscape. A warm, expressive cello also appears in a legato counter-melody, deepening the emotional tone. In a later section, a subtle piano and a light, unobtrusive drum pattern are introduced, with a simple steady bassline adding foundation. A brief, processed male spoken word sample in Spanish is layered in, introducing a mysterious, narrative quality. The track maintains a reflective, introspective, and melancholic mood throughout, with the cello taking center stage during melodic statements before transitioning into a more reflective middle section. The piece returns to the main theme before ending abruptly.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 4.0,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0497-PIJf1wAeTwA_1080840251.mp3",
@@ -1026,9 +1107,12 @@
         "An intense and dramatic neoclassical piece driven by a synthesized string ensemble. The arrangement features sharp, staccato violins playing urgent, interlocking melodic lines over a driving pizzicato cello and bass foundation. The composition builds in complexity and tension, moving through various thematic sections with dynamic shifts, from forceful, accented passages to more flowing, legato moments. The overall mood is cinematic, tense, and slightly frantic, reminiscent of a film score for a chase or a dramatic confrontation, before ending abruptly mid-phrase."
       ],
       "caption_raw": "An intense and dramatic orchestral piece driven by a powerful, staccato string ensemble. The arrangement features aggressive, rhythmic ostinatos in the cellos and basses, creating a sense of urgency and forward momentum. Over this driving foundation, violins and violas play tense, soaring melodic lines and agitated motifs. The piece builds in dynamic layers, with different sections of the orchestra trading thematic ideas, escalating the tension throughout. The overall mood is cinematic, suspenseful, and action-packed, reminiscent of a film score for a chase or a dramatic confrontation. The arrangement features frantic, interlocking melodic lines passed between violins, violas, and cellos, creating a sense of urgency and tension. The performance is characterized by sharp, staccato bowing and powerful, accented phrases, maintaining a high-energy, driving pace throughout. The composition has a cinematic, almost chase-like quality, with contrapuntal textures and a relentless forward momentum that builds until an abrupt stop. The arrangement features sharp, staccato violins playing urgent, interlocking melodic lines over a driving pizzicato cello and bass foundation. The composition builds in complexity and tension, moving through various thematic sections with dynamic shifts, from forceful, accented passages to more flowing, legato moments. The overall mood is cinematic, tense, and slightly frantic, reminiscent of a film score for a chase or a dramatic confrontation, before ending abruptly mid-phrase.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An intense and dramatic neoclassical piece driven by a synthesized string ensemble, featuring sharp, staccato violins with urgent, interlocking melodic lines over a driving pizzicato cello and bass foundation. The arrangement includes aggressive, rhythmic ostinatos in the cellos and basses, creating a sense of urgency and forward momentum. Violins and violas add tense, soaring melodic lines and agitated motifs, while the piece builds in dynamic layers with different sections trading thematic ideas, escalating tension throughout. The performance is marked by sharp, staccato bowing and powerful, accented phrases, maintaining a high-energy, relentless pace. The overall mood is cinematic, suspenseful, and action-packed, reminiscent of a film score for a chase or dramatic confrontation, culminating in an abrupt stop mid-phrase.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.5,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0498-bk8mS5daUH4_2554509437.mp3",
@@ -1067,9 +1151,12 @@
         "An energetic and festive instrumental track driven by a lively Middle Eastern rhythm. A crisp darbuka and other hand percussion lay down a driving, danceable groove. A reedy, expressive ney flute takes the lead, weaving intricate, ornamental melodies with fast runs and trills. It's supported by a lush string section playing sustained chords and counter-melodies, alongside a rhythmic oud or similar plucked string instrument. The track opens with a brief, rhythmic male vocal chant before launching into its main instrumental theme, maintaining a high-energy, celebratory mood throughout."
       ],
       "caption_raw": "An energetic and cinematic Middle Eastern instrumental piece driven by a powerful, rhythmic oud and hand percussion, likely a darbuka. The track opens with a brief spoken word intro before launching into a driving groove. A lush string section provides harmonic depth, while a ney flute delivers expressive, melodic solos with characteristic ornamentation. The arrangement features dynamic interplay between the instruments, with sections highlighting the virtuosic oud and the soaring ney flute, creating a dramatic and epic soundscape. A crisp darbuka and other hand percussion lay down a driving, danceable groove. A bright, reedy wind instrument, possibly a zurna or a synthesized equivalent, plays a fast, highly ornamented lead melody full of intricate trills and rapid runs. It's supported by a lush string section providing harmonic pads and a plucked string instrument, like an oud, which adds rhythmic chordal accompaniment and melodic fills. The track has a celebratory and lively atmosphere, characteristic of modern Arabic or Turkish folk dance music. A reedy, expressive ney flute takes the lead, weaving intricate, ornamental melodies with fast runs and trills. It's supported by a lush string section playing sustained chords and counter-melodies, alongside a rhythmic oud or similar plucked string instrument. The track opens with a brief, rhythmic male vocal chant before launching into its main instrumental theme, maintaining a high-energy, celebratory mood throughout.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An energetic and cinematic Middle Eastern instrumental piece is driven by a powerful rhythmic oud and hand percussion, primarily a darbuka. The track begins with a brief rhythmic male vocal chant, followed by a driving groove. A reedy ney flute takes the lead, delivering expressive, ornamented melodies with fast runs and trills, while a lush string section provides harmonic depth, sustained chords, and counter-melodies. A plucked string instrument, such as an oud, contributes rhythmic chordal accompaniment and melodic fills. The arrangement features dynamic interplay between the instruments, with virtuosic passages highlighting both the oud and the ney, creating a dramatic and celebratory soundscape characteristic of modern Arabic or Turkish folk dance music.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.1,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0499-KbTqKEiFHPo_591629639.mp3",
@@ -1103,9 +1190,12 @@
         "An instrumental piece driven by a highly expressive and virtuosic synthesized wind instrument, possibly a digital clarinet or duduk patch, which performs a complex, melancholic melody rich with microtonal bends and ornamentation characteristic of Middle Eastern or Balkan music. This lead instrument is supported by a steady, rhythmic hand drum, likely a darbuka or similar percussion, providing a consistent groove. The track is structured as a continuous melodic exploration without a traditional song form, maintaining a hypnotic and introspective mood throughout. The piece concludes with an abrupt stop, followed by a brief, atmospheric synth pad that fades into silence."
       ],
       "caption_raw": "An intensely emotional and virtuosic instrumental piece led by a bowed string instrument, likely a violin or kemenche, played with a rich, expressive vibrato and extensive microtonal ornamentation characteristic of Middle Eastern or Turkish music. The track begins with a brief, processed vocal sample before the lead instrument enters, weaving a mournful, dramatic melody. A steady, rhythmic hand drum, possibly a darbuka, joins in, providing a grounded pulse beneath the soaring, improvisatory-sounding string lines. The arrangement is sparse, focusing entirely on the powerful interplay between the emotive lead instrument and the driving percussion, creating a cinematic and deeply melancholic soundscape. This lead instrument is supported by a steady, rhythmic hand drum, likely a darbuka or similar percussion, providing a consistent groove. The track is structured as a continuous melodic exploration without a traditional song form, maintaining a hypnotic and introspective mood throughout. The piece concludes with an abrupt stop, followed by a brief, atmospheric synth pad that fades into silence.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An intensely emotional and virtuosic instrumental piece features a bowed string instrument—likely a violin or kemenche—played with rich vibrato and extensive microtonal ornamentation typical of Middle Eastern or Turkish music. The track begins with a brief processed vocal sample, after which the lead instrument enters, weaving a mournful, dramatic melody. A steady, rhythmic hand drum, probably a darbuka, joins, providing a grounded pulse beneath the soaring, improvisatory string lines. The arrangement remains sparse, emphasizing the powerful interplay between the emotive lead and the driving percussion, creating a cinematic and deeply melancholic atmosphere. The piece unfolds as a continuous melodic exploration without a traditional song structure, maintaining a hypnotic and introspective mood. It ends with an abrupt stop, followed by a brief atmospheric synth pad that fades into silence.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.5,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0500-BIg1wHdIFIg_1387758848.mp3",
@@ -1146,9 +1236,12 @@
         "A melancholic and introspective instrumental piece led by a nylon-string acoustic guitar playing a Spanish-influenced chord progression and melody. A simple, steady lo-fi hip-hop beat provides the rhythmic foundation, complemented by a subtle, deep bassline. The track features heavily processed, wordless female vocal chops that are used as a melodic and textural instrument, delivering airy, rhythmic phrases and layered harmonies. The arrangement builds slightly, introducing a poignant violin melody in the latter half, which intertwines with the guitar before the track concludes with a final, lingering guitar chord."
       ],
       "caption_raw": "An instrumental piece centered around a virtuosic nylon-string acoustic guitar performing in a Spanish or Middle Eastern style. The track opens with a brief spoken word sample before launching into an intricate, melodic guitar passage full of fast runs and expressive phrasing. A steady, rhythmic pulse enters, driven by a darbuka and other hand percussion, establishing a mid-tempo groove. A lush string section joins in, providing sustained chords and soaring melodic counterpoints that add a cinematic and emotional depth. The arrangement builds in layers, with the guitar and strings trading melodic focus, creating a rich, evocative soundscape that blends traditional world music elements with orchestral textures. A simple, steady lo-fi hip-hop beat provides the rhythmic foundation, complemented by a subtle, deep bassline. The track features heavily processed, wordless female vocal chops that are used as a melodic and textural instrument, delivering airy, rhythmic phrases and layered harmonies. The arrangement builds slightly, introducing a poignant violin melody in the latter half, which intertwines with the guitar before the track concludes with a final, lingering guitar chord.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An instrumental piece centered on a virtuosic nylon-string acoustic guitar playing in a Spanish or Middle Eastern style. The track begins with a brief spoken word sample, followed by an intricate, melodic guitar passage filled with fast runs and expressive phrasing. A steady rhythmic pulse enters, driven by a darbuka and hand percussion, establishing a mid-tempo groove. A lush string section joins, offering sustained chords and soaring melodic counterpoints that add cinematic and emotional depth. The arrangement builds in layers, with the guitar and strings trading melodic focus, creating a rich, evocative soundscape that blends traditional world music with orchestral textures.  \n\nLater, a melancholic and introspective tone emerges, with the guitar playing a Spanish-influenced chord progression and melody. A simple, steady lo-fi hip-hop beat provides the rhythmic foundation, enhanced by a subtle deep bassline. Heavily processed, wordless female vocal chops serve as a melodic and textural element, delivering airy, rhythmic phrases and layered harmonies. A poignant violin melody enters in the latter half, intertwining with the guitar before the track concludes with a final, lingering guitar chord.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 4.8,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0502-oKyKGMaapfQ_1013543052.mp3",
@@ -1191,9 +1284,12 @@
         "An emotive and cinematic instrumental piece driven by a nylon-string acoustic guitar playing intricate, arpeggiated patterns. A mournful, expressive violin carries the main melody, rich with vibrato and emotional slides. The arrangement is supported by a subtle, steady hand-drum rhythm and a low, sustained cello or synth pad providing a harmonic foundation. The track features a recurring, rhythmic male vocal chant of 'eh eh eh', adding a percussive, tribal-like texture. The overall mood is deeply melancholic, introspective, and evocative of Middle Eastern or Mediterranean folk traditions."
       ],
       "caption_raw": "An emotive and cinematic instrumental piece led by a poignant, expressive cello that carries the main melody with rich vibrato and mournful phrasing. The track opens with a brief, processed spoken word sample before the cello enters, establishing a melancholic and reflective mood. An acoustic guitar joins in, providing a steady, arpeggiated rhythmic foundation and harmonic depth. The arrangement is spacious and atmospheric, allowing the interplay between the soaring cello and the grounded guitar to create a feeling of wistful storytelling. The piece builds subtly in emotional intensity, particularly during a cello-led melodic peak towards the end. It's supported by a rhythmic acoustic guitar playing arpeggiated chords and a subtle, steady hand percussion groove. A layered, choral-like vocal section enters, singing wordless, soaring melodic lines that blend seamlessly with the cello's theme, adding an epic, cinematic quality to the arrangement. The track builds in emotional intensity before ending abruptly mid-phrase. A mournful, expressive violin carries the main melody, rich with vibrato and emotional slides. The arrangement is supported by a subtle, steady hand-drum rhythm and a low, sustained cello or synth pad providing a harmonic foundation. The track features a recurring, rhythmic male vocal chant of 'eh eh eh', adding a percussive, tribal-like texture. The overall mood is deeply melancholic, introspective, and evocative of Middle Eastern or Mediterranean folk traditions.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An emotive and cinematic instrumental piece is led by a poignant, expressive cello that carries the main melody with rich vibrato and mournful phrasing, establishing a deeply melancholic and reflective mood. The track opens with a brief, processed spoken word sample before the cello enters. An acoustic guitar joins, playing arpeggiated chords that provide a steady rhythmic foundation and harmonic depth. A subtle hand percussion groove adds texture, while a layered, choral-like vocal section enters with wordless, soaring melodic lines that blend seamlessly with the cello, enhancing the epic, cinematic quality. A mournful violin also contributes to the melody, rich with vibrato and emotional slides. A recurring rhythmic male vocal chant of 'eh eh eh' adds a percussive, tribal-like texture, evoking Middle Eastern or Mediterranean folk traditions. The arrangement is spacious and atmospheric, allowing the interplay between the soaring cello and grounded guitar to create a sense of wistful storytelling. The piece builds subtly in emotional intensity, culminating in a cello-led melodic peak toward the end, before ending abruptly mid-phrase.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 4.6,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0503-zroiCfDx1Xg_2886476833.mp3",
@@ -1222,9 +1318,12 @@
         "An intensely emotional and virtuosic classical piece driven by a solo violin. The violin performs a passionate, almost frantic melody filled with rapid runs, expressive vibrato, and dramatic dynamic shifts. It is accompanied by a supportive piano playing arpeggiated chords that provide a harmonic foundation. The arrangement has a cinematic, neo-classical feel, conveying a sense of urgency and melancholy. The piece concludes with a brief, pensive piano-led interlude before an abrupt end."
       ],
       "caption_raw": "A virtuosic and highly expressive solo violin performance, beginning with a mournful, lyrical melody rich with vibrato and dramatic slides. The piece quickly accelerates into a frantic, fast-paced section characterized by rapid-fire scales, complex arpeggios, and aggressive bowing techniques. The performance showcases immense technical skill, moving through various melodic motifs and dynamic shifts, from intense, driving passages to more contemplative moments, all while maintaining a raw, passionate, and dramatic character rooted in a classical or folk tradition. The performance is characterized by a strong, expressive vibrato and dramatic dynamic shifts, evoking the passionate style of Klezmer or Eastern European folk music. The violin carries the entire melodic narrative, moving through mournful, lyrical phrases and rapid, technically demanding passages with a raw, almost crying quality. The arrangement is sparse, focusing entirely on the solo instrument's powerful and intricate expression. The violin performs a passionate, almost frantic melody filled with rapid runs, expressive vibrato, and dramatic dynamic shifts. It is accompanied by a supportive piano playing arpeggiated chords that provide a harmonic foundation. The arrangement has a cinematic, neo-classical feel, conveying a sense of urgency and melancholy. The piece concludes with a brief, pensive piano-led interlude before an abrupt end.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "A virtuosic and emotionally intense solo violin performance begins with a mournful, lyrical melody rich in vibrato and dramatic slides, evoking the passionate style of Klezmer or Eastern European folk music. The piece quickly accelerates into a frantic, fast-paced section marked by rapid-fire scales, complex arpeggios, and aggressive bowing techniques. The violin carries the entire melodic narrative with expressive vibrato and dramatic dynamic shifts, moving through passionate, almost crying phrases and technically demanding passages. Early on, the performance is sparse and focused, emphasizing the solo instrument's raw, powerful expression. Later, a supportive piano enters, playing arpeggiated chords that provide a harmonic foundation, giving the arrangement a cinematic, neo-classical feel filled with urgency and melancholy. The piece concludes with a brief, pensive piano-led interlude before ending abruptly.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.6,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0504-BWveNYQDmF4_1281638518.mp3",
@@ -1259,9 +1358,12 @@
         "An instrumental world fusion track featuring a prominent oud playing intricate, melodic lines with characteristic microtonal ornamentation. The piece is built on a steady, mid-tempo electronic beat with a crisp clap and a subtle synth bassline. A lush, synthesized string section enters, providing a rich harmonic bed and soaring counter-melodies that add an emotional, cinematic quality. The arrangement shifts between sections highlighting the oud's solo performance and sections where the full ensemble creates a hypnotic, atmospheric soundscape. The track concludes with a brief, reflective oud melody before fading out."
       ],
       "caption_raw": "An energetic and dramatic instrumental piece driven by a string ensemble. The track opens with a brief atmospheric swell before launching into a driving, rhythmic pizzicato cello and viola ostinato that establishes a tense, propulsive groove. A soaring, expressive violin melody enters, playing a powerful and memorable theme with a distinct Middle Eastern or Eastern European flavor. The arrangement builds in intensity, with the lead violin delivering virtuosic, fast-paced passages over the insistent, rhythmic foundation of the lower strings, creating a cinematic and epic atmosphere. The piece is built on a steady, mid-tempo electronic beat with a crisp clap and a subtle synth bassline. A lush, synthesized string section enters, providing a rich harmonic bed and soaring counter-melodies that add an emotional, cinematic quality. The arrangement shifts between sections highlighting the oud's solo performance and sections where the full ensemble creates a hypnotic, atmospheric soundscape. The track concludes with a brief, reflective oud melody before fading out.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An energetic and dramatic instrumental piece driven by a string ensemble, beginning with a brief atmospheric swell that gives way to a driving, rhythmic pizzicato cello and viola ostinato, establishing a tense, propulsive groove. A soaring, expressive violin melody enters, delivering a powerful and memorable theme with a distinct Middle Eastern or Eastern European flavor. The arrangement builds in intensity as the lead violin performs virtuosic, fast-paced passages over the insistent lower string foundation, creating a cinematic and epic atmosphere.  \n\nThe piece also features a prominent oud playing intricate, melodic lines with characteristic microtonal ornamentation, set against a steady mid-tempo electronic beat with a crisp clap and a subtle synth bassline. A lush synthesized string section enters, adding a rich harmonic bed and soaring counter-melodies that enhance the emotional, cinematic quality. The track shifts between sections that highlight the oud's solo performance and those where the full ensemble creates a hypnotic, atmospheric soundsscape. It concludes with a brief, reflective oud melody before fading out.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 4.3,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0505-mznlwxnuBCU_3744624645.mp3",
@@ -1297,9 +1399,12 @@
         "A deeply melancholic and cinematic piece featuring a solo violin and an expressive, wordless female vocal. The track opens with a mournful, lyrical violin melody, rich with vibrato and emotional phrasing. A female voice enters, performing an elaborate and emotive vocalise with extensive melisma and ornamentation reminiscent of Middle Eastern or classical Indian styles. The violin and voice engage in a poignant dialogue, with the vocal line often mirroring or responding to the violin's melodic phrases. The arrangement is sparse and atmospheric, focusing entirely on the raw, emotional interplay between the two elements in a spacious, reverberant setting."
       ],
       "caption_raw": "An intensely emotional and virtuosic piece centered on a solo violin and a male vocalise performance. The track opens with a brief, sampled-sounding spoken word segment before a deeply expressive violin enters, delivering a mournful, lyrical melody rich with vibrato and dramatic slides. A male voice joins in, not with lyrics, but with soulful, melismatic vocalizations that masterfully mimic the violin's phrasing, full of passionate runs and glissandos. The interplay between the emotive violin and the equally passionate vocal creates a poignant, cinematic, and almost spiritual dialogue. The vocalist performs elaborate melismatic runs and glissandos with a melancholic and introspective tone. At the midpoint, a poignant violin enters, taking over the lead melody with a soaring, lyrical line rich with vibrato. The arrangement remains sparse, focusing on the interplay between the emotive vocal and the classical violin, creating a deeply poignant and cinematic soundscape. The track opens with a mournful, lyrical violin melody, rich with vibrato and emotional phrasing. A female voice enters, performing an elaborate and emotive vocalise with extensive melisma and ornamentation reminiscent of Middle Eastern or classical Indian styles. The violin and voice engage in a poignant dialogue, with the vocal line often mirroring or responding to the violin's melodic phrases. The arrangement is sparse and atmospheric, focusing entirely on the raw, emotional interplay between the two elements in a spacious, reverberant setting.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "The track begins with a brief, sampled spoken word segment, followed by a deeply expressive solo violin introducing a mournful, lyrical melody rich with vibrato and dramatic slides. A male voice enters with soulful, melismatic vocalizations that mirror the violin's phrasing, featuring passionate runs and glissandos, creating a poignant, cinematic, and almost spiritual dialogue. Later, a female vocalist performs an elaborate, emotive vocalise in a classical Indian style, marked by melancholic introspection and extensive melisma and ornamentation. The violin takes over with a soaring, lyrical line, maintaining a sparse, atmospheric arrangement where the vocal and violin engage in a raw, emotional interplay, often mirroring or responding to one another in a spacious, reverberant setting. The entire piece is characterized by its deep melancholy, cinematic quality, and the seamless, passionate dialogue between the violin and wordless vocals.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.8,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0506-ASnWQdQogJs_2511056867.mp3",
@@ -1336,9 +1441,12 @@
         "An intensely dramatic and cinematic orchestral piece driven by a powerful, emotive string section. A lead violin or viola performs a virtuosic, Middle Eastern-flavored melody full of rapid runs, expressive vibrato, and poignant slides. It's supported by a full string ensemble providing a driving, rhythmic accompaniment and lush harmonic pads. The arrangement builds in intensity, incorporating powerful orchestral percussion hits and swells that heighten the epic, adventurous mood. The piece transitions through dynamic sections, from full-force melodic statements to more contemplative passages, before concluding with a tense, building staccato motif that ends abruptly."
       ],
       "caption_raw": "An intensely dramatic and epic orchestral piece driven by a powerful, cinematic string section. The arrangement opens with a bold, declarative motif from the full ensemble, establishing a tense and adventurous mood. A virtuosic solo violin emerges, delivering a passionate and highly ornamented melody with a distinct Middle Eastern or Eastern European flavor, characterized by rapid runs and emotive phrasing. The supporting strings provide a robust, rhythmic foundation with driving staccato chords and soaring harmonic layers. The piece builds in dynamic intensity, layering motifs and swelling to a powerful climax before an abrupt, impactful ending. The track opens with a sweeping, cinematic theme before transitioning into a more melancholic, lyrical passage led by the woodwind instrument. The energy builds significantly with the introduction of driving, rhythmic percussion, including frame drums and darbukas, alongside urgent staccato strings. The arrangement swells into a grand, heroic climax with the full orchestra, featuring soaring melodic lines, powerful rhythmic hits, and a sense of intense action, characteristic of a film score or trailer music. A lead violin or viola performs a virtuosic, Middle Eastern-flavored melody full of rapid runs, expressive vibrato, and poignant slides. It's supported by a full string ensemble providing a driving, rhythmic accompaniment and lush harmonic pads. The arrangement builds in intensity, incorporating powerful orchestral percussion hits and swells that heighten the epic, adventurous mood. The piece transitions through dynamic sections, from full-force melodic statements to more contemplative passages, before concluding with a tense, building staccato motif that ends abruptly.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An intensely dramatic and cinematic orchestral piece driven by a powerful string section, opening with a bold, declarative motif that establishes a tense and adventurous mood. A virtuosic solo violin or viola delivers a passionate, Middle Eastern or Eastern European-flavored melody, marked by rapid runs, expressive vibrato, and poignant slides. The supporting strings provide a robust, rhythmic foundation with driving staccato chords and lush harmonic layers. The arrangement builds in dynamic intensity, layering motifs and swelling to a powerful climax, before concluding with a tense, building staccato motif that ends abruptly. A prominent emotive woodwind lead—possibly a ney or duduk—introduces a melancholic, lyrical passage, and the energy increases with the addition of driving rhythmic percussion, including frame drums and darbukas, alongside urgent staccato strings. The piece reaches a grand, heroic climax with the full orchestra, featuring soaring melodic lines, powerful rhythmic hits, and a sense of intense action characteristic of film score or trailer music. The track transitions through dynamic sections, from full-force melodic statements to more contemplative passages, before the abrupt final resolution.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 4.9,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0512-YrejU-BW-g4_1233218422.mp3",
@@ -1381,9 +1489,12 @@
         "An energetic, driving Arabic dance track built on a foundation of a punchy electronic drum machine beat and a rhythmic synth bassline. The lead melody is carried by a synthesized wind instrument, possibly mimicking a zurna or mizmar, which plays fast, highly ornamented lines with characteristic microtonal bends. The arrangement features dynamic shifts, including a brief, atmospheric bridge with a synthesized ney-like flute and wordless, melodic female vocalizations that add an ethereal layer. The track maintains a high-energy, festive mood throughout, perfect for belly dancing or modern Middle Eastern pop contexts."
       ],
       "caption_raw": "An energetic, driving Arabic dance-pop track built on a foundation of a punchy electronic drum machine beat and a rhythmic synth bass. The central focus is a sharp, plucked synth lead playing a catchy, oriental-scale melody, complemented by layered percussion including darbuka-style hand drums. A brief, melodic female vocal section sings a wordless 'na na na' hook, adding a human touch to the vibrant instrumental. The track maintains a high-energy, club-ready feel throughout its short duration, perfect for dancing. The core melodic identity comes from a prominent synth lead playing a distinct Middle Eastern scale, giving the track its characteristic oriental flavor. A female vocalist delivers a catchy, non-lexical 'na na na' melody, her voice treated with reverb and layered into harmonies. The arrangement features dynamic instrumental sections where the synth lead takes center stage, interspersed with vocal-led melodic breaks, creating a vibrant and club-ready atmosphere. The lead melody is carried by a synthesized wind instrument, possibly mimicking a zurna or mizmar, which plays fast, highly ornamented lines with characteristic microtonal bends. The arrangement features dynamic shifts, including a brief, atmospheric bridge with a synthesized ney-like flute and wordless, melodic female vocalizations that add an ethereal layer. The track maintains a high-energy, festive mood throughout, perfect for belly dancing or modern Middle Eastern pop contexts.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An energetic, driving Arabic dance-pop track built on a punchy electronic drum machine beat and a rhythmic synth bassline. The central melody is carried by a sharp, plucked synth lead playing a distinct Middle Eastern scale, giving the track its oriental character. A synthesized wind instrument, possibly mimicking a zurna or mizmar, adds fast, ornamented lines with microtonal bends. Layered percussion includes darbuka-style hand drums, enhancing the rhythmic drive. A brief, melodic female vocal section sings a wordless 'na na na' hook, treated with reverb and layered into harmonies, adding a human and ethereal touch. The arrangement features dynamic shifts, including an atmospheric bridge with a synthesized ney-like flute and further wordless vocalizations. The track maintains a high-energy, club-ready and festive mood throughout, ideal for dancing or modern Middle Eastern pop contexts.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.8,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0513-OSAYQmRuWAM_3676789078.mp3",
@@ -1424,9 +1535,12 @@
         "An instrumental world fusion track blending Middle Eastern tonalities with a modern hip-hop beat. The piece opens with a brief spoken word sample before launching into a driving rhythm carried by a crisp drum machine and a deep synth bass. A highly expressive, synthesized wind instrument, reminiscent of a ney or duduk, plays a winding, microtonal melody full of intricate ornamentation. This lead is supported by lush, cinematic string pads and punctuated by rhythmic stabs from an oud-like plucked string instrument. The arrangement builds through dynamic sections, culminating in a brief, soulful breakdown featuring a wordless, melismatic female vocal performance before a final melodic statement and an abrupt end."
       ],
       "caption_raw": "An energetic and dramatic instrumental track blending Middle Eastern and Balkan influences with modern electronic production. The piece is driven by a powerful, syncopated drum machine beat and a deep synth bassline. A prominent, virtuosic violin carries the main melody, delivering fast, ornate, and emotive lines characteristic of the region. The arrangement features dynamic shifts between intense melodic sections and rhythmic breakdowns, creating a driving, cinematic, and danceable atmosphere. The piece opens with a brief spoken word sample before launching into a driving rhythm carried by a crisp drum machine and a deep synth bass. A highly expressive, synthesized wind instrument, reminiscent of a ney or duduk, plays a winding, microtonal melody full of intricate ornamentation. This lead is supported by lush, cinematic string pads and punctuated by rhythmic stabs from an oud-like plucked string instrument. The arrangement builds through dynamic sections, culminating in a brief, soulful breakdown featuring a wordless, melismatic female vocal performance before a final melodic statement and an abrupt end.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An energetic instrumental track fuses Middle Eastern and Balkan influences with modern electronic production, driven by a powerful, syncopated drum machine beat and a deep synth bassline. A virtuosic violin carries the main melody with fast, ornate, and emotive lines, while a synthesized wind instrument reminiscent of a ney or duduk delivers a winding, microtonal melody filled with intricate ornamentation. The arrangement features dynamic shifts between intense melodic sections and rhythmic breakdowns, supported by lush cinematic string pads and punctuated by rhythmic stabs from an oud-like plucked string instrument. The piece opens with a brief spoken word sample before building through dynamic sections, culminating in a soulful breakdown with a wordless, melismatic female vocal performance, followed by a final melodic statement and an abrupt end.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.4,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0514-TPCRRSgp7zs_1116662124.mp3",
@@ -1462,9 +1576,15 @@
         "An emotive and dramatic instrumental piece driven by a passionate, virtuosic cello or viola performance. The track opens with a brief spoken word sample before launching into a driving, rhythmic ostinato played by a string ensemble, underpinned by a steady hand drum groove. The lead string instrument delivers a soaring, melancholic melody rich with expressive vibrato and slides, evoking a strong Eastern European or Middle Eastern folk character. The arrangement builds in intensity, layering multiple string parts to create a dense, cinematic texture before a brief, reflective breakdown and a final, lingering melodic statement."
       ],
       "caption_raw": "An intense and dramatic instrumental piece driven by a passionate, virtuosic cello or viola performance. The track opens with a brief, processed spoken word sample before launching into a driving, rhythmic ostinato played by a percussive string instrument, likely a cello or double bass. The lead string instrument enters with a soaring, melancholic melody rich with vibrato and glissandos, evoking a strong Eastern European or Middle Eastern folk character. The arrangement builds in intensity, layering the lead melody over the insistent rhythmic pulse, creating a cinematic and epic atmosphere suitable for a film score. The track opens with a brief, atmospheric string pad before the lead instrument enters with a highly ornamented, melancholic melody full of expressive slides and vibrato. A steady, rhythmic hand drum, possibly a darbuka, provides a grounded pulse beneath the soaring strings. The arrangement builds in intensity, with the lead instrument exploring different melodic phrases and motifs, creating a cinematic and deeply emotional soundscape. The track opens with a brief spoken word sample before launching into a driving, rhythmic ostinato played by a string ensemble, underpinned by a steady hand drum groove. The arrangement builds in intensity, layering multiple string parts to create a dense, cinematic texture before a brief, reflective breakdown and a final, lingering melodic statement.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An intense and dramatic instrumental piece driven by a passionate, virtuosic cello or viola performance. The track opens with a brief, processed spoken word sample before launching into a driving, rhythmic ostinato played by a percussive string instrument, likely a cello or double bass. The lead string instrument enters with a soaring, melancholic melody rich with vibrato and glissandos, evoking a strong Eastern European or Middle Eastern folk character. The arrangement builds in intensity, layering the lead melody over the insistent rhythmic pulse, creating a cinematic and epic atmosphere suitable for a film score. The track opens with a brief, atmospheric string pad before the lead instrument enters with a highly ornamented, melancholic melody full of expressive slides and vibrato. A steady, rhythmic hand drum, possibly a darbuka, provides a grounded pulse beneath the soaring strings. The arrangement builds in intensity, with the lead instrument exploring different melodic phrases and motifs, creating a cinematic and deeply emotional soundscape. The track opens with a brief spoken word sample before launching into a driving, rhythmic ostinato played by a string ensemble, underpinned by a steady hand drum groove. The arrangement builds in intensity, layering multiple string parts to create a dense, cinematic texture before a brief, reflective breakdown and a final, lingering melodic statement.",
+      "rewrite_status": "fallback",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.3,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2,
+      "rewrite_reasons": [
+        "ending claim not supported by the final section"
+      ]
     },
     {
       "file": "yt500-0517-E9-1sO7FCaA_3116664424.mp3",
@@ -1506,9 +1626,17 @@
         "An energetic, instrumental Italo-disco track driven by a classic 80s drum machine beat and a punchy, sequenced synth bassline. A bright, expressive lead synth carries the main melody, soaring over lush synth pads and rhythmic chord stabs. The arrangement features dynamic interplay between the lead synth and a synthesized saxophone, which trade melodic phrases and harmonized lines, particularly in the chorus sections. The track builds with layered synth arpeggios and melodic fills, maintaining a driving, retro-futuristic, and danceable mood throughout before breaking down into a brief, atmospheric synth-led interlude and then returning for a final melodic statement."
       ],
       "caption_raw": "An energetic and driving Italo-disco track powered by a punchy, sequenced synth bassline and a classic 80s drum machine beat with gated reverb on the snare. The arrangement features layers of bright, brassy synth stabs and lush pads. A highly expressive lead synth, mimicking a saxophone with dramatic pitch bends and vibrato, carries the main melodic theme. The track builds with arpeggiated synth lines and dynamic fills, maintaining a high-energy, retro-futuristic, and danceable mood throughout. The foundation is a classic, punchy drum machine beat and a sequenced synth bassline providing a constant rhythmic pulse. Layered on top are bright, brassy synth chords and a prominent, expressive lead synth that performs melodic lines with significant pitch bending and vibrato, mimicking an electric guitar or saxophone. The arrangement features distinct sections, including an introductory melodic statement, verse-like passages with arpeggiated synth textures, and a more intense chorus-like section where the lead synth melody soars. The production is clean with a characteristic 80s reverb wash, creating a nostalgic and danceable soundscape. A bright, expressive lead synth carries the main melody, soaring over lush synth pads and rhythmic chord stabs. The arrangement features dynamic interplay between the lead synth and a synthesized saxophone, which trade melodic phrases and harmonized lines, particularly in the chorus sections. The track builds with layered synth arpeggios and melodic fills, maintaining a driving, retro-futuristic, and danceable mood throughout before breaking down into a brief, atmospheric synth-led interlude and then returning for a final melodic statement.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An energetic and driving Italo-disco track powered by a punchy, sequenced synth bassline and a classic 80s drum machine beat with gated reverb on the snare. The arrangement features layers of bright, brassy synth stabs and lush pads. A highly expressive lead synth, mimicking a saxophone with dramatic pitch bends and vibrato, carries the main melodic theme. The track builds with arpeggiated synth lines and dynamic fills, maintaining a high-energy, retro-futuristic, and danceable mood throughout. The foundation is a classic, punchy drum machine beat and a sequenced synth bassline providing a constant rhythmic pulse. Layered on top are bright, brassy synth chords and a prominent, expressive lead synth that performs melodic lines with significant pitch bending and vibrato, mimicking an electric guitar or saxophone. The arrangement features distinct sections, including an introductory melodic statement, verse-like passages with arpeggiated synth textures, and a more intense chorus-like section where the lead synth melody soars. The production is clean with a characteristic 80s reverb wash, creating a nostalgic and danceable soundscape. A bright, expressive lead synth carries the main melody, soaring over lush synth pads and rhythmic chord stabs. The arrangement features dynamic interplay between the lead synth and a synthesized saxophone, which trade melodic phrases and harmonized lines, particularly in the chorus sections. The track builds with layered synth arpeggios and melodic fills, maintaining a driving, retro-futuristic, and danceable mood throughout before breaking down into a brief, atmospheric synth-led interlude and then returning for a final melodic statement.",
+      "rewrite_status": "failed",
+      "tags_experimental": true,
+      "rewrite_seconds": 12.7,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2,
+      "rewrite_reasons": [
+        "timestamp in output: 80s",
+        "timestamp guard: gave up after 3 attempts"
+      ],
+      "timestamp_cleanup": "failed"
     },
     {
       "file": "yt500-0519--ZTMCkDPFvQ_3398423227.mp3",
@@ -1544,9 +1672,12 @@
         "An energetic and dramatic instrumental piece driven by a virtuosic, emotive violin performance in a Middle Eastern or Balkan style. The track opens with a brief spoken word sample before launching into a driving, danceable rhythm section composed of a punchy darbuka, a solid bassline, and other hand percussion. The lead violin delivers passionate, fast-paced melodies full of intricate ornamentation and slides, layered over sustained string pads that add harmonic depth. The arrangement features dynamic shifts between intense melodic sections and rhythmic breakdowns, maintaining a high-energy, cinematic feel throughout."
       ],
       "caption_raw": "An energetic and dramatic instrumental piece driven by a virtuosic, emotive violin performance in a Middle Eastern or Turkish style. The track opens with a brief, rhythmic hand drum intro before the lead violin enters with a passionate, ornamented melody full of rapid runs and expressive vibrato. It's supported by a driving percussion section featuring a darbuka or similar hand drum, and a lush bed of orchestral strings providing harmonic depth. The arrangement builds in intensity, with the lead violin trading melodic phrases with the full ensemble, creating a dynamic and captivating listening experience. The track opens with a brief spoken word sample before launching into a driving, danceable rhythm section composed of a punchy darbuka, a solid bassline, and other hand percussion. The lead violin delivers passionate, fast-paced melodies full of intricate ornamentation and slides, layered over sustained string pads that add harmonic depth. The arrangement features dynamic shifts between intense melodic sections and rhythmic breakdowns, maintaining a high-energy, cinematic feel throughout.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An energetic and dramatic instrumental piece driven by a virtuosic, emotive violin performance in a Middle Eastern or Turkish style. The track begins with a brief rhythmic hand drum intro, followed by the lead violin entering with a passionate, ornamented melody filled with rapid runs and expressive vibrato. Supported by a driving percussion section featuring a darbuka or similar hand drum and a lush bed of orchestral strings, the arrangement builds in intensity, with the lead violin trading melodic phrases with the full ensemble, creating a dynamic and captivating experience. Later, the track shifts to a more danceable rhythm section with a punchy darbuka, a solid bassline, and other hand percussion, while the violin continues delivering fast-paced, intricately ornamented melodies layered over sustained string pads. The piece features dynamic shifts between intense melodic sections and rhythmic breakdowns, maintaining a high-energy, cinematic feel throughout.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.7,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0523-2Fx8-iHvyeo_244656835.mp3",
@@ -1586,9 +1717,242 @@
         "An energetic and driving instrumental track rooted in Middle Eastern and Balkan traditions. The piece is led by a virtuosic bowed string instrument, likely a violin or kemenche, which delivers a fast, highly ornamented melody full of expressive slides and trills. This is propelled by a tight, rhythmic foundation of hand percussion, possibly a darbuka or djembe, creating an insistent, danceable groove. The arrangement is dynamic, shifting between intense melodic statements and rhythmic breaks, maintaining a high-energy, celebratory, and slightly dramatic mood throughout."
       ],
       "caption_raw": "An epic, cinematic orchestral piece driven by a powerful, driving rhythm section featuring prominent darbuka and other Middle Eastern percussion. A dramatic string ensemble carries the main theme, employing distinct Middle Eastern scales and phrasing that evoke a sense of grandeur and intensity. The arrangement begins with a bold, melodic statement from the strings, then transitions into a high-energy, percussive main section. The track builds in layers and intensity, maintaining a heroic and dramatic mood throughout its short duration. A sharp, reedy synth lead, mimicking a zurna or mizmar, plays a fast, highly ornamented melody full of microtonal bends and rapid runs. It's supported by a driving, cinematic percussion section featuring synthesized darbukas and other hand drums, alongside dramatic synth string pads that provide a rich harmonic foundation. The track maintains a relentless, urgent pace throughout, creating a powerful and epic atmosphere suitable for a dramatic action sequence or a video game boss battle. The arrangement is built on a driving, cinematic drum machine beat with a punchy kick and snare, complemented by a rhythmic synth bassline. The track has a distinct video game or action movie soundtrack feel, with its bold, fanfare-like brass motifs and consistently high dynamic level. The structure features recurring melodic themes with variations, maintaining a sense of urgency and grandeur throughout. The piece is led by a virtuosic bowed string instrument, likely a violin or kemenche, which delivers a fast, highly ornamented melody full of expressive slides and trills. This is propelled by a tight, rhythmic foundation of hand percussion, possibly a darbuka or djembe, creating an insistent, danceable groove. The arrangement is dynamic, shifting between intense melodic statements and rhythmic breaks, maintaining a high-energy, celebratory, and slightly dramatic mood throughout.",
-      "caption": "",
-      "rewrite_status": "pending",
-      "tags_experimental": true
+      "caption": "An epic, cinematic orchestral piece driven by a powerful rhythm section featuring prominent darbuka and other Middle Eastern percussion. A dramatic string ensemble carries the main theme using distinct Middle Eastern scales and phrasing, evoking grandeur and intensity. The track begins with a bold melodic statement from the strings, transitioning into a high-energy, percussive main section. It builds in layers and intensity, maintaining a heroic and dramatic mood throughout. A sharp, reedy synth lead mimics a zurna or mizmar, playing a fast, ornamented melody with microtonal bends and rapid runs, supported by synthesized darbuka and hand drums, and dramatic synth string pads that provide a rich harmonic foundation. A heroic brass section plays a triumphant melody over a driving drum machine beat with a punchy kick and snare, complemented by a rhythmic synth bassline, giving the piece a bold, fanfare-like quality and a video game or action movie feel. The arrangement features recurring melodic themes with variations, sustaining a sense of urgency and grandeur. A virtuosic bowed string instrument, likely a violin or kemenche, delivers a fast, ornamented melody with expressive slides and trills, propelled by a tight, rhythmic hand percussion groove, such as a darbuka or djembe. The piece shifts dynamically between intense melodic statements and rhythmic breaks, maintaining a high-energy, celebratory, and slightly dramatic mood.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 6.0,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
+    },
+    {
+      "file": "yt500-0524-IytuH6_O2Q8_3422157988.mp3",
+      "duration_s": 212.4,
+      "bitrate_kbps": 192,
+      "chunk_count": 2,
+      "silence_trimmed_s": 0.0,
+      "caption_seconds": 18.4,
+      "instruments": [
+        "string section",
+        "oud",
+        "strings",
+        "percussion",
+        "kick",
+        "snare",
+        "darbuka"
+      ],
+      "vocals": [
+        "spoken word",
+        "male vocal",
+        "chant",
+        "harmonies"
+      ],
+      "production": [
+        "cinematic",
+        "punchy",
+        "groove",
+        "melodic",
+        "crisp",
+        "mix",
+        "lush",
+        "hook",
+        "layered",
+        "reverb",
+        "dynamic"
+      ],
+      "chunk_captions": [
+        "An intense, cinematic instrumental piece driven by a powerful, staccato string section playing a driving ostinato. A prominent oud enters, weaving intricate, microtonal melodies with a distinct Middle Eastern character over the urgent strings. The arrangement builds dramatically at the 50-second mark with the introduction of a heavy, driving percussion section featuring a punchy kick and sharp snare, creating a powerful, epic groove. The oud continues its melodic lead role over the full ensemble, maintaining the track's high-energy, dramatic, and cinematic feel throughout.",
+        "An energetic fusion of traditional Middle Eastern music and modern electronic dance. The track opens with a spoken word passage in Arabic before launching into a driving rhythm led by a crisp darbuka and other hand percussion. A prominent oud plays intricate, fast-paced melodies, weaving through the mix alongside lush, cinematic string pads. The main hook is carried by a powerful, wordless male vocal chant, layered with harmonies and soaked in reverb, creating an epic and anthemic feel. The arrangement features dynamic shifts, including a percussive breakdown and sections where the oud and strings trade melodic phrases, maintaining a high-energy, danceable groove throughout."
+      ],
+      "caption_raw": "An intense, cinematic instrumental piece driven by a powerful, staccato string section playing a driving ostinato. A prominent oud enters, weaving intricate, microtonal melodies with a distinct Middle Eastern character over the urgent strings. The arrangement builds dramatically at the 50-second mark with the introduction of a heavy, driving percussion section featuring a punchy kick and sharp snare, creating a powerful, epic groove. The oud continues its melodic lead role over the full ensemble, maintaining the track's high-energy, dramatic, and cinematic feel throughout. An energetic fusion of traditional Middle Eastern music and modern electronic dance. The track opens with a spoken word passage in Arabic before launching into a driving rhythm led by a crisp darbuka and other hand percussion. A prominent oud plays intricate, fast-paced melodies, weaving through the mix alongside lush, cinematic string pads. The main hook is carried by a powerful, wordless male vocal chant, layered with harmonies and soaked in reverb, creating an epic and anthemic feel. The arrangement features dynamic shifts, including a percussive breakdown and sections where the oud and strings trade melodic phrases, maintaining a high-energy, danceable groove throughout.",
+      "caption": "An intense, cinematic instrumental piece begins with a spoken word passage in Arabic, followed by a driving rhythm led by a crisp darbuka and other hand percussion. A prominent oud weaves intricate, fast-paced, microtonal melodies with a distinct Middle Eastern character, playing alongside lush cinematic string pads. The track features a powerful, wordless male vocal chant layered with harmonies and soaked in reverb, creating an epic and anthemic feel. A staccato string section establishes a driving ostinato, forming the foundation of the piece. Soon after, a heavy, driving percussion section enters with a punchy kick and sharp snare, amplifying the energy and creating a powerful, epic groove. The oud maintains its melodic lead throughout, trading phrases with the strings during dynamic shifts, including a percussive breakdown. The arrangement builds dramatically, sustaining a high-energy, danceable, and dramatic atmosphere throughout.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.8,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
+    },
+    {
+      "file": "yt500-0525-ab_5uJDZoy0_1193024863.mp3",
+      "duration_s": 262.7,
+      "bitrate_kbps": 192,
+      "chunk_count": 3,
+      "silence_trimmed_s": 0.0,
+      "caption_seconds": 24.4,
+      "instruments": [
+        "violin",
+        "acoustic guitar",
+        "percussion",
+        "string section",
+        "orchestral",
+        "darbuka",
+        "shaker",
+        "bass guitar",
+        "cello",
+        "cajon"
+      ],
+      "vocals": [
+        "harmony",
+        "spoken word",
+        "vibrato"
+      ],
+      "production": [
+        "cinematic",
+        "melody",
+        "groove",
+        "lush",
+        "melodic",
+        "world fusion",
+        "sample"
+      ],
+      "chunk_captions": [
+        "A dramatic and cinematic piece beginning with a virtuosic solo violin performing a rapid, tense melody over a sustained string ensemble. The arrangement then introduces a nylon-string acoustic guitar playing a rhythmic, Spanish-influenced chord progression, accompanied by a driving hand percussion groove, likely a cajón. The lush string section continues with soaring, melodic lines, creating a rich, orchestral texture that blends classical drama with a world music and flamenco feel. The piece is entirely instrumental.",
+        "An instrumental world fusion track featuring a prominent, emotive violin carrying a melancholic, Middle Eastern-inspired melody. The arrangement is built upon a foundation of rhythmic acoustic guitar strumming and a steady, mid-tempo groove provided by hand percussion, likely a darbuka or djembe, and a shaker. A subtle bass guitar underpins the harmony. The track begins with a brief spoken word sample before launching into its main theme, transitions into a more reflective bridge with acoustic guitar melodies, and then returns to the primary violin-led section before an abrupt end.",
+        "An instrumental piece with a strong cinematic and world music feel. It opens with a brief spoken word sample before introducing a nylon-string acoustic guitar playing a rhythmic, Spanish-influenced progression. A mournful and expressive cello enters, carrying the main melody with rich vibrato. The arrangement builds with the addition of subtle hand percussion, likely a cajon, and a lush string section providing harmonic pads. The cello takes center stage with a passionate, virtuosic performance, leading to a brief, reflective interlude before a final flourish and an abrupt, resonant end."
+      ],
+      "caption_raw": "A dramatic and cinematic piece beginning with a virtuosic solo violin performing a rapid, tense melody over a sustained string ensemble. The arrangement then introduces a nylon-string acoustic guitar playing a rhythmic, Spanish-influenced chord progression, accompanied by a driving hand percussion groove, likely a cajón. The lush string section continues with soaring, melodic lines, creating a rich, orchestral texture that blends classical drama with a world music and flamenco feel. The piece is entirely instrumental. The arrangement is built upon a foundation of rhythmic acoustic guitar strumming and a steady, mid-tempo groove provided by hand percussion, likely a darbuka or djembe, and a shaker. A subtle bass guitar underpins the harmony. The track begins with a brief spoken word sample before launching into its main theme, transitions into a more reflective bridge with acoustic guitar melodies, and then returns to the primary violin-led section before an abrupt end. It opens with a brief spoken word sample before introducing a nylon-string acoustic guitar playing a rhythmic, Spanish-influenced progression. A mournful and expressive cello enters, carrying the main melody with rich vibrato. The arrangement builds with the addition of subtle hand percussion, likely a cajon, and a lush string section providing harmonic pads. The cello takes center stage with a passionate, virtuosic performance, leading to a brief, reflective interlude before a final flourish and an abrupt, resonant end.",
+      "caption": "An instrumental world fusion track begins with a brief spoken word sample, followed by a nylon-string acoustic guitar playing a rhythmic, Spanish-influenced chord progression. A steady mid-tempo groove is provided by hand percussion—likely a cajón, darbuka, or djembe—accompanied by a shaker. A subtle bass guitar underpins the harmony. The piece features a prominent, emotive violin with a melancholic, Middle Eastern-inspired melody, while a mournful and expressive cello carries the main melody with rich vibrato. The arrangement builds with the addition of a lush string section providing harmonic pads and a driving percussion groove. Early on, the violin and cello share the melodic focus, with the cello taking center stage in a passionate, virtuosic performance. A brief reflective interlude follows, before the track returns to the primary violin-led section and concludes with an abrupt, resonant end.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.8,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
+    },
+    {
+      "file": "yt500-0529-vOr_8MuWyls_1805957814.mp3",
+      "duration_s": 196.5,
+      "bitrate_kbps": 192,
+      "chunk_count": 2,
+      "silence_trimmed_s": 0.0,
+      "caption_seconds": 17.2,
+      "instruments": [
+        "darbuka",
+        "percussion",
+        "oud",
+        "synth",
+        "synth pads",
+        "acoustic guitar",
+        "guitar"
+      ],
+      "vocals": [
+        "vocal"
+      ],
+      "production": [
+        "sample",
+        "crisp",
+        "melodic",
+        "riff",
+        "layered",
+        "bassline",
+        "atmospheric",
+        "cinematic",
+        "world fusion",
+        "punchy",
+        "four-on-the-floor",
+        "melody",
+        "groove",
+        "dynamic"
+      ],
+      "chunk_captions": [
+        "An energetic and driving instrumental track blending traditional Middle Eastern sounds with modern electronic production. The piece opens with a brief, processed vocal sample before launching into a propulsive rhythm carried by a crisp darbuka and other hand percussion. A central oud plays a catchy, memorable melodic riff that defines the song's character. This is layered with a solid synth bassline and atmospheric synth pads that swell during the chorus sections, adding depth and a cinematic quality. The arrangement builds dynamically, alternating between the oud-led melodic sections and more rhythm-focused passages, creating a powerful, danceable, and epic world fusion soundscape.",
+        "An energetic and driving instrumental track blending Middle Eastern and Latin influences with modern electronic dance music. The arrangement is built on a foundation of a punchy, four-on-the-floor electronic drum beat and a rhythmic synth bassline. A central, hypnotic oud melody weaves through the track, complemented by rhythmic Spanish-style acoustic guitar chords and arpeggios. The track maintains a high-energy, danceable groove throughout, with dynamic shifts where the oud and guitar take turns leading before the full ensemble returns."
+      ],
+      "caption_raw": "An energetic and driving instrumental track blending traditional Middle Eastern sounds with modern electronic production. The piece opens with a brief, processed vocal sample before launching into a propulsive rhythm carried by a crisp darbuka and other hand percussion. A central oud plays a catchy, memorable melodic riff that defines the song's character. This is layered with a solid synth bassline and atmospheric synth pads that swell during the chorus sections, adding depth and a cinematic quality. The arrangement builds dynamically, alternating between the oud-led melodic sections and more rhythm-focused passages, creating a powerful, danceable, and epic world fusion soundscape. The arrangement is built on a foundation of a punchy, four-on-the-floor electronic drum beat and a rhythmic synth bassline. A central, hypnotic oud melody weaves through the track, complemented by rhythmic Spanish-style acoustic guitar chords and arpeggios. The track maintains a high-energy, danceable groove throughout, with dynamic shifts where the oud and guitar take turns leading before the full ensemble returns.",
+      "caption": "An energetic and driving instrumental track fuses traditional Middle Eastern and Latin influences with modern electronic production. It begins with a brief, processed vocal sample, followed by a propulsive rhythm driven by a crisp darbuka and hand percussion. A central oud melody emerges, featuring a catchy, memorable riff that defines the song's character, complemented by rhythmic Spanish-style acoustic guitar chords and arpeggios. The arrangement is anchored by a punchy four-on-the-floor electronic drum beat and a solid synth bassline. Atmospheric synth pads swell during key sections, adding depth and a cinematic quality. The track alternates between oud-led melodic passages and rhythm-focused segments, with dynamic shifts where the oud and guitar take turns leading before the full ensemble returns, creating a powerful, danceable, and epic world fusion soundscape.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.4,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
+    },
+    {
+      "file": "yt500-0530-xGwKfqDfsn0_3673775475.mp3",
+      "duration_s": 299.7,
+      "bitrate_kbps": 192,
+      "chunk_count": 3,
+      "silence_trimmed_s": 0.0,
+      "caption_seconds": 26.7,
+      "instruments": [
+        "orchestral",
+        "string section",
+        "percussion",
+        "darbuka",
+        "drums",
+        "strings",
+        "tabla",
+        "oud",
+        "keyboard",
+        "harmonium",
+        "mandolin"
+      ],
+      "vocals": [],
+      "production": [
+        "cinematic",
+        "groove",
+        "melodic",
+        "clean",
+        "crisp",
+        "bright",
+        "plucked",
+        "dynamic",
+        "syncopated"
+      ],
+      "chunk_captions": [
+        "An epic, cinematic orchestral piece driven by a powerful Middle Eastern-inspired rhythm. The track opens with a dramatic, full string section playing a bold, memorable theme. At the ten-second mark, a driving percussion ensemble, featuring the distinct sound of a darbuka and other hand drums, enters with a propulsive, energetic groove. The strings continue to soar over this rhythmic foundation, alternating between powerful melodic statements and rhythmic ostinatos that lock in with the percussion. The production is clean and grand, creating a heroic and adventurous atmosphere suitable for a film score or an epic trailer.",
+        "An energetic and driving instrumental track rooted in Middle Eastern and South Asian traditions. The piece is built on a foundation of crisp, rhythmic hand percussion, likely a tabla or djembe, providing a constant, propulsive groove. A prominent oud carries the main melodic and harmonic content, playing intricate, fast-paced lines and rhythmic chords. The arrangement evolves with the introduction of a bright, reedy keyboard or harmonium that engages in a call-and-response with the oud, adding another layer of texture. The track maintains a high-energy, celebratory, and danceable mood throughout its runtime.",
+        "An energetic and driving instrumental piece rooted in Middle Eastern and South Asian traditions. The track is built upon a foundation of crisp, propulsive hand percussion, likely a tabla or djembe, laying down a constant, danceable groove. A bright, plucked string instrument, possibly an oud or mandolin, plays a catchy, repeating melodic motif that defines the song's character. The arrangement is dynamic, shifting between the main theme and more intense, syncopated sections that build tension before returning to the primary groove. The track concludes abruptly with a cinematic whoosh sound effect."
+      ],
+      "caption_raw": "An epic, cinematic orchestral piece driven by a powerful Middle Eastern-inspired rhythm. The track opens with a dramatic, full string section playing a bold, memorable theme. At the ten-second mark, a driving percussion ensemble, featuring the distinct sound of a darbuka and other hand drums, enters with a propulsive, energetic groove. The strings continue to soar over this rhythmic foundation, alternating between powerful melodic statements and rhythmic ostinatos that lock in with the percussion. The production is clean and grand, creating a heroic and adventurous atmosphere suitable for a film score or an epic trailer. The piece is built on a foundation of crisp, rhythmic hand percussion, likely a tabla or djembe, providing a constant, propulsive groove. A prominent oud carries the main melodic and harmonic content, playing intricate, fast-paced lines and rhythmic chords. The arrangement evolves with the introduction of a bright, reedy keyboard or harmonium that engages in a call-and-response with the oud, adding another layer of texture. The track maintains a high-energy, celebratory, and danceable mood throughout its runtime. The track is built upon a foundation of crisp, propulsive hand percussion, likely a tabla or djembe, laying down a constant, danceable groove. A bright, plucked string instrument, possibly an oud or mandolin, plays a catchy, repeating melodic motif that defines the song's character. The arrangement is dynamic, shifting between the main theme and more intense, syncopated sections that build tension before returning to the primary groove. The track concludes abruptly with a cinematic whoosh sound effect.",
+      "caption": "An epic, cinematic orchestral piece inspired by Middle Eastern and South Asian traditions begins with a bold, memorable theme played by a full string section. Early on, a driving percussion ensemble enters—featuring the darbuka and other hand drums—establishing a propulsive, energetic groove. The strings soar over this rhythm, alternating between melodic statements and rhythmic ostinatos that lock in with the percussion. A prominent oud carries the main melodic and harmonic content, playing intricate, fast-paced lines and rhythmic chords. A bright, reedy keyboard or harmonium engages in a call-and-response with the oud, adding texture and depth. The arrangement shifts dynamically between the main theme and more intense, syncopated sections that build tension before returning to the primary groove. The track concludes abruptly with a cinematic whoosh sound effect. The production is clean and grand, creating a heroic and adventurous atmosphere suitable for a film score or epic trailer.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 3.9,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
+    },
+    {
+      "file": "yt500-0531-RXcfOC3fIYs_2140883359.mp3",
+      "duration_s": 292.8,
+      "bitrate_kbps": 192,
+      "chunk_count": 3,
+      "silence_trimmed_s": 1.608,
+      "caption_seconds": 26.7,
+      "instruments": [
+        "violin",
+        "darbuka",
+        "percussion",
+        "drums",
+        "string section",
+        "synth bass",
+        "drum machine",
+        "oud",
+        "strings"
+      ],
+      "vocals": [
+        "spoken word",
+        "harmony"
+      ],
+      "production": [
+        "bassline",
+        "dynamic",
+        "layered",
+        "syncopated",
+        "groove",
+        "melody",
+        "melodic",
+        "punchy"
+      ],
+      "chunk_captions": [
+        "An energetic and driving instrumental piece featuring a prominent, virtuosic violin playing fast, ornate melodies with a distinct Middle Eastern or Balkan flavor. The track is propelled by a tight, rhythmic foundation of darbuka hand percussion and a steady bassline. The arrangement begins with a brief percussive intro and a spoken word count-in before launching into a high-energy main theme. The violin's performance is expressive and dynamic, full of rapid runs and embellishments, creating a festive and danceable atmosphere. The track ends abruptly mid-phrase.",
+        "An energetic and driving instrumental track blending Middle Eastern and Balkan influences with modern electronic dance music. The arrangement is built on a foundation of propulsive, layered percussion, featuring the distinct sounds of a darbuka and other hand drums creating a complex, syncopated groove. A powerful, synthesized string section carries the main melody, playing fast, dramatic, and highly rhythmic lines with a distinct Eastern European or Arabic scale. A solid synth bass anchors the harmony, while the track maintains a high-energy, dance-focused momentum throughout its runtime.",
+        "An energetic and driving instrumental track blending Middle Eastern melodic sensibilities with a modern funk and hip-hop groove. The foundation is a tight, punchy drum machine beat and a funky, syncopated bassline. A prominent synthesized string section, mimicking the sound of an oud or violin, plays a catchy, microtonal melody in a Phrygian mode. The arrangement features dynamic shifts, including brief breakdowns where the strings perform expressive, virtuosic runs before the main groove slams back in. The track concludes with a dramatic, free-time string cadenza that fades into an abrupt silence."
+      ],
+      "caption_raw": "An energetic and driving instrumental piece featuring a prominent, virtuosic violin playing fast, ornate melodies with a distinct Middle Eastern or Balkan flavor. The track is propelled by a tight, rhythmic foundation of darbuka hand percussion and a steady bassline. The arrangement begins with a brief percussive intro and a spoken word count-in before launching into a high-energy main theme. The violin's performance is expressive and dynamic, full of rapid runs and embellishments, creating a festive and danceable atmosphere. The arrangement is built on a foundation of propulsive, layered percussion, featuring the distinct sounds of a darbuka and other hand drums creating a complex, syncopated groove. A powerful, synthesized string section carries the main melody, playing fast, dramatic, and highly rhythmic lines with a distinct Eastern European or Arabic scale. A solid synth bass anchors the harmony, while the track maintains a high-energy, dance-focused momentum throughout its runtime. The foundation is a tight, punchy drum machine beat and a funky, syncopated bassline. A prominent synthesized string section, mimicking the sound of an oud or violin, plays a catchy, microtonal melody in a Phrygian mode. The arrangement features dynamic shifts, including brief breakdowns where the strings perform expressive, virtuosic runs before the main groove slams back in. The track concludes with a dramatic, free-time string cadenza that fades into an abrupt silence.",
+      "caption": "An energetic and driving instrumental piece features a prominent, virtuosic violin playing fast, ornate melodies with a distinct Middle Eastern or Balkan flavor. The track is propelled by a tight, rhythmic foundation of darbuka hand percussion and a steady bassline. It begins with a brief percussive intro and a spoken word count-in before launching into a high-energy main theme. The violin's performance is expressive and dynamic, full of rapid runs and embellishments, creating a festive and danceable atmosphere. The arrangement includes dynamic shifts, with brief breakdowns where the strings perform expressive, virtuosic runs before the main groove returns. The track concludes with a dramatic, free-time string cadenza that fades into an abrupt silence. A powerful, synthesized string section carries the main melody, playing fast, dramatic, and highly rhythmic lines with a distinct Eastern European or Arabic scale. A solid synth bass anchors the harmony, and the overall sound blends Middle Eastern and Balkan influences with modern electronic dance music. The percussion features layered hand drums, creating a complex, syncopated groove, while the rhythm is supported by a funky, syncopated bassline. The melody is microtonal, performed in a Phrygian mode, and mimics the sound of an oud or violin.",
+      "rewrite_status": "ok",
+      "tags_experimental": true,
+      "rewrite_seconds": 5.3,
+      "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+      "rewrite_prompt_version": 2
     },
     {
       "file": "yt500-0023-amy2fttDCb8_3071547017.mp3",
@@ -3294,14 +3658,14 @@
       "caption": "The track opens with a dramatic, cinematic introduction featuring a mournful and expressive cello solo, rich with vibrato and glissando, set against a backdrop of spacious, ambient synth pads. This somber atmosphere is abruptly shattered by the entrance of a driving, staccato pizzicato string ostinato, establishing a powerful rhythmic pulse. The energy escalates into a full-blown symphonic rock arrangement, where a powerful rock drum beat and a solid bassline anchor the soaring string melodies and the insistent pizzicato rhythm. The piece is entirely instrumental, conveying its intense and epic narrative through dynamic shifts and layered orchestral textures. The sound palette is distinctly retro, reminiscent of 8-bit and 16-bit video game music, featuring bright, square-wave synth leads that play catchy, melodic hooks. The arrangement is dynamic, starting with a brief spoken word sample before launching into a driving instrumental verse and chorus structure. A brief melodic bridge introduces a new synth lead before the track builds back to its main energetic theme, concluding with an abrupt cutoff. The arrangement is built on layers of bright, digital synthesizers, including brassy chord stabs and a prominent, fast-paced arpeggiated synth lead that carries the main melodic theme. The sound palette is reminiscent of late '80s or early '90s video game music or synth-pop, with a clean, direct production style. The track maintains a high-energy, driving feel throughout, breaking down briefly for a melodic synth interlude before returning to the full, dynamic groove. The song is built on a foundation of a punchy, synthesized drum machine beat and a rhythmic synth bassline. A bright, square-wave synth lead carries the main melody, complemented by arpeggiated synth chords that add harmonic texture. The track opens with a brief, processed spoken word sample before launching into its high-energy instrumental arrangement, characteristic of 8-bit or 16-bit era game soundtracks.",
       "rewrite_status": "failed",
       "tags_experimental": true,
-      "rewrite_seconds": 23.0,
+      "rewrite_seconds": 23.1,
+      "timestamp_cleanup": "failed",
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 2,
       "rewrite_reasons": [
         "timestamp in output: 80s, 90s",
         "timestamp guard: gave up after 3 attempts"
-      ],
-      "timestamp_cleanup": "failed"
+      ]
     },
     {
       "file": "yt500-0457-Q7c_ExWZDRw_377345709.mp3",
@@ -3777,7 +4141,7 @@
       "caption": "An evocative and cinematic instrumental piece led by a resonant oud, which establishes a melancholic and traditional Middle Eastern melodic theme. The arrangement begins with the solo oud performing an intricate, expressive melody. At one point, a lush string section enters, adding dramatic swells and sustained harmonic layers that build emotional depth. Subtle hand percussion, likely a darbuka, joins in at the one-minute mark, providing a steady, traditional rhythmic foundation. The interplay between the oud's virtuosic phrasing and the sweeping, cinematic strings creates a rich, textured soundscape that feels both ancient and epic. An epic, cinematic Middle Eastern instrumental opens with a dramatic, fast-paced string section playing a powerful melody over a driving darbuka rhythm. An oud enters, weaving intricate melodic lines that become a central feature of the track. Around the halfway mark, a powerful male choir enters with emotive, wordless vocalizations, adding a layer of grandeur and passion. The arrangement briefly breaks down into a more contemplative section led by the oud before the full ensemble returns for a powerful, climactic finish. The foundation is a hypnotic, rhythmic interplay between a resonant oud and a deep, pulsing frame drum, likely a bendir or darbuka. The arrangement is spacious and atmospheric, with subtle, sustained string pads adding depth in the background. The track begins with a brief, rhythmic spoken word sample in Arabic before settling into its contemplative, melancholic groove, punctuated by virtuosic ney flourishes and a brief, pensive oud-led breakdown.",
       "rewrite_status": "failed",
       "tags_experimental": true,
-      "rewrite_seconds": 15.0,
+      "rewrite_seconds": 14.9,
       "caption_pre_cleanup": "An evocative and cinematic instrumental piece led by a resonant oud, which establishes a melancholic and traditional Middle Eastern melodic theme. The arrangement begins with the solo oud performing an intricate, expressive melody. Around the 20-second mark, a lush string section enters, adding dramatic swells and sustained harmonic layers that build emotional depth. Subtle hand percussion, likely a darbuka, joins in at the one-minute mark, providing a steady, traditional rhythmic foundation. The interplay between the oud's virtuosic phrasing and the sweeping, cinematic strings creates a rich, textured soundscape that feels both ancient and epic. An epic, cinematic Middle Eastern instrumental opens with a dramatic, fast-paced string section playing a powerful melody over a driving darbuka rhythm. An oud enters, weaving intricate melodic lines that become a central feature of the track. Around the halfway mark, a powerful male choir enters with emotive, wordless vocalizations, adding a layer of grandeur and passion. The arrangement briefly breaks down into a more contemplative section led by the oud before the full ensemble returns for a powerful, climactic finish. The foundation is a hypnotic, rhythmic interplay between a resonant oud and a deep, pulsing frame drum, likely a bendir or darbuka. The arrangement is spacious and atmospheric, with subtle, sustained string pads adding depth in the background. The track begins with a brief, rhythmic spoken word sample in Arabic before settling into its contemplative, melancholic groove, punctuated by virtuosic ney flourishes and a brief, pensive oud-led breakdown.",
       "timestamp_cleanup": "ok",
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
@@ -12601,7 +12965,7 @@
       "caption": "An energetic and triumphant instrumental track driven by a powerful, synthesized brass section playing a bold, fanfare-like melody. The arrangement is built on a punchy, straightforward drum machine beat and a solid synth bassline, creating a driving, danceable groove. The overall sound is clean, bright, and has a retro, almost video-game-like quality, reminiscent of a celebratory level-up theme or a corporate anthem. The structure is repetitive and loop-based, maintaining a consistently high level of energy throughout. The lead voice is a bright, synthesized brass section, possibly a synth saxophone, which plays a catchy, syncopated melody full of fast runs and embellishments. The arrangement is layered with supporting synth pads and chords, creating a full, vibrant soundscape reminiscent of 80s or early 90s synth-pop or video game music. The track maintains a high-energy, danceable groove throughout its entire duration.",
       "rewrite_status": "failed",
       "tags_experimental": true,
-      "rewrite_seconds": 9.6,
+      "rewrite_seconds": 9.5,
       "timestamp_cleanup": "failed",
       "rewrite_model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
       "rewrite_prompt_version": 2,
@@ -13438,5 +13802,17 @@
     }
   ],
   "failed_tracks": [],
-  "skipped_tracks": []
+  "skipped_tracks": [],
+  "rewrite": {
+    "model": "gguf:Qwen3-4B-Instruct-2507-Q8_0.gguf",
+    "prompt_version": 2,
+    "ok": 271,
+    "fallback": 21,
+    "error": 0,
+    "failed": 9,
+    "single_chunk": 1,
+    "reused": 256,
+    "status": "ok"
+  },
+  "total_rewrite_seconds": 303.8
 }
