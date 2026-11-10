@@ -14,6 +14,7 @@ Start here if you are new to the project.
 | [Transcription](TRANSCRIPTION.md) | The separate ABC/maqam transcription pipeline. |
 | [Transcription results](TRANSCRIPTION_RESULTS.md) | Measured transcription results and known failures. |
 | [Resume transcription](RESUME_TRANSCRIPTION.md) | How to resume transcription work on a fresh runtime. |
+| [Dataset run](DATASET_RUN.md) | Building a caption + ABC dataset for one generated run: commands, measured timings, upload verification. |
 
 For the project overview and full command reference, see the
 [README](../README.md).

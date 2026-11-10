@@ -18,6 +18,14 @@
 
 ### Added
 
+- `scripts/build_dataset.py`: build a caption + ABC dataset for one generated
+  run. `caption` runs the captioner and then the polish model into one album
+  JSON (no git, no manifest); `assemble` joins that JSON with the reference ABC
+  (SHA-256-checked against the run manifest) and the SheetSage2 transcription
+  into JSONL + Parquet + per-track files + a dataset card. See
+  `docs/DATASET_RUN.md` for the first run's measured numbers.
+- `tests/test_build_dataset.py`: CPU-only coverage for `assemble` (package
+  layout, manifest hashes, reference-ABC mismatch, missing transcript).
 - `docs/QUICKSTART.md`: a beginner-friendly, end-to-end guide (Colab setup,
   first run, output fields, common tasks, troubleshooting, glossary) aimed at
   people who are new to the project.
