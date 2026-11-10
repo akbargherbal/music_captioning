@@ -114,3 +114,29 @@ def test_done_album_is_not_rerun_when_local_copy_is_gone(tmp_path):
         "status": "done", "path": "ELISSA/abc/Album.json"}}}
     assert album_pending("ELISSA/Album", index, tmp_path,
                          force=False, retry_failed=False) is False
+
+
+def test_qc_album_hard_stops_when_output_dir_is_missing(tmp_path):
+    # A missing out_dir used to escape as a raw FileNotFoundError and crash
+    # the batch instead of raising a readable BatchError.
+    with pytest.raises(BatchError, match="no output directory"):
+        abc_batch.qc_album(tmp_path / "missing", _rows("a.m4a"))
+
+
+def test_relative_work_dir_is_resolved_against_the_caller_cwd(tmp_path, monkeypatch, capsys):
+    # transcribe.sh runs with cwd=amr_dir, so the batch must hand it absolute
+    # work-dir paths even when the user passes a relative --work-dir.
+    (tmp_path / "amr").mkdir()
+    (tmp_path / "amr" / "transcribe.sh").write_text("#!/bin/sh\n", encoding="utf-8")
+    (tmp_path / "m.jsonl").write_text(
+        '{"track_id":"ELISSA/Album/a","artist":"ELISSA","album":"Album",'
+        '"file":"a.m4a","source_uri":"gs://bucket/a.m4a","duration_s":10}\n',
+        encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    rc = abc_batch.main(["--manifest", "m.jsonl", "--work-dir", "work",
+                         "--amr-dir", "amr", "--repo", "repo", "--list"])
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert f"manifest: {tmp_path / 'm.jsonl'}" in out

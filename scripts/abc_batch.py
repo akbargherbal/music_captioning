@@ -525,6 +525,10 @@ def run_transcribe(album_dir: Path, out_dir: Path, remaining_s: float,
 
 def qc_album(out_dir: Path, rows: list[dict]) -> dict[str, str]:
     """Map stem/file -> ok|flagged|failed using the §9 gate."""
+    if not out_dir.is_dir():
+        raise BatchError(
+            f"no output directory {out_dir}; transcribe.sh produced nothing "
+            f"(check the per-album log)")
     by_stem = {Path(r["file"]).stem: r for r in rows}
     result: dict[str, str] = {}
     for track_dir in sorted(p for p in out_dir.iterdir() if p.is_dir()):
@@ -752,6 +756,19 @@ def main(argv: list[str] | None = None) -> int:
                          "pre-album budget check")
     args = ap.parse_args(argv)
 
+    # transcribe.sh runs with cwd=amr_dir, so any work-dir path handed to it
+    # (and any output path compared afterwards) must be absolute. Resolve the
+    # roots once here instead of trusting the caller's relative --work-dir.
+    args.repo = args.repo.resolve()
+    args.amr_dir = args.amr_dir.resolve()
+    args.work_dir = args.work_dir.resolve()
+    if args.outputs is not None:
+        args.outputs = args.outputs.resolve()
+    if args.index is not None:
+        args.index = args.index.resolve()
+    if args.manifest is not None:
+        args.manifest = args.manifest.resolve()
+
     outputs = args.outputs or (args.repo / "outputs")
     index_path = args.index or (outputs / "abc_index.json")
     manifest_path = args.manifest
@@ -764,6 +781,7 @@ def main(argv: list[str] | None = None) -> int:
                 break
     if manifest_path is None:
         raise BatchError("no manifest; pass --manifest")
+    manifest_path = manifest_path.resolve()
     if not (args.amr_dir / "transcribe.sh").is_file():
         raise BatchError(f"transcribe.sh not found in {args.amr_dir}")
     if args.restore_from_gcs and not (args.archive_every_track
