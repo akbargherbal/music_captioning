@@ -25,6 +25,26 @@ extraction has known gaps; see `docs/TAG_AUDIT.md`.
 - Python only for glue code. Keep dependencies minimal; pin versions when adding any.
 - Do not load models in full precision. An unquantized 11B model will OOM the T4.
 
+## Autonomy: an approved plan is the permission
+
+Phases in a plan keep work ordered and resumable; they are **not** approval
+gates. Once the user has said "do it", or handed over a plan, execute it end to
+end without asking between steps: preflight, long job, upload, verification,
+commit, push.
+
+Stop and ask only when:
+
+- a step would change the model, quantization, prompt, chunking or decoding;
+- data would be deleted, rewritten irreversibly, or published under a new prefix;
+- credentials/permissions fail in a way you cannot fix;
+- a verification gate fails because a plan assumption is wrong — not a transient
+  error; retry those, then continue.
+
+Otherwise pick the default the plan already lists, record the choice, retry the
+transient, and keep going. Report **once, at the end**: counts, branch + commit
+hashes, timings, and anything still unverified. A run that needs the user to
+nudge it between phases is a defect in the run, not diligence.
+
 ## Durable work: push before you run (agent rule)
 
 Local disk **and the git working tree** are ephemeral. A fresh Colab VM clones
