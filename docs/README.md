@@ -18,6 +18,7 @@ Start here if you are new to the project.
 | [YT500 instrumental dataset](YT500_INSTRUMENTAL_DATASET.md) | Plan/runbook for captioning + ABC-transcribing the 489 YT500 instrumentals while they generate: context, open decisions, acceptance gate, split workers, regen, assembly. |
 | [YT500 streaming operators](YT500_INSTRUMENTAL_OPS.md) | The four implemented scripts (`yt500_sync/learn/publish/assemble`), their flags, and the behaviours the plan left open. |
 | [Resume the caption run](RESUME_CAPTIONS.md) | One command to pick the caption+polish run up on a fresh runtime: what is durable and where, how to tell where it stopped, the invariants a resume relies on. |
+| [Caption completion plan](YT500_CAPTION_COMPLETION_PLAN.md) | Plan: caption the 34 dataset tracks that have no caption, then attach `caption.txt`/`caption.json` inside every dataset track folder and publish v0.2. |
 
 For the project overview and full command reference, see the
 [README](../README.md).
