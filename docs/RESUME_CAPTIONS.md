@@ -7,6 +7,11 @@ no `work/transcripts/`. `docs/YT500_INSTRUMENTAL_OPS.md` is the interface,
 This page exists so a fresh Colab runtime, or a fresh agent session, can pick the
 run up without re-deriving anything.
 
+**Before launching anything:** `./plumbing/check_durable.sh` must pass. It fails
+when the tree has unpushed commits, is behind `origin`, or contains unsaved
+changes — the three ways a resume silently starts from a stale copy (see
+`AGENTS.md`, "Durable work: push before you run").
+
 ## One command
 
 ```bash

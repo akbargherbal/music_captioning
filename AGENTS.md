@@ -25,6 +25,34 @@ extraction has known gaps; see `docs/TAG_AUDIT.md`.
 - Python only for glue code. Keep dependencies minimal; pin versions when adding any.
 - Do not load models in full precision. An unquantized 11B model will OOM the T4.
 
+## Durable work: push before you run (agent rule)
+
+Local disk **and the git working tree** are ephemeral. A fresh Colab VM clones
+`origin`, so a file that is not pushed does not exist for the next session. This
+has already cost a run twice: a plan doc and a dataset script were written and
+left uncommitted, the next agent cloned the repo, found neither file, and
+re-implemented the compiler from a summary instead of using it.
+
+- **A file that is not pushed does not exist.** Commit and push any new or
+  changed plan, script, test or doc **before** starting the work it describes.
+  Push first, then launch the long job. Never leave source uncommitted on a VM
+  while a multi-hour job runs.
+- **Compare with the remote first.** At session start `git fetch` and read
+  `origin/main`. If a file you were told exists is missing from the clone,
+  `git pull`; if it is still missing, **stop and report**. Never re-implement a
+  missing file from a description — that silently forks the design and its tests.
+- **Commit in the repo that owns the file.** Dataset/package code lives in
+  `arabmaqamrock` (`plumbing/compile_yt500_collection.py` + its `tests/`); caption
+  and model code lives here. Push both and report the branch and commit hashes.
+- **Run the preflight:** `./plumbing/check_durable.sh [files…]`. It fails on
+  unpushed commits, a branch behind its upstream, modified tracked files, or
+  untracked non-ignored files. `REPO=../arabmaqamrock ./plumbing/check_durable.sh`
+  checks the other repo.
+- **Artifacts follow the same rule.** Album and built-tree state go to GCS after
+  every step and on a timer (`plumbing/snapshot_work.sh`, 2 min); a tarball of a
+  built tree is cheaper than rebuilding it. A five-minute CPU job can still be
+  cut off — write a status file and upload it after each step.
+
 ## Model decision (do not change without asking the user)
 
 The **model and prompt are unchanged**. The **runtime was switched on 2026-10-09 with
@@ -253,7 +281,9 @@ Alternative backend (llama.cpp GGUF):
 - [ ] `docs/RESULTS.md` has real measured VRAM and time for at least one clip
 - [ ] README shows the quickstart and example output
 - [ ] No secrets, weights or audio in the git diff
+- [ ] Pushed, not just written: `./plumbing/check_durable.sh` passes in every repo
+      touched, and the report names the branch + commit hashes
 
 ## Communication
 
-Be concise. State what you ran, what happened, and what is still unverified. If a command fails, show the exact error and your next step instead of guessing.
+Be concise. State what you ran, what happened, and what is still unverified. If a command fails, show the exact error and your next step instead of guessing. When you finish a session, report the **branch and commit hashes** you pushed — "done" without a pushed commit does not survive the VM.
