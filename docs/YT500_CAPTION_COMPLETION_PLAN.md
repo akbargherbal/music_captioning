@@ -1,6 +1,6 @@
 # Plan — finish the 34 missing captions, then attach captions to the dataset
 
-**Status:** plan only, not implemented · **Date:** 2026-11-11 · **Owner:** akbar
+**Status:** phases 1–2 executed 2026-11-11 (see run log at the end) · **Date:** 2026-11-11 · **Owner:** akbar
 **Runs on:** Google Colab (GPU for phase 1, CPU is enough for phase 2)
 
 This is the implementation plan for two deliverables:
@@ -452,3 +452,63 @@ takes, transcription and any rename of the dataset prefix are out of scope.
 3. `compile_yt500_collection.py --verify --remote` exits 0; `pytest tests/`
    still passes; the new CPU unit tests pass.
 4. Audio untouched, no secrets or weights in either git diff.
+
+## Run log — 2026-11-11 (phase 2 on Colab CPU)
+
+Phase 1 was already complete: the album at
+`GENERATION/YT500_INSTRUMENTAL/work/caption_album.json` is **467 tracks**,
+`caption_stage=polished`, `caption_pipeline_version=3`, sha256
+`07aa645392a0996871efcc182769a96cbd9aed1fd5be213370417260123e29d9`
+(checked before anything else). Every one of the 460 dataset takes has a caption
+for its exact take stem, so no GPU work ran.
+
+Phase 2 code came from `origin/feat/dataset-captions-v0.2` (`b72ff6a`, tip
+`9842390` after its merge of main). It was merged `--ff-only` into `main`;
+`tests/test_compile_yt500_collection.py` → **10 passed**.
+
+Driver: `arabmaqamrock` `plumbing/phase2_attach_captions.sh` (canonical, tracked;
+executed as `logs/phase2.sh`), detached with `setsid nohup`, log
+`arabmaqamrock/logs/phase2.log`, per-step status pushed to
+`GENERATION/YT500_INSTRUMENTAL/work/backup/status_phase2.json`.
+
+| step | wall | result |
+|---|---:|---|
+| pull_tree (`rsync -r -x '.*audio\.mp3$'`) | 21 s | 1,853 files, 13 MB, 0 `audio.mp3` |
+| backup_v01 | 4 s | `…/backup/dataset_v0.1_meta.tar.gz` |
+| fetch_album + sha gate | 3 s | sha256 matched `07aa6453…` |
+| attach (`--attach-captions --allow-unpolished --min-caption-chars 150`) | 1 s | `attached 460/460 captions`, `dataset v0.2` |
+| backup_v02 | 5 s | `…/backup/dataset_v0.2_meta.tar.gz` |
+| verify (`--verify --local … --allow-unpolished`) | 1 s | `verified 460 rows, 0 problem(s)` |
+| dry run | — | **1,392** `Would copy` |
+| publish (`--publish --no-audio`) | 23 s | `published 460 metadata tracks (audio untouched)` |
+| remote counts + re-sync | 19 s | 460 `caption.json`, 460 `caption.txt`, `Would copy` = 0 |
+| audio diff | — | before/after listing identical; newest `audio.mp3` object update still `2026-11-11T16:22:20Z`, i.e. before the 20:06:49Z publish |
+| bank_album | — | album committed in `music_captioning` |
+| summary | 2 s | `…/backup/phase2_summary.json` |
+
+Total wall time 20:05:45Z → 20:07:48Z = **2 min 03 s**.
+
+Final published state (`DATASET/yt500_instrumental`):
+
+- `manifest.json`: `dataset_version=v0.2`, `counts.tracks=460`,
+  `counts.captions=460`, `counts.captions_unpolished=6`,
+  `captions.source_sha256=07aa6453…`, `captions.attached_at=2026-11-11T20:06:29Z`.
+- Root `captions.jsonl` = 460 rows, `captions.sha256` = 920 lines.
+- Spot checks on `yt500-0001…`, `yt500-0468…`, `yt500-0684…`: `caption.txt` sha
+  == `caption.json.caption_sha256` == `track.json.caption.sha256`, take seed ==
+  `track.json.generation.seed`, prose with no timecodes.
+
+The six takes attached as **unpolished** (raw caption kept, flagged
+`unpolished: true`, never presented as polished — the documented outcome):
+
+```
+yt500-0147-ZP1sp5vzBik_2484751784   yt500-0174-vPLW6oWdEjc_1729334891
+yt500-0320-c9CXSbWIpMs_2678923838   yt500-0331-iFjFNhs1glQ_661465120
+yt500-0468-vVYepS8lWjM_369284659    yt500-0478-jZ-naNcSVXg_603989557
+```
+
+One deviation from the driver spec: the bank step's
+`gcloud storage cp "$BK/../captions.jsonl"` is not normalised by `gcloud`
+(“matched no objects”), so the album `captions.jsonl` was copied from its real
+URI (`work/captions.jsonl`) and committed separately. Nothing else deviated.
+
