@@ -113,9 +113,13 @@ staging steps are the three blocks above.
 
 ### 2.2 Restore the album — mandatory freshness gate
 
-`sync` restores the album from GCS **only when the local file is missing**, and a
-fresh clone already contains the git snapshot (182 tracks, `17:34Z`). Leaving it
-in place would silently re-caption the other ~250 tracks. Overwrite it explicitly:
+`sync` restores the album from GCS **only when the local file is missing**, and the
+clone already contains a git snapshot of the album (`plumbing/snapshot_work.sh`
+commits it every 15 min, so it is up to 15 min behind GCS and can be missing
+tracks that GCS already has). Leaving a stale copy in place would silently
+re-caption those tracks. At the time of writing the git snapshot is 432 tracks
+(`20:10:46Z`) and GCS is 432 (`20:07:40Z`), but the gate below is what makes
+that safe rather than lucky. Overwrite it explicitly:
 
 ```bash
 gcloud storage cp -q \
@@ -280,6 +284,11 @@ advertise them as prompt tags.
 
 ### 3.2 Code changes in `arabmaqamrock/plumbing/compile_yt500_collection.py`
 
+The compiler is committed in `arabmaqamrock` `main` (`5c07c04`) together with the
+`outputs/YT500/generation/quality_audit_duration.json` snapshot it built v0.1
+with — `--verify` reads `index.json` + that audit to re-derive the 460-name set,
+so both must be the committed versions.
+
 Small, additive, reusing the existing writers:
 
 1. `parse_caption_album(path) -> (by_stem, album_sha256)` — key by the full stem
@@ -422,7 +431,7 @@ gcloud storage cp -q gs://akbar-december-2024-backup/DATASET/yt500_instrumental/
 
 | Risk | Mitigation |
 |---|---|
-| Phase 1 re-captions the 432 because of a stale git album | §2.2 hard gate asserts 432 tracks before any GPU work |
+| Phase 1 re-captions already-done tracks because the local album is stale | §2.2 overwrites it from GCS and asserts 432 tracks before any GPU work |
 | Corpus index drift → `abc_mismatch` exit 2 | §2.1 sha256 gate against `work/manifest.json.corpus.sha256`; do **not** reach for `--allow-abc-mismatch` |
 | Colab OOM | 4-bit captioner, one role at a time, no watchers; T4 peaks 8.0 GiB (measured) |
 | Dataset `track.json` rewritten wrongly | full v0.1 metadata tarball in `GENERATION/.../work/backup/` (untar over the local tree, re-run `--publish`); audio never at risk |
